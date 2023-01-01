@@ -1,15 +1,15 @@
 VERSION 5.00
 Begin VB.Form FMain 
    Caption         =   "Bitmaps"
-   ClientHeight    =   7575
+   ClientHeight    =   8670
    ClientLeft      =   120
    ClientTop       =   465
-   ClientWidth     =   11055
+   ClientWidth     =   14895
    Icon            =   "FMain.frx":0000
    LinkTopic       =   "FMain"
-   ScaleHeight     =   505
+   ScaleHeight     =   578
    ScaleMode       =   3  'Pixel
-   ScaleWidth      =   737
+   ScaleWidth      =   993
    StartUpPosition =   3  'Windows-Standard
    Begin VB.TextBox Text1 
       BeginProperty Font 
@@ -28,7 +28,7 @@ Begin VB.Form FMain
       TabIndex        =   4
       ToolTipText     =   "Drag'n'drop pictures of filetype *.bmp to the window."
       Top             =   600
-      Width           =   3135
+      Width           =   4095
    End
    Begin VB.CommandButton BtnInfo 
       Caption         =   "Info"
@@ -42,7 +42,7 @@ Begin VB.Form FMain
       AutoRedraw      =   -1  'True
       BackColor       =   &H00400040&
       Height          =   6735
-      Left            =   3120
+      Left            =   4080
       OLEDragMode     =   1  'Automatisch
       OLEDropMode     =   1  'Manuell
       ScaleHeight     =   445

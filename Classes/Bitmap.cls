@@ -20,15 +20,14 @@ Option Explicit
 'Private Const BITSPIXEL    As Long = 12 ' ???
 
 Public Enum EPixelFormat
-    'was soll der ganze Mist????
-    'Undefined = 0&                  '      &H0       0  Das Pixelformat ist nicht definiert oder
-    'DontCare = 0&                   '      &H0       0  Es wurde kein Pixelformat angegeben.
-    'Indexed = &H10000               '  &H10000   65536  Die Pixeldaten enthalten farbindizierte Werte, d. h., diese sind ein Index für die Farben in der Systemfarbtabelle, im Gegensatz zu einzelnen Farbwerten.
-    'Gdi = &H20000                   '  &H20000  131072  Die Pixeldaten enthalten GDI-Farben.
-    'Alpha = &H40000                 '  &H40000  262144  Die Pixeldaten enthalten Alphawerte, die nicht zuvor multipliziert wurden.
-    'PAlpha = &H80000                '  &H80000  524288  Das Pixelformat enthält zuvor multiplizierte Alphawerte.
-    'Extended = &H100000             ' &H100000 1048576  Reserviert.
-    'Canonical = &H200000            ' &H200000 2097152  Das Standardpixelformat ist 32 Bits pro Pixel.Das Format gibt 24-Bit Farbtiefe und einen 8-Bit-Alphakanal an.
+    'Undefined =        0&          '      &H0       0  Das Pixelformat ist nicht definiert oder
+    'DontCare  =        0&          '      &H0       0  Es wurde kein Pixelformat angegeben.
+    'Indexed   =  &H10000           '  &H10000   65536  Die Pixeldaten enthalten farbindizierte Werte, d. h., diese sind ein Index für die Farben in der Systemfarbtabelle, im Gegensatz zu einzelnen Farbwerten.
+    'Gdi       =  &H20000           '  &H20000  131072  Die Pixeldaten enthalten GDI-Farben.
+    'Alpha     =  &H40000           '  &H40000  262144  Die Pixeldaten enthalten Alphawerte, die nicht zuvor multipliziert wurden.
+    'PAlpha    =  &H80000           '  &H80000  524288  Das Pixelformat enthält zuvor multiplizierte Alphawerte.
+    'Extended  = &H100000           ' &H100000 1048576  Reserviert.
+    'Canonical = &H200000           ' &H200000 2097152  Das Standardpixelformat ist 32 Bits pro Pixel.Das Format gibt 24-Bit Farbtiefe und einen 8-Bit-Alphakanal an.
     
     Format1bppIndexed = &H30101     '  &H30101  196865  Gibt an, dass das Format  1 Bit pro Pixel ist. Es werden indizierte Farben verwendet. Die Farbtabelle enthält   2 Farben.
     Format4bppIndexed = &H30402     '  &H30402  197634  Gibt an, dass das Format  4 Bit pro Pixel ist. Es werden indizierte Farben verwendet. Die Farbtabelle enthält  16 Farben.
@@ -73,6 +72,17 @@ Private Type BGRA '
     A As Byte
 End Type
 
+'https://learn.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-bitmap
+Private Type Bitmap
+    bmType       As Long
+    bmWidth      As Long
+    bmHeight     As Long
+    bmWidthBytes As Long
+    bmPlanes     As Integer
+    bmBitsPixel  As Integer
+    bmBits       As Long
+End Type
+
 'https://docs.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-bitmapfileheader
 Private Type BITMAPFILEHEADER
 'do not read at once read every single variable separately instead
@@ -104,17 +114,16 @@ Private Type BITMAPINFOHEADER
 End Type                 ' Sum: 40
 
 'BI_-constants
-Private Const BI_RGB       As Long = 0& 'An uncompressed format.
-Private Const BI_RLE8      As Long = 1& 'A run-length encoded (RLE) format for bitmaps with 8 bpp. The compression format is a 2-byte format consisting of a count byte followed by a byte containing a color index. For more information, see Bitmap Compression.
-Private Const BI_RLE4      As Long = 2& 'An RLE format for bitmaps with 4 bpp. The compression format is a 2-byte format consisting of a count byte followed by two word-length color indexes. For more information, see Bitmap Compression.
-Private Const BI_BITFIELDS As Long = 3& 'Specifies that the bitmap is not compressed. The members bV4RedMask, bV4GreenMask, and bV4BlueMask specify the red, green, and blue components for each pixel. This is valid when used with 16- and 32-bpp bitmaps
-                                        'If biCompression = BI_BITFIELDS -> the format is either RGB-555 or RGB-565.
-                                        'Use the subtype GUID in the AM_MEDIA_TYPE structure to determine the specific RGB type.
+Private Const BI_RGB       As Long = 0&  ' An uncompressed format.
+Private Const BI_RLE8      As Long = 1&  ' A run-length encoded (RLE) format for bitmaps with 8 bpp. The compression format is a 2-byte format consisting of a count byte followed by a byte containing a color index. For more information, see Bitmap Compression.
+Private Const BI_RLE4      As Long = 2&  ' An RLE format for bitmaps with 4 bpp. The compression format is a 2-byte format consisting of a count byte followed by two word-length color indexes. For more information, see Bitmap Compression.
+Private Const BI_BITFIELDS As Long = 3&  ' Specifies that the bitmap is not compressed. The members bV4RedMask, bV4GreenMask, and bV4BlueMask specify the red, green, and blue components for each pixel. This is valid when used with 16- and 32-bpp bitmaps
+                                         ' If biCompression = BI_BITFIELDS -> the format is either RGB-555 or RGB-565.
+                                         ' Use the subtype GUID in the AM_MEDIA_TYPE structure to determine the specific RGB type.
+                                         ' https://learn.microsoft.com/en-us/windows/win32/api/strmif/ns-strmif-am_media_type
                                         
-                                        'https://learn.microsoft.com/en-us/windows/win32/api/strmif/ns-strmif-am_media_type
-                                        
-Private Const BI_JPEG      As Long = 4& 'Specifies that the image is compressed using the JPEG file interchange format. JPEG compression trades off compression against loss; it can achieve a compression ratio of 20:1 with little noticeable loss.
-Private Const BI_PNG       As Long = 5& 'Specifies that the image is compressed using the PNG  file interchange format.
+Private Const BI_JPEG      As Long = 4&  ' Specifies that the image is compressed using the JPEG file interchange format. JPEG compression trades off compression against loss; it can achieve a compression ratio of 20:1 with little noticeable loss.
+Private Const BI_PNG       As Long = 5&  ' Specifies that the image is compressed using the PNG  file interchange format.
 Private Const BI_1632      As Long = &H32333631 ' "1632"
 Private Const LCS_CALIBRATED_RGB As Long = &H0&
 
@@ -450,8 +459,8 @@ Private Function BITMAPINFO_ToStr(this As BITMAPINFO) As String
             s = s & "BitCount      : " & .biBitCount & vbCrLf
             s = s & "Compression   : " & .biCompression & vbCrLf
             s = s & "SizeImage     : " & .biSizeImage & vbCrLf
-            s = s & "XPelsPerMeter : " & .biXPelsPerMeter & "=" & GetDPI(.biXPelsPerMeter) & "dpi" & vbCrLf
-            s = s & "YPelsPerMeter : " & .biYPelsPerMeter & "=" & GetDPI(.biYPelsPerMeter) & "dpi" & vbCrLf
+            s = s & "XPelsPerMeter : " & .biXPelsPerMeter & " = " & GetDPI(.biXPelsPerMeter) & " dpi" & vbCrLf
+            s = s & "YPelsPerMeter : " & .biYPelsPerMeter & " = " & GetDPI(.biYPelsPerMeter) & " dpi" & vbCrLf
             s = s & "ColorsUsed    : " & .biClrUsed & vbCrLf
             s = s & "ClrImportant  : " & .biClrImportant & vbCrLf
         End With
@@ -516,29 +525,29 @@ Private Function PixelFormat_ToStr() As String
     Dim s As String
     Select Case pf
     Case 0:        s = "DontCare" 'Es wurde kein Pixelformat angegeben.
-    Case &H10000:  s = "Indexed"               '  &H10000   65536  Die Pixeldaten enthalten farbindizierte Werte, d. h., diese sind ein Index für die Farben in der Systemfarbtabelle, im Gegensatz zu einzelnen Farbwerten.
-    Case &H20000:  s = "Gdi"                   '  &H20000  131072  Die Pixeldaten enthalten GDI-Farben.
-    Case &H40000:  s = "Alpha "                '  &H40000  262144  Die Pixeldaten enthalten Alphawerte, die nicht zuvor multipliziert wurden.
-    Case &H80000:  s = "PAlpha"                '  &H80000  524288  Das Pixelformat enthält zuvor multiplizierte Alphawerte.
-    Case &H100000: s = "Extended"              ' &H100000 1048576  Reserviert.
-    Case &H200000: s = "Canonical"             ' &H200000 2097152  Das Standardpixelformat ist 32 Bits pro Pixel.Das Format gibt 24-Bit Farbtiefe und einen 8-Bit-Alphakanal an.
+    Case &H10000:  s = "Indexed"           '  &H10000   65536  Die Pixeldaten enthalten farbindizierte Werte, d. h., diese sind ein Index für die Farben in der Systemfarbtabelle, im Gegensatz zu einzelnen Farbwerten.
+    Case &H20000:  s = "Gdi"               '  &H20000  131072  Die Pixeldaten enthalten GDI-Farben.
+    Case &H40000:  s = "Alpha "            '  &H40000  262144  Die Pixeldaten enthalten Alphawerte, die nicht zuvor multipliziert wurden.
+    Case &H80000:  s = "PAlpha"            '  &H80000  524288  Das Pixelformat enthält zuvor multiplizierte Alphawerte.
+    Case &H100000: s = "Extended"          ' &H100000 1048576  Reserviert.
+    Case &H200000: s = "Canonical"         ' &H200000 2097152  Das Standardpixelformat ist 32 Bits pro Pixel.Das Format gibt 24-Bit Farbtiefe und einen 8-Bit-Alphakanal an.
     
-    Case &H30101:  s = "Format1bppIndexed"     '  &H30101  196865  Gibt an, dass das Format  1 Bit pro Pixel ist. Es werden indizierte Farben verwendet. Die Farbtabelle enthält   2 Farben.
-    Case &H30402:  s = "Format4bppIndexed"     '  &H30402  197634  Gibt an, dass das Format  4 Bit pro Pixel ist. Es werden indizierte Farben verwendet. Die Farbtabelle enthält  16 Farben.
-    Case &H30803:  s = "Format8bppIndexed"     '  &H30803  198659  Gibt an, dass das Format  8 Bit pro Pixel ist. Es werden indizierte Farben verwendet. Die Farbtabelle enthält 256 Farben.
+    Case &H30101:  s = "1 bpp Indexed"     '  &H30101  196865  Gibt an, dass das Format  1 Bit pro Pixel ist. Es werden indizierte Farben verwendet. Die Farbtabelle enthält   2 Farben.
+    Case &H30402:  s = "4 bpp Indexed"     '  &H30402  197634  Gibt an, dass das Format  4 Bit pro Pixel ist. Es werden indizierte Farben verwendet. Die Farbtabelle enthält  16 Farben.
+    Case &H30803:  s = "8 bpp Indexed"     '  &H30803  198659  Gibt an, dass das Format  8 Bit pro Pixel ist. Es werden indizierte Farben verwendet. Die Farbtabelle enthält 256 Farben.
     
     'Graustufen? es gibt kein Format das darauf festgelegt werden kann was soll das?
-    Case &H101004: s = "Format16bppGrayScale"  ' &H101004 1052676  Gibt an, dass das Format 16 Bit pro Pixel ist. Die Farbinformationen geben 65.536 Grauschattierungen an.
-    Case &H21005:  s = "Format16bppRgb555"     '  &H21005  135173  Gibt an, dass das Format 16 Bit pro Pixel ist. Für den Rot-, Blau- und Grünanteil werden jeweils 5 Bit verwendet. Das verbleibende Bit wird nicht verwendet.
-    Case &H21006:  s = "Format16bppRgb565"     '  &H21006  135174  Gibt an, dass das Format 16 Bit pro Pixel ist. Für den Rot- und Blauanteil werden jeweils 5 Bit und für den Grünanteil 6 Bit verwendet.
-    Case &H61007:  s = "Format16bppArgb1555"   '  &H61007  397319  Gibt an, dass das Format 16 Bit pro Pixel ist. Die Farbinformationen liefern 32.768 Farbschattierungen, wobei der Rot-, Grün- und Blauanteil jeweils von 5 Bits und die Alphakomponente von 1 Bit wiedergegeben wird.
-    Case &H21808:  s = "Format24bppRgb"        '  &H21808  137224  Gibt an, dass das Format 24 Bits pro Pixel ist, wobei für den Rot-, Grün- und Blauanteil jeweils 8 Bits verwendet werden.
-    Case &H22009:  s = "Format32bppRgb"        '  &H22009  139273  Gibt an, dass das Format 32 Bits pro Pixel ist, wobei für den Rot-, Grün- und Blauanteil jeweils 8 Bits verwendet werden.Die verbleibendenden 8 Bits werden nicht verwendet.
-    Case &H26200A: s = "Format32bppArgb"       ' &H26200A 2498570  Gibt an, dass das Format 32 Bits pro Pixel ist, wobei für den Alpha-, Rot-, Grün- und Blauanteil jeweils 8 Bits verwendet werden.
-    Case &HE200B:  s = "Format32bppPArgb"      '  &HE200B  925707  Gibt an, dass das Format 32 Bits pro Pixel ist, wobei für den Alpha-, Rot-, Grün- und Blauanteil jeweils 8 Bits verwendet werden.Die Rot-, Grün- und Blaukomponente wird entsprechend der Alphakomponente im Voraus multipliziert.
-    Case &H10300C: s = "Format48bppRgb"        ' &H10300C 1060876  Specifies that the format is 48 bits per pixel; 16 bits each are used for the red, green, and blue components.
-    Case &H34400D: s = "Format64bppArgb"       ' &H34400D 3424269  Specifies that the format is 64 bits per pixel; 16 bits each are used for the alpha, red, green, and blue components.
-    Case &H1C400E: s = "Format64bppPArgb"      ' &H1C400E 1851406  Gibt an, dass das Format 64 Bits pro Pixel ist, wobei für den Alpha-, Rot-, Grün- und Blauanteil jeweils 16 Bits verwendet werden.Die Rot-, Grün- und Blaukomponente wird entsprechend der Alphakomponente im Voraus multipliziert.
+    Case &H101004: s = "16 bpp GrayScale"  ' &H101004 1052676  Gibt an, dass das Format 16 Bit pro Pixel ist. Die Farbinformationen geben 65.536 Grauschattierungen an.
+    Case &H21005:  s = "16 bpp RGB 555"    '  &H21005  135173  Gibt an, dass das Format 16 Bit pro Pixel ist. Für den Rot-, Blau- und Grünanteil werden jeweils 5 Bit verwendet. Das verbleibende Bit wird nicht verwendet.
+    Case &H21006:  s = "16 bpp RGB 565"    '  &H21006  135174  Gibt an, dass das Format 16 Bit pro Pixel ist. Für den Rot- und Blauanteil werden jeweils 5 Bit und für den Grünanteil 6 Bit verwendet.
+    Case &H61007:  s = "16 bpp ARGB 1555"  '  &H61007  397319  Gibt an, dass das Format 16 Bit pro Pixel ist. Die Farbinformationen liefern 32.768 Farbschattierungen, wobei der Rot-, Grün- und Blauanteil jeweils von 5 Bits und die Alphakomponente von 1 Bit wiedergegeben wird.
+    Case &H21808:  s = "24 bpp RGB"        '  &H21808  137224  Gibt an, dass das Format 24 Bits pro Pixel ist, wobei für den Rot-, Grün- und Blauanteil jeweils 8 Bits verwendet werden.
+    Case &H22009:  s = "32 bpp RGB"        '  &H22009  139273  Gibt an, dass das Format 32 Bits pro Pixel ist, wobei für den Rot-, Grün- und Blauanteil jeweils 8 Bits verwendet werden.Die verbleibendenden 8 Bits werden nicht verwendet.
+    Case &H26200A: s = "32 bpp ARGB"       ' &H26200A 2498570  Gibt an, dass das Format 32 Bits pro Pixel ist, wobei für den Alpha-, Rot-, Grün- und Blauanteil jeweils 8 Bits verwendet werden.
+    Case &HE200B:  s = "32 bpp PARGB"      '  &HE200B  925707  Gibt an, dass das Format 32 Bits pro Pixel ist, wobei für den Alpha-, Rot-, Grün- und Blauanteil jeweils 8 Bits verwendet werden.Die Rot-, Grün- und Blaukomponente wird entsprechend der Alphakomponente im Voraus multipliziert.
+    Case &H10300C: s = "48 bpp RGB"        ' &H10300C 1060876  Specifies that the format is 48 bits per pixel; 16 bits each are used for the red, green, and blue components.
+    Case &H34400D: s = "64 bpp ARGB"       ' &H34400D 3424269  Specifies that the format is 64 bits per pixel; 16 bits each are used for the alpha, red, green, and blue components.
+    Case &H1C400E: s = "64 bpp PARGB"      ' &H1C400E 1851406  Gibt an, dass das Format 64 Bits pro Pixel ist, wobei für den Alpha-, Rot-, Grün- und Blauanteil jeweils 16 Bits verwendet werden.Die Rot-, Grün- und Blaukomponente wird entsprechend der Alphakomponente im Voraus multipliziert.
     End Select
     PixelFormat_ToStr = s
 End Function
