@@ -305,33 +305,33 @@ Friend Sub New_(aPFN As String)
 End Sub
 
 Friend Sub NewWH(ByVal Width As Long, ByVal Height As Long, ByVal PixelFormat As EPixelFormat)
-    With m_BmpHead
-        '.bfType = &H4D42
-        '.bfReserved1 = 0
-        '.bfReserved2 = 0
-        '.bfSize =
-        '.bfOffBits
-    End With
-    'Dim pf As EPixelFormat
-    Select Case Me.PixelFormat
-    Case EPixelFormat.Format1bppIndexed
-    Case EPixelFormat.Format4bppIndexed
-    Case EPixelFormat.Format8bppIndexed
-    Case EPixelFormat.Format16bppArgb1555
-    Case EPixelFormat.Format16bppGrayScale
-    Case EPixelFormat.Format16bppRgb565
-    End Select
-    With m_BmpInfo
-        '
-    End With
+'    With m_BmpHead
+'        '.bfType = &H4D42
+'        '.bfReserved1 = 0
+'        '.bfReserved2 = 0
+'        '.bfSize =
+'        '.bfOffBits
+'    End With
+'    'Dim pf As EPixelFormat
+'    Select Case Me.PixelFormat
+'    Case EPixelFormat.Format1bppIndexed
+'    Case EPixelFormat.Format4bppIndexed
+'    Case EPixelFormat.Format8bppIndexed
+'    Case EPixelFormat.Format16bppArgb1555
+'    Case EPixelFormat.Format16bppGrayScale
+'    Case EPixelFormat.Format16bppRgb565
+'    End Select
+'    With m_BmpInfo
+'        '
+'    End With
 End Sub
 
-Friend Sub NewC(other As Bitmap)
+Friend Sub NewC(other As bitmap)
     Me.NewWH other.Width, other.Height, other.PixelFormat
 End Sub
 
-Public Function Clone() As Bitmap
-    Set Clone = New Bitmap
+Public Function Clone() As bitmap
+    Set Clone = New bitmap
     Clone.NewC Me
 End Function
 
@@ -890,8 +890,9 @@ Public Property Get Pixel32(ByVal X As Long, ByVal Y As Long) As Long
     Dim H As Long: H = Me.Height:   If Y < 0 Or H <= Y Then Exit Property
     Dim i As Long: i = ((H - 1 - Y) * W + X) * 4
     Dim RGBA As RGBA
+    Debug.Print UBound(m_data)
     With RGBA
-        .A = m_data(i + 3)
+        '.A = m_data(i + 3)
         .R = m_data(i + 2)
         .G = m_data(i + 1)
         .b = m_data(i + 0)
