@@ -2,8 +2,8 @@ VERSION 5.00
 Begin VB.Form FMain 
    Caption         =   "Bitmaps"
    ClientHeight    =   8670
-   ClientLeft      =   120
-   ClientTop       =   465
+   ClientLeft      =   225
+   ClientTop       =   870
    ClientWidth     =   14895
    Icon            =   "FMain.frx":0000
    LinkTopic       =   "FMain"
@@ -11,13 +11,13 @@ Begin VB.Form FMain
    ScaleMode       =   3  'Pixel
    ScaleWidth      =   993
    StartUpPosition =   3  'Windows-Standard
-   Begin VB.CommandButton Command1 
-      Caption         =   "Command1"
+   Begin VB.CommandButton BtnPalette 
+      Caption         =   "Palette"
       Height          =   375
-      Left            =   10800
+      Left            =   10560
       TabIndex        =   7
-      Top             =   240
-      Width           =   1695
+      Top             =   120
+      Width           =   1335
    End
    Begin VB.PictureBox Picture2 
       BackColor       =   &H00FFFFFF&
@@ -26,7 +26,7 @@ Begin VB.Form FMain
       ScaleHeight     =   315
       ScaleWidth      =   315
       TabIndex        =   6
-      Top             =   240
+      Top             =   120
       Width           =   375
    End
    Begin VB.CommandButton BtnPickAColor 
@@ -34,7 +34,7 @@ Begin VB.Form FMain
       Height          =   375
       Left            =   8880
       TabIndex        =   5
-      Top             =   240
+      Top             =   120
       Width           =   1335
    End
    Begin VB.TextBox Text1 
@@ -105,6 +105,18 @@ Begin VB.Form FMain
       Top             =   240
       Width           =   3735
    End
+   Begin VB.Menu mnuFile 
+      Caption         =   "&File"
+      Begin VB.Menu mnuFileOpen 
+         Caption         =   "&Open"
+      End
+      Begin VB.Menu mnuFileSep1 
+         Caption         =   "-"
+      End
+      Begin VB.Menu mnuFileExit 
+         Caption         =   "E&xit"
+      End
+   End
 End
 Attribute VB_Name = "FMain"
 Attribute VB_GlobalNameSpace = False
@@ -113,26 +125,13 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
 Private m_PFN As String
-Private m_bmp As Bitmap
+Private m_Bmp As bitmap
 Private m_bPickAColor As Boolean
 
-Private Sub Command1_Click()
-    Dim c As Long
-    If m_bmp Is Nothing Then
-        MsgBox "create bmp first!"
-        Exit Sub
-    End If
-    If m_bmp.IsIndexed Then
-        c = m_bmp.Pixel4(47, 0)
-        'c = m_bmp.Pixel8(45, 1)
-        Picture2.BackColor = c
-        'Command1.Caption = "&H" & Hex(c)
-        'c = m_bmp.PaletteColor(0)
-        'MsgBox "&H" & Hex(c)
-        'm_bmp.PaletteColor(0) = &HFF0000
-        'c = m_bmp.PaletteColor(0)
-        'MsgBox "&H" & Hex(c)
-        'UpdateView
+Private Sub BtnPalette_Click()
+    FPalette.Move Me.Left + Me.Width / 2 - FPalette.Width / 2, Me.Top + Me.Height / 2 - FPalette.Height / 2
+    If FPalette.ShowDialog(Me, m_Bmp) = vbOK Then
+        UpdateView
     End If
 End Sub
 
@@ -141,21 +140,23 @@ Private Sub BtnPickAColor_Click()
 End Sub
 
 Private Sub Form_Load()
-    Me.Caption = "Bitmaps" & " v" & App.Major & "." & App.Minor & "." & App.Revision
+    BtnPalette.Enabled = False
+    BtnPickAColor.Enabled = False
+    UpdateFormCaption
 End Sub
 
-Private Sub FormCaptionAddFilename()
-    Me.Caption = "Bitmaps" & " v" & App.Major & "." & App.Minor & "." & App.Revision & " - " & m_PFN
+Private Sub UpdateFormCaption()
+    Me.Caption = "Bitmaps" & " v" & App.Major & "." & App.Minor & "." & App.Revision & IIf(Len(m_PFN), " - " & m_PFN, "")
 End Sub
 
 Private Sub Form_Resize()
-    Dim l As Single
+    Dim L As Single
     Dim T As Single: T = Text1.Top
-    Dim W As Single: W = Text1.Width - l
+    Dim W As Single: W = Text1.Width - L
     Dim H As Single: H = Me.ScaleHeight - T
-    If W > 0 And H > 0 Then Text1.Move l, T, W, H
-    l = W:    W = Me.ScaleWidth - W
-    If W > 0 And H > 0 Then Picture1.Move l, T, W, H
+    If W > 0 And H > 0 Then Text1.Move L, T, W, H
+    L = W:    W = Me.ScaleWidth - W
+    If W > 0 And H > 0 Then Picture1.Move L, T, W, H
 End Sub
 
 Private Sub BtnOpenFolder_Click()
@@ -168,10 +169,23 @@ Private Sub BtnInfo_Click()
     MsgBox App.CompanyName & " " & App.EXEName & " v" & App.Major & "." & App.Minor & "." & App.Revision & vbCrLf & App.FileDescription
 End Sub
 
+Private Sub mnuFileExit_Click()
+    Unload Me
+End Sub
+
+Private Sub mnuFileOpen_Click()
+    Dim OFD As OpenFileDialog: Set OFD = New OpenFileDialog
+    OFD.Filter = "Bitmaps (*.bmp)|*.bmp|All files (*.*)|*.*"
+    If OFD.ShowDialog(Me) = vbCancel Then Exit Sub
+    m_PFN = OFD.FileName
+    Set m_Bmp = MNew.bitmap(m_PFN)
+    UpdateView
+End Sub
+
 Private Sub Picture1_MouseMove(Button As Integer, Shift As Integer, X As Single, Y As Single)
-    If m_bmp Is Nothing Then Exit Sub
+    If m_Bmp Is Nothing Then Exit Sub
     If m_bPickAColor Then
-        Picture2.BackColor = m_bmp.Pixel(X, Y)
+        Picture2.BackColor = m_Bmp.Pixel(X, Y)
         Label2.Caption = "X: " & X & "; Y: " & Y
     End If
 End Sub
@@ -191,16 +205,23 @@ End Sub
 Private Sub AllOLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, X As Single, Y As Single)
     If Not Data.GetFormat(vbCFFiles) Then Exit Sub
     m_PFN = Data.Files(1)
-    Set m_bmp = MNew.Bitmap(m_PFN)
-    UpdateView
+    Dim ext As String: ext = LCase(Right(m_PFN, 3))
+    If ext = "bmp" Then
+        Set m_Bmp = MNew.bitmap(m_PFN)
+        UpdateView
+    ElseIf ext = "png" Then
+        Set Picture1.Picture = MLoadPng.LoadPictureGDIp(m_PFN)
+    End If
 End Sub
 
 Private Sub UpdateView()
     Dim dt As Single: dt = Timer
     dt = Timer - dt
-    If m_bmp Is Nothing Then Exit Sub
-    Set Picture1.Picture = m_bmp.ToPicture
+    If m_Bmp Is Nothing Then Exit Sub
+    Set Picture1.Picture = m_Bmp.ToPicture
     Label1.Caption = "File loading time t: " & dt & "sec;"
-    FormCaptionAddFilename
-    Text1.Text = m_bmp.ToStr
+    UpdateFormCaption
+    Text1.Text = m_Bmp.ToStr
+    BtnPalette.Enabled = m_Bmp.IsIndexed
+    BtnPickAColor.Enabled = True
 End Sub
