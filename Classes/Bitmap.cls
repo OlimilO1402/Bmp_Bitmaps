@@ -247,10 +247,11 @@ Private Type PICTDESC
     hPal    As LongPtr ' 4, 8 ' HPALETTE
 End Type         ' Sum: 16/24
 
-Private Type BITMAPCORE
-    BmpHead As BITMAPFILEHEADER
-    BmpInfo As BITMAPINFO
-End Type
+'Private Type BITMAPCORE
+'    BmpHead As BITMAPFILEHEADER
+'    BmpInfo As BITMAPINFO
+'End Type
+
 #If VBA7 Then
     Private Declare PtrSafe Function CreateDIBSection Lib "gdi32" ( _
         ByVal hdc As LongPtr, ByVal pbmi As LongPtr, ByVal usage As Long, ByVal ppvBits As LongPtr, ByVal hSection As LongPtr, ByVal offset As Long) As Long
@@ -279,6 +280,8 @@ Private m_PicDesc As PICTDESC
 Private m_data()  As Byte 'the pixel-data
 
 Private Sub Class_Initialize()
+    'Debug.Print LenB(m_BmpHead) '  16
+    'Debug.Print LenB(m_BmpInfo) '1148
     Dim i As Integer
     With m_BmpHead
         .bfType = &H4D42
@@ -305,29 +308,60 @@ Friend Sub New_(aPFN As String)
 End Sub
 
 Friend Sub NewWH(ByVal Width As Long, ByVal Height As Long, ByVal PixelFormat As EPixelFormat)
-'    With m_BmpHead
-'        '.bfType = &H4D42
-'        '.bfReserved1 = 0
-'        '.bfReserved2 = 0
-'        '.bfSize =
-'        '.bfOffBits
-'    End With
-'    'Dim pf As EPixelFormat
-'    Select Case Me.PixelFormat
-'    Case EPixelFormat.Format1bppIndexed
-'    Case EPixelFormat.Format4bppIndexed
-'    Case EPixelFormat.Format8bppIndexed
-'    Case EPixelFormat.Format16bppArgb1555
-'    Case EPixelFormat.Format16bppGrayScale
-'    Case EPixelFormat.Format16bppRgb565
-'    End Select
-'    With m_BmpInfo
-'        '
-'    End With
+    With m_BmpHead
+        '.bfReserved1 = 0
+        '.bfReserved2 = 0
+        '.bfSize =
+        '.bfOffBits
+    End With
+    With m_BmpInfo
+        With .bmiHeader
+            .biHeight = Height
+            .biWidth = Width
+            Select Case PixelFormat
+            Case EPixelFormat.Format1bppIndexed
+                .biBitCount = 1
+                .biClrUsed = 2
+                .biClrImportant = 2
+            Case EPixelFormat.Format4bppIndexed
+                .biBitCount = 4
+                .biClrUsed = 16
+                .biClrImportant = 16
+            Case EPixelFormat.Format8bppIndexed
+                .biBitCount = 8
+                .biClrUsed = 256
+                .biClrImportant = 256
+            Case EPixelFormat.Format16bppArgb1555
+                .biBitCount = 16
+            Case EPixelFormat.Format16bppGrayScale
+                .biBitCount = 16
+            Case EPixelFormat.Format16bppRgb565
+                .biBitCount = 16
+            Case EPixelFormat.Format16bppRgb555
+                .biBitCount = 16
+            Case EPixelFormat.Format24bppRgb
+                .biBitCount = 24
+            Case EPixelFormat.Format32bppArgb
+                .biBitCount = 32
+            Case EPixelFormat.Format32bppPArgb
+                .biBitCount = 32
+            Case EPixelFormat.Format32bppRgb
+                .biBitCount = 32
+            Case Else
+                '
+            End Select
+        End With
+    End With
 End Sub
 
 Friend Sub NewC(other As bitmap)
-    Me.NewWH other.Width, other.Height, other.PixelFormat
+    m_PFN = other.FileName
+    '1. copy the complete bitmap-header-stuff
+    RtlMoveMemory m_BmpHead, ByVal other.HeaderPtr, 1164
+    '2. copy the complete data-array
+    Dim bytSize As Long: bytSize = other.DataSize
+    ReDim m_data(0 To bytSize - 1)
+    RtlMoveMemory m_data(0), ByVal other.DataPtr, bytSize
 End Sub
 
 Public Function Clone() As bitmap
@@ -339,7 +373,9 @@ Public Property Get FileName() As String
     FileName = m_PFN
 End Property
 'Publci property get
-
+Public Property Get HeaderPtr() As LongPtr
+    HeaderPtr = VarPtr(m_BmpHead)
+End Property
 Public Property Get DataPtr() As LongPtr
     DataPtr = VarPtr(m_data(0))
 End Property
@@ -375,7 +411,7 @@ Try: On Error GoTo Catch
         Get FNr, , .bfOffBits
         Dim T As Integer: T = .bfType
         IsBitmap = (T = &H4D42) Or (T = &H4142) Or (T = &H4943) Or (T = &H5043) Or (T = &H4349) Or (T = &H5450)
-        '&H4D42 = 19778 "BM" ' Windows 3.1x, 95, NT, . . .
+        '&H4D42 = 19778 "BM" ' Windows 3.1x, 95, NT, . . . also for OS/2
         '&H4142 = 16706 "BA" ' OS/2 struct bitmap array
         '&H4943 = 18755 "CI" ' OS/2 struct color icon
         '&H5043 = 19778 "CP" ' OS/2 const color pointer
@@ -475,10 +511,6 @@ Try: On Error GoTo Catch
             bi.biSize = m_BmpInfo.biSize
             bi.bmiHeader = m_BmpInfo.bmiHeader
             bi.Palette = m_BmpInfo.Palette
-            'Dim i As Long
-            'For i = 0 To m_BmpInfo.bmiHeader.biClrUsed - 1
-            '    bi.Palette.bmiColors(i) = m_BmpInfo.Palette.bmiColors(i)
-            'Next
             pBI = VarPtr(bi)
         Else
             pBI = VarPtr(m_BmpInfo)
@@ -548,7 +580,7 @@ Private Function BITMAPINFO_ToStr(this As BITMAPINFO) As String
             s = s & "Height        : " & .biHeight & vbCrLf
             s = s & "Planes        : " & .biPlanes & vbCrLf
             s = s & "BitCount      : " & .biBitCount & vbCrLf
-            s = s & "Compression   : " & .biCompression & vbCrLf
+            s = s & "Compression   : " & Compression_ToStr(.biCompression) & vbCrLf
             s = s & "SizeImage     : " & .biSizeImage & vbCrLf
             s = s & "XPelsPerMeter : " & .biXPelsPerMeter & " = " & GetDPI(.biXPelsPerMeter) & " dpi" & vbCrLf
             s = s & "YPelsPerMeter : " & .biYPelsPerMeter & " = " & GetDPI(.biYPelsPerMeter) & " dpi" & vbCrLf
@@ -567,7 +599,7 @@ Private Function BITMAPINFO_ToStr(this As BITMAPINFO) As String
             s = s & "GreenMask     : &H" & Hex(.bV4GreenMask) & vbCrLf
             s = s & "BlueMask      : &H" & Hex(.bV4BlueMask) & vbCrLf
             s = s & "AlphaMask     : &H" & Hex(.bV4AlphaMask) & vbCrLf
-            s = s & "CSType        : " & Hex(.bV4CSType) & vbCrLf
+            s = s & "CSType        : " & CSType_ToStr(.bV4CSType) & vbCrLf
             s = s & "Endpoints     : " & CIEXYZTRIPLE_ToStr(.bV4Endpoints) & vbCrLf
             s = s & "GammaRed      : " & .bV4GammaRed & vbCrLf
             s = s & "GammaGreen    : " & .bV4GammaGreen & vbCrLf
@@ -586,6 +618,37 @@ Private Function BITMAPINFO_ToStr(this As BITMAPINFO) As String
             End If
         End With
     End With
+End Function
+
+Private Function Compression_ToStr(ByVal biComp As Long) As String
+    Dim s As String: s = "&H" & Hex(biComp) & " : "
+    Select Case biComp
+    'BI_-constants
+    Case BI_RGB:       s = s & "BI_RGB"       ' = 0&  ' An uncompressed format.
+    Case BI_RLE8:      s = s & "BI_RLE8"      ' = 1&  ' A run-length encoded (RLE) format for bitmaps with 8 bpp. The compression format is a 2-byte format consisting of a count byte followed by a byte containing a color index. For more information, see Bitmap Compression.
+    Case BI_RLE4:      s = s & "BI_RLE4"      ' = 2&  ' An RLE format for bitmaps with 4 bpp. The compression format is a 2-byte format consisting of a count byte followed by two word-length color indexes. For more information, see Bitmap Compression.
+    Case BI_BITFIELDS: s = s & "BI_BITFIELDS" ' = 3&  ' Specifies that the bitmap is not compressed. The members bV4RedMask, bV4GreenMask, and bV4BlueMask specify the red, green, and blue components for each pixel. This is valid when used with 16- and 32-bpp bitmaps
+                                          '       ' If biCompression = BI_BITFIELDS -> the format is either RGB-555 or RGB-565.
+                                          '       ' Use the subtype GUID in the AM_MEDIA_TYPE structure to determine the specific RGB type.
+                                          '       ' https://learn.microsoft.com/en-us/windows/win32/api/strmif/ns-strmif-am_media_type
+                                        
+    Case BI_JPEG:      s = s & "BI_JPEG"      ' = 4&  ' Specifies that the image is compressed using the JPEG file interchange format. JPEG compression trades off compression against loss; it can achieve a compression ratio of 20:1 with little noticeable loss.
+    Case BI_PNG:       s = s & "BI_PNG"       ' = 5&  ' Specifies that the image is compressed using the PNG  file interchange format.
+    Case BI_1632:      s = s & "BI_1632"      ' = &H32333631 ' "1632"
+    Case &H56595559:   s = s & "YUYV video"   ' = &H56595559 ' "YUYV" video has the FOURCC 'VYUY' or 0x56595559
+    Case Else:         s = s & "unkown"
+    End Select
+    Compression_ToStr = s
+End Function
+
+Private Function CSType_ToStr(ByVal CSTyp As Long) As String
+    Dim s As String: s = "&H" & Hex(CSTyp) & " : "
+    Select Case CSTyp
+    Case 0:          s = s & "CALIBRATED_RGB"
+    Case &H73524742: s = s & "sRGB"
+    Case &H206E6957: s = s & "WINDOWS_COLOR_SPACE" ' &H206E6957 = "Win "
+    End Select
+    CSType_ToStr = s
 End Function
 
 Private Function GetDPI(ByVal PixelsPerMeter As Long) As Long
@@ -653,7 +716,6 @@ Public Property Get PixelFormat() As EPixelFormat
     Case 4:     If bcu > 0 Then epf = EPixelFormat.Format4bppIndexed
     Case 8:     If bcu > 0 Then epf = EPixelFormat.Format8bppIndexed
     Case 16:
-                
                 'use the ColorMasks of v4-header to distinguish the different 16-bit-color-formats
                 If m_BmpInfo.bmiHeaderV4.bV4AlphaMask = &H8000& Then
                     epf = EPixelFormat.Format16bppArgb1555
@@ -665,7 +727,12 @@ Public Property Get PixelFormat() As EPixelFormat
                     End If
                 End If
     Case 24:    epf = EPixelFormat.Format24bppRgb
-    Case 32:    epf = EPixelFormat.Format32bppArgb
+    Case 32:
+                If m_BmpInfo.bmiHeaderV4.bV4AlphaMask = &H0& Then
+                    epf = EPixelFormat.Format32bppRgb
+                Else
+                    epf = EPixelFormat.Format32bppArgb
+                End If
                 'How to distinguish the different 32bpp formats?
                 'epf = EPixelFormat.Format32bppPArgb
                 'epf = EPixelFormat.Format32bppRgb
@@ -718,6 +785,21 @@ Public Function Resize(ByVal NewWidth As Long, ByVal NewHeight As Long) As Boole
     'we do not preserve here
     ReDim m_data(0 To NewDataSize - 1)
 End Function
+
+Public Property Get IsOS2() As Boolean
+    Dim T As Integer: T = m_BmpHead.bfType
+    IsOS2 = (T = &H4142) Or (T = &H4943) Or (T = &H5043) Or (T = &H4349) Or (T = &H5450)
+    If T = &H4D42 Then
+        'If BM then only if bfSize is less than 40
+        If m_BmpHead.bfSize < 40 Then IsOS2 = True
+    End If
+    '&H4D42 = 19778 "BM" ' Windows 3.1x, 95, NT, . . . also for OS/2
+    '&H4142 = 16706 "BA" ' OS/2 struct bitmap array
+    '&H4943 = 18755 "CI" ' OS/2 struct color icon
+    '&H5043 = 19778 "CP" ' OS/2 const color pointer
+    '&H4349 = 20547 "IC" ' OS/2 struct icon
+    '&H5450 = 21584 "PT" ' OS/2 pointer
+End Property
 
 Public Property Get IsIndexed() As Boolean
     IsIndexed = Me.PaletteCount > 0 'm_BmpInfo.bmiHeader.biClrUsed > 0

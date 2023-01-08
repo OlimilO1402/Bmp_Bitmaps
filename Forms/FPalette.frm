@@ -65,15 +65,14 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
 Private m_Result    As VbMsgBoxResult
-Private m_Bmp       As Bitmap
+Private m_Bmp       As bitmap
 Private m_Palette() As Long
 Private m_Index     As Long
 
-Private Sub Form_Load()
-    '
-End Sub
-
-Public Function ShowDialog(Owner As Form, Bmp As Bitmap) As VbMsgBoxResult
+Public Function ShowDialog(Owner As Form, Bmp As bitmap) As VbMsgBoxResult
+    'Here now as a modal dialog.
+    'maybe also would be nice as a modeless dialog?
+    'to see the effect of changing palette-colors immediately
     Set m_Bmp = Bmp
     If Not m_Bmp.IsIndexed Then Exit Function
     SavePalette m_Bmp
@@ -96,7 +95,7 @@ Private Sub BtnCancel_Click()
     Unload Me
 End Sub
 
-Sub SavePalette(Bmp As Bitmap)
+Sub SavePalette(Bmp As bitmap)
     Dim u As Long: u = Bmp.PaletteCount - 1
     ReDim m_Palette(0 To u)
     Dim i As Long
@@ -106,6 +105,9 @@ Sub SavePalette(Bmp As Bitmap)
 End Sub
 
 Sub LoadSHPalette(ByVal n As Long)
+    'ShPalette() is a control-array of quadratic shapes
+    'First tried it with 256 Pictureboxes, this was a bit too slow because each Picturebox is a window in itself.
+    'With the Shapes this works really fast, moreover the control-array is really ideal for this purpose
     Dim L0 As Single: L0 = ShPalette(0).Left
     Dim T0 As Single: T0 = ShPalette(0).Top
     Dim W0 As Single: W0 = ShPalette(0).Width
@@ -164,9 +166,11 @@ End Sub
 
 Private Function GetShapeIndex(ByVal X As Long, ByVal Y As Long) As Long
     Dim i As Long: GetShapeIndex = -1
+    Dim q As Shape
     For i = 0 To ShPalette.UBound
-        If (ShPalette(i).Left < X) And (X < ShPalette(i).Left + ShPalette(i).Width) And _
-           (ShPalette(i).Top < Y) And (Y < ShPalette(i).Top + ShPalette(i).Height) Then
+        Set q = ShPalette(i)
+        If (q.Left < X) And (X < q.Left + q.Width) And _
+           (q.Top < Y) And (Y < q.Top + q.Height) Then
            GetShapeIndex = i
            Exit Function
         End If
@@ -174,7 +178,8 @@ Private Function GetShapeIndex(ByVal X As Long, ByVal Y As Long) As Long
 End Function
 
 Private Sub SetDefaultColorPalette()
-    'this are the colors from the VB-IDE OLE-color palette
+    'these are the colors from the VB-IDE properties color palette
+    'no longer needed, served for testing purposes
     ShPalette(0).BackColor = &HFFFFFF
     ShPalette(1).BackColor = &HC0C0FF
     ShPalette(2).BackColor = &HC0E0FF
