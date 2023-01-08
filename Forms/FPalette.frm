@@ -1,7 +1,7 @@
 VERSION 5.00
 Begin VB.Form FPalette 
    BorderStyle     =   5  'Änderbares Werkzeugfenster
-   Caption         =   "Form1"
+   Caption         =   "Palette"
    ClientHeight    =   4800
    ClientLeft      =   10320
    ClientTop       =   4785
@@ -139,6 +139,7 @@ Private Sub PanelPalette_MouseMove(Button As Integer, Shift As Integer, X As Sin
     m_Index = GetShapeIndex(X, Y)
     SetBorderStyleTransparent
     If m_Index < 0 Then Exit Sub
+    Me.Caption = "Palette index: " & m_Index
     ShPalette(m_Index).BorderStyle = 1
     ShPalette(m_Index).BorderColor = &H8000000D
 End Sub
@@ -173,6 +174,7 @@ Private Function GetShapeIndex(ByVal X As Long, ByVal Y As Long) As Long
 End Function
 
 Private Sub SetDefaultColorPalette()
+    'this are the colors from the VB-IDE OLE-color palette
     ShPalette(0).BackColor = &HFFFFFF
     ShPalette(1).BackColor = &HC0C0FF
     ShPalette(2).BackColor = &HC0E0FF
