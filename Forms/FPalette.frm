@@ -16,20 +16,38 @@ Begin VB.Form FPalette
    Begin VB.CommandButton BtnCancel 
       Cancel          =   -1  'True
       Caption         =   "&Cancel"
+      BeginProperty Font 
+         Name            =   "Tahoma"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
       Height          =   375
       Left            =   2280
       TabIndex        =   2
       Top             =   4320
-      Width           =   1695
+      Width           =   1575
    End
    Begin VB.CommandButton BtnOK 
       Caption         =   "&OK"
       Default         =   -1  'True
+      BeginProperty Font 
+         Name            =   "Tahoma"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
       Height          =   375
-      Left            =   360
+      Left            =   480
       TabIndex        =   1
       Top             =   4320
-      Width           =   1695
+      Width           =   1575
    End
    Begin VB.PictureBox PanelPalette 
       Appearance      =   0  '2D

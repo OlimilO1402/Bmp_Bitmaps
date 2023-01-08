@@ -13,28 +13,46 @@ Begin VB.Form FMain
    StartUpPosition =   3  'Windows-Standard
    Begin VB.CommandButton BtnPalette 
       Caption         =   "Palette"
+      BeginProperty Font 
+         Name            =   "Tahoma"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
       Height          =   375
-      Left            =   10560
-      TabIndex        =   7
-      Top             =   120
+      Left            =   10440
+      TabIndex        =   6
+      Top             =   0
       Width           =   1335
    End
    Begin VB.PictureBox Picture2 
       BackColor       =   &H00FFFFFF&
       Height          =   375
-      Left            =   10200
+      Left            =   10080
       ScaleHeight     =   315
       ScaleWidth      =   315
-      TabIndex        =   6
-      Top             =   120
+      TabIndex        =   5
+      Top             =   0
       Width           =   375
    End
    Begin VB.CommandButton BtnPickAColor 
       Caption         =   "Pick a Color"
+      BeginProperty Font 
+         Name            =   "Tahoma"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
       Height          =   375
-      Left            =   8880
-      TabIndex        =   5
-      Top             =   120
+      Left            =   8760
+      TabIndex        =   4
+      Top             =   0
       Width           =   1335
    End
    Begin VB.TextBox Text1 
@@ -51,18 +69,10 @@ Begin VB.Form FMain
       Left            =   0
       MultiLine       =   -1  'True
       ScrollBars      =   3  'Beides
-      TabIndex        =   4
-      ToolTipText     =   "Drag'n'drop pictures of filetype *.bmp to the window."
-      Top             =   600
-      Width           =   4095
-   End
-   Begin VB.CommandButton BtnInfo 
-      Caption         =   "Info"
-      Height          =   375
-      Left            =   2040
       TabIndex        =   3
-      Top             =   120
-      Width           =   1095
+      ToolTipText     =   "Drag'n'drop pictures of filetype *.bmp to the window."
+      Top             =   360
+      Width           =   4095
    End
    Begin VB.PictureBox Picture1 
       AutoRedraw      =   -1  'True
@@ -77,33 +87,61 @@ Begin VB.Form FMain
       ScaleWidth      =   513
       TabIndex        =   1
       ToolTipText     =   "Drag'n'drop pictures of filetype *.bmp to the window."
-      Top             =   600
+      Top             =   360
       Width           =   7695
    End
    Begin VB.CommandButton BtnOpenFolder 
       Caption         =   "Open bmps-subfolder"
+      BeginProperty Font 
+         Name            =   "Tahoma"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
       Height          =   375
-      Left            =   120
+      Left            =   0
       TabIndex        =   0
-      Top             =   120
-      Width           =   1935
+      Top             =   0
+      Width           =   2295
    End
    Begin VB.Label Label2 
-      Caption         =   "Label2"
+      Caption         =   "        "
+      BeginProperty Font 
+         Name            =   "Tahoma"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
       Height          =   255
       Left            =   7200
-      TabIndex        =   8
-      Top             =   240
+      TabIndex        =   7
+      Top             =   45
       Width           =   1575
    End
    Begin VB.Label Label1 
+      AutoSize        =   -1  'True
       Caption         =   "Drag'n'drop pictures of filetype *.bmp to the window."
-      Height          =   255
-      Left            =   3240
+      BeginProperty Font 
+         Name            =   "Tahoma"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   210
+      Left            =   2400
       TabIndex        =   2
       ToolTipText     =   "Drag'n'drop pictures of filetype *.bmp to the window."
-      Top             =   240
-      Width           =   3735
+      Top             =   45
+      Width           =   4470
    End
    Begin VB.Menu mnuFile 
       Caption         =   "&File"
@@ -117,6 +155,12 @@ Begin VB.Form FMain
          Caption         =   "E&xit"
       End
    End
+   Begin VB.Menu mnuHelp 
+      Caption         =   " &? "
+      Begin VB.Menu mnuHelpInfo 
+         Caption         =   "&Info"
+      End
+   End
 End
 Attribute VB_Name = "FMain"
 Attribute VB_GlobalNameSpace = False
@@ -127,17 +171,6 @@ Option Explicit
 Private m_PFN As String
 Private m_Bmp As bitmap
 Private m_bPickAColor As Boolean
-
-Private Sub BtnPalette_Click()
-    FPalette.Move Me.Left + Me.Width / 2 - FPalette.Width / 2, Me.Top + Me.Height / 2 - FPalette.Height / 2
-    If FPalette.ShowDialog(Me, m_Bmp) = vbOK Then
-        UpdateView
-    End If
-End Sub
-
-Private Sub BtnPickAColor_Click()
-    m_bPickAColor = True
-End Sub
 
 Private Sub Form_Load()
     BtnPalette.Enabled = False
@@ -165,12 +198,15 @@ Private Sub BtnOpenFolder_Click()
     Shell "Explorer.exe " & p, vbNormalFocus
 End Sub
 
-Private Sub BtnInfo_Click()
-    MsgBox App.CompanyName & " " & App.EXEName & " v" & App.Major & "." & App.Minor & "." & App.Revision & vbCrLf & App.FileDescription
+Private Sub BtnPickAColor_Click()
+    m_bPickAColor = True
 End Sub
 
-Private Sub mnuFileExit_Click()
-    Unload Me
+Private Sub BtnPalette_Click()
+    FPalette.Move Me.Left + Me.Width / 2 - FPalette.Width / 2, Me.Top + Me.Height / 2 - FPalette.Height / 2
+    If FPalette.ShowDialog(Me, m_Bmp) = vbOK Then
+        UpdateView
+    End If
 End Sub
 
 Private Sub mnuFileOpen_Click()
@@ -180,6 +216,14 @@ Private Sub mnuFileOpen_Click()
     m_PFN = OFD.FileName
     Set m_Bmp = MNew.bitmap(m_PFN)
     UpdateView
+End Sub
+
+Private Sub mnuFileExit_Click()
+    Unload Me
+End Sub
+
+Private Sub mnuHelpInfo_Click()
+    MsgBox App.CompanyName & " " & App.EXEName & " v" & App.Major & "." & App.Minor & "." & App.Revision & vbCrLf & App.FileDescription
 End Sub
 
 Private Sub Picture1_MouseMove(Button As Integer, Shift As Integer, X As Single, Y As Single)
