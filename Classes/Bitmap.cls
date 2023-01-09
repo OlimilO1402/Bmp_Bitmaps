@@ -354,7 +354,7 @@ Friend Sub NewWH(ByVal Width As Long, ByVal Height As Long, ByVal PixelFormat As
     End With
 End Sub
 
-Friend Sub NewC(other As bitmap)
+Friend Sub NewC(other As Bitmap)
     m_PFN = other.FileName
     '1. copy the complete bitmap-header-stuff
     RtlMoveMemory m_BmpHead, ByVal other.HeaderPtr, 1164
@@ -364,8 +364,8 @@ Friend Sub NewC(other As bitmap)
     RtlMoveMemory m_data(0), ByVal other.DataPtr, bytSize
 End Sub
 
-Public Function Clone() As bitmap
-    Set Clone = New bitmap
+Public Function Clone() As Bitmap
+    Set Clone = New Bitmap
     Clone.NewC Me
 End Function
 

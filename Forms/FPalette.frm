@@ -83,37 +83,39 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
 Private m_Result    As VbMsgBoxResult
-Private m_Bmp       As bitmap
-Private m_Palette() As Long
+Private m_Bmp       As Bitmap
+Private m_Palette() As Long 'backup copy of bitmaps palette
 Private m_Index     As Long
+Private m_Owner     As FMain
 
-Public Function ShowDialog(Owner As Form, Bmp As bitmap) As VbMsgBoxResult
+Public Function ShowDialog(Owner As FMain, Bmp As Bitmap) As VbMsgBoxResult
     'Here now as a modal dialog.
     'maybe also would be nice as a modeless dialog?
     'to see the effect of changing palette-colors immediately
+    Set m_Owner = Owner
     Set m_Bmp = Bmp
     If Not m_Bmp.IsIndexed Then Exit Function
     SavePalette m_Bmp
     LoadSHPalette m_Bmp.PaletteCount
-    Me.Show vbModal, Owner
+    Me.Show vbModal, m_Owner
     ShowDialog = m_Result
 End Function
 
 Private Sub BtnOK_Click()
     m_Result = vbOK
     'Take all the changes and write it to the bitmap-palette
+    Unload Me
+End Sub
+Private Sub BtnCancel_Click()
+    m_Result = vbCancel
     Dim i As Long
     For i = 0 To UBound(m_Palette)
         m_Bmp.PaletteColor(i) = m_Palette(i)
     Next
     Unload Me
 End Sub
-Private Sub BtnCancel_Click()
-    m_Result = vbCancel
-    Unload Me
-End Sub
 
-Sub SavePalette(Bmp As bitmap)
+Sub SavePalette(Bmp As Bitmap)
     Dim u As Long: u = Bmp.PaletteCount - 1
     ReDim m_Palette(0 To u)
     Dim i As Long
@@ -166,11 +168,15 @@ End Sub
 
 Private Sub PanelPalette_DblClick()
     If m_Index < 0 Then Exit Sub
+    Dim oldColor As Long: oldColor = m_Bmp.PaletteColor(m_Index)
     Dim CD As ColorDialog: Set CD = New ColorDialog
-    CD.Color = m_Palette(m_Index)
+    CD.Color = oldColor 'm_Bmp.PaletteColor(m_Index) 'm_Palette(m_Index)
     If CD.ShowDialog(Me) = vbCancel Then Exit Sub
-    m_Palette(m_Index) = CD.Color
-    ShPalette(m_Index).BackColor = m_Palette(m_Index)
+    Dim newColor As Long: newColor = CD.Color
+    If oldColor = newColor Then Exit Sub
+    ShPalette(m_Index).BackColor = newColor
+    m_Bmp.PaletteColor(m_Index) = newColor
+    m_Owner.UpdateView
 End Sub
 
 Private Sub SetBorderStyleTransparent()

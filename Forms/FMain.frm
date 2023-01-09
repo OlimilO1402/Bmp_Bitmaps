@@ -11,6 +11,23 @@ Begin VB.Form FMain
    ScaleMode       =   3  'Pixel
    ScaleWidth      =   993
    StartUpPosition =   3  'Windows-Standard
+   Begin VB.CommandButton BtnClone 
+      Caption         =   "Clone >>"
+      BeginProperty Font 
+         Name            =   "Tahoma"
+         Size            =   9
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   375
+      Left            =   11760
+      TabIndex        =   8
+      Top             =   0
+      Width           =   1335
+   End
    Begin VB.CommandButton BtnPalette 
       Caption         =   "Palette"
       BeginProperty Font 
@@ -71,7 +88,7 @@ Begin VB.Form FMain
       ScrollBars      =   3  'Beides
       TabIndex        =   3
       ToolTipText     =   "Drag'n'drop pictures of filetype *.bmp to the window."
-      Top             =   360
+      Top             =   390
       Width           =   4095
    End
    Begin VB.PictureBox Picture1 
@@ -87,7 +104,7 @@ Begin VB.Form FMain
       ScaleWidth      =   513
       TabIndex        =   1
       ToolTipText     =   "Drag'n'drop pictures of filetype *.bmp to the window."
-      Top             =   360
+      Top             =   390
       Width           =   7695
    End
    Begin VB.CommandButton BtnOpenFolder 
@@ -126,7 +143,7 @@ Begin VB.Form FMain
    End
    Begin VB.Label Label1 
       AutoSize        =   -1  'True
-      Caption         =   "Drag'n'drop pictures of filetype *.bmp to the window."
+      Caption         =   "Drag'n'drop pictures of filetype *.bmp onto the window."
       BeginProperty Font 
          Name            =   "Tahoma"
          Size            =   9
@@ -141,7 +158,7 @@ Begin VB.Form FMain
       TabIndex        =   2
       ToolTipText     =   "Drag'n'drop pictures of filetype *.bmp to the window."
       Top             =   45
-      Width           =   4470
+      Width           =   4680
    End
    Begin VB.Menu mnuFile 
       Caption         =   "&File"
@@ -168,9 +185,25 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
-Private m_PFN As String
-Private m_Bmp As bitmap
+'Private m_PFN As String
+Private m_Bmp As Bitmap
 Private m_bPickAColor As Boolean
+
+Public Function Clone() As FMain
+    Set Clone = New FMain
+    Clone.NewC m_Bmp
+End Function
+
+Friend Sub NewC(other As Bitmap)
+    Set m_Bmp = other.Clone
+    Me.Show
+End Sub
+
+Private Sub BtnClone_Click()
+    If m_Bmp Is Nothing Then Exit Sub
+    Dim NewForm As FMain: Set NewForm = Me.Clone
+    NewForm.UpdateView
+End Sub
 
 Private Sub Form_Load()
     BtnPalette.Enabled = False
@@ -179,7 +212,9 @@ Private Sub Form_Load()
 End Sub
 
 Private Sub UpdateFormCaption()
-    Me.Caption = "Bitmaps" & " v" & App.Major & "." & App.Minor & "." & App.Revision & IIf(Len(m_PFN), " - " & m_PFN, "")
+    Dim PFN As String
+    If Not m_Bmp Is Nothing Then PFN = m_Bmp.FileName
+    Me.Caption = "Bitmaps" & " v" & App.Major & "." & App.Minor & "." & App.Revision & IIf(Len(PFN), " - " & PFN, "")
 End Sub
 
 Private Sub Form_Resize()
@@ -213,8 +248,8 @@ Private Sub mnuFileOpen_Click()
     Dim OFD As OpenFileDialog: Set OFD = New OpenFileDialog
     OFD.Filter = "Bitmaps (*.bmp)|*.bmp|All files (*.*)|*.*"
     If OFD.ShowDialog(Me) = vbCancel Then Exit Sub
-    m_PFN = OFD.FileName
-    Set m_Bmp = MNew.bitmap(m_PFN)
+    Dim PFN As String: PFN = OFD.FileName
+    Set m_Bmp = MNew.Bitmap(PFN)
     UpdateView
 End Sub
 
@@ -248,17 +283,17 @@ End Sub
 
 Private Sub AllOLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, X As Single, Y As Single)
     If Not Data.GetFormat(vbCFFiles) Then Exit Sub
-    m_PFN = Data.Files(1)
-    Dim ext As String: ext = LCase(Right(m_PFN, 3))
+    Dim PFN As String: PFN = Data.Files(1)
+    Dim ext As String: ext = LCase(Right(PFN, 3))
     If ext = "bmp" Then
-        Set m_Bmp = MNew.bitmap(m_PFN)
+        Set m_Bmp = MNew.Bitmap(PFN)
         UpdateView
     ElseIf ext = "png" Then
-        Set Picture1.Picture = MLoadPng.LoadPictureGDIp(m_PFN)
+        Set Picture1.Picture = MLoadPng.LoadPictureGDIp(PFN)
     End If
 End Sub
 
-Private Sub UpdateView()
+Public Sub UpdateView()
     Dim dt As Single: dt = Timer
     dt = Timer - dt
     If m_Bmp Is Nothing Then Exit Sub
@@ -268,4 +303,5 @@ Private Sub UpdateView()
     Text1.Text = m_Bmp.ToStr
     BtnPalette.Enabled = m_Bmp.IsIndexed
     BtnPickAColor.Enabled = True
+    BtnClone.Enabled = True
 End Sub
