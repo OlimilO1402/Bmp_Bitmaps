@@ -354,7 +354,7 @@ Friend Sub NewWH(ByVal Width As Long, ByVal Height As Long, ByVal PixelFormat As
     End With
 End Sub
 
-Friend Sub NewC(other As Bitmap)
+Friend Sub NewC(other As bitmap)
     m_PFN = other.FileName
     '1. copy the complete bitmap-header-stuff
     RtlMoveMemory m_BmpHead, ByVal other.HeaderPtr, 1164
@@ -364,8 +364,8 @@ Friend Sub NewC(other As Bitmap)
     RtlMoveMemory m_data(0), ByVal other.DataPtr, bytSize
 End Sub
 
-Public Function Clone() As Bitmap
-    Set Clone = New Bitmap
+Public Function Clone() As bitmap
+    Set Clone = New bitmap
     Clone.NewC Me
 End Function
 
@@ -950,7 +950,13 @@ End Property
 Public Property Get Pixel24(ByVal X As Long, ByVal Y As Long) As Long
     Dim W As Long: W = Me.Width:    If X < 0 Or W <= X Then Exit Property
     Dim H As Long: H = Me.Height:   If Y < 0 Or H <= Y Then Exit Property
-    Dim i As Long: i = ((H - 1 - Y) * W + X) * 3
+    'W = W + (W Mod 4)
+    Dim BitsPerPixel  As Long: BitsPerPixel = 24
+    Dim BitsPerByte   As Long: BitsPerByte = 8
+    Dim BytesPerPixel As Long: BytesPerPixel = BitsPerPixel / BitsPerByte ' 3
+    Dim W1 As Long: W1 = W * BytesPerPixel
+    Dim stride As Long: stride = W1 + (W1 Mod 4)
+    Dim i As Long: i = (H - 1 - Y) * stride + X * BytesPerPixel
     'Dim BGRA As BGRA
     Dim RGBA As RGBA
     With RGBA
