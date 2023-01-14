@@ -11,6 +11,14 @@ Begin VB.Form FMain
    ScaleMode       =   3  'Pixel
    ScaleWidth      =   993
    StartUpPosition =   3  'Windows-Standard
+   Begin VB.CommandButton Command1 
+      Caption         =   "Command1"
+      Height          =   375
+      Left            =   13320
+      TabIndex        =   9
+      Top             =   0
+      Width           =   1215
+   End
    Begin VB.CommandButton BtnClone 
       Caption         =   "Clone >>"
       BeginProperty Font 
@@ -186,7 +194,7 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
 'Private m_PFN As String
-Private m_Bmp As Bitmap
+Private m_Bmp As bitmap
 Private m_bPickAColor As Boolean
 
 Public Function Clone() As FMain
@@ -194,7 +202,7 @@ Public Function Clone() As FMain
     Clone.NewC m_Bmp
 End Function
 
-Friend Sub NewC(other As Bitmap)
+Friend Sub NewC(other As bitmap)
     Set m_Bmp = other.Clone
     Me.Show
 End Sub
@@ -203,6 +211,11 @@ Private Sub BtnClone_Click()
     If m_Bmp Is Nothing Then Exit Sub
     Dim NewForm As FMain: Set NewForm = Me.Clone
     NewForm.UpdateView
+End Sub
+
+Private Sub Command1_Click()
+    'save the data to disk
+    m_Bmp.SavePixelData
 End Sub
 
 Private Sub Form_Load()
@@ -249,7 +262,7 @@ Private Sub mnuFileOpen_Click()
     OFD.Filter = "Bitmaps (*.bmp)|*.bmp|All files (*.*)|*.*"
     If OFD.ShowDialog(Me) = vbCancel Then Exit Sub
     Dim PFN As String: PFN = OFD.FileName
-    Set m_Bmp = MNew.Bitmap(PFN)
+    Set m_Bmp = MNew.bitmap(PFN)
     UpdateView
 End Sub
 
@@ -286,7 +299,7 @@ Private Sub AllOLEDragDrop(Data As DataObject, Effect As Long, Button As Integer
     Dim PFN As String: PFN = Data.Files(1)
     Dim ext As String: ext = LCase(Right(PFN, 3))
     If ext = "bmp" Then
-        Set m_Bmp = MNew.Bitmap(PFN)
+        Set m_Bmp = MNew.bitmap(PFN)
         UpdateView
     ElseIf ext = "png" Then
         Set Picture1.Picture = MLoadPng.LoadPictureGDIp(PFN)

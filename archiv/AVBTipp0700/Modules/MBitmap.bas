@@ -188,9 +188,9 @@ Try: On Error GoTo Catch
         lngBitsPerPixel = 8
         lngPalCount = 256
         bPalette = True
-        If BitsPerPixel = BPP.PixelFormat8bppIndexed_RLE Then
-            biCompr = BI_RLE8
-        End If
+        'If BitsPerPixel = BPP.PixelFormat8bppIndexed_RLE Then
+        '    biCompr = BI_RLE8
+        'nd If
     Case BPP.PixelFormat16bppRGB ' 16Bit
         lngBitsPerPixel = 16
     Case BPP.PixelFormat24bppRGB ' 24Bit

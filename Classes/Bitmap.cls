@@ -369,6 +369,19 @@ Public Function Clone() As bitmap
     Clone.NewC Me
 End Function
 
+Public Sub SavePixelData()
+Try: On Error GoTo Catch
+    Dim FNr As Integer: FNr = FreeFile
+    Dim FNm As String: FNm = m_PFN & ".data"
+    Open FNm For Binary Access Write As FNr
+    Put FNr, , m_data
+    GoTo Finally
+Catch:
+    MsgBox Err.Description
+Finally:
+    Close FNr
+End Sub
+
 Public Property Get FileName() As String
     FileName = m_PFN
 End Property
@@ -382,6 +395,10 @@ End Property
 
 Public Property Get DataSize() As Long
     DataSize = UBound(m_data) + 1
+End Property
+
+Public Property Get BitsPerPixel() As Long
+    BitsPerPixel = m_BmpInfo.bmiHeader.biBitCount
 End Property
 
 Public Sub Read(aPFN As String)
@@ -750,6 +767,80 @@ Public Property Let Width(ByVal Value As Long)
     Resize Value, Me.Height
 End Property
 
+Public Property Get Stride() As Long
+    Dim W As Long: W = Me.Width
+    Stride = W * Me.BitsPerPixel / 8
+    Dim m As Long: m = Stride Mod 4: If m > 0 Then m = 4 - m
+    Stride = Stride + m
+End Property
+
+'Private Function GetStrideFS() As Long
+'    Dim W As Long: W = Me.Width
+'    Dim BytesPerPixel As Long: BytesPerPixel = m_bpp / 8
+'    Select Case m_bpp
+'    Case 8:        GetStrideFS = (W + 3) And Not 3
+'    Case 16, 24:   GetStrideFS = ((W * BytesPerPixel) + BytesPerPixel) And Not BytesPerPixel
+'    Case 32:       GetStrideFS = W * BytesPerPixel
+'    End Select
+'End Function
+
+'Private m_bpp As Byte
+'Private m_Width As Integer
+'
+'Private Sub TestStride()
+'    m_bpp = 8
+'    m_Width = 100
+'    Debug.Print GetStrideFS & " " & GetStrideOM
+'    m_Width = 101
+'    Debug.Print GetStrideFS & " " & GetStrideOM
+'    m_Width = 102
+'    Debug.Print GetStrideFS & " " & GetStrideOM
+'    m_Width = 103
+'    Debug.Print GetStrideFS & " " & GetStrideOM
+'    m_Width = 104
+'    Debug.Print GetStrideFS & " " & GetStrideOM
+'    m_bpp = 16
+'    m_Width = 100
+'    Debug.Print GetStrideFS & " " & GetStrideOM
+'    m_Width = 101
+'    Debug.Print GetStrideFS & " " & GetStrideOM
+'    m_Width = 102
+'    Debug.Print GetStrideFS & " " & GetStrideOM
+'    m_Width = 103
+'    Debug.Print GetStrideFS & " " & GetStrideOM
+'    m_Width = 104
+'    Debug.Print GetStrideFS & " " & GetStrideOM
+'    m_bpp = 24
+'    m_Width = 100
+'    Debug.Print GetStrideFS & " " & GetStrideOM
+'    m_Width = 101
+'    Debug.Print GetStrideFS & " " & GetStrideOM
+'    m_Width = 102
+'    Debug.Print GetStrideFS & " " & GetStrideOM
+'    m_Width = 103
+'    Debug.Print GetStrideFS & " " & GetStrideOM
+'    m_Width = 104
+'    Debug.Print GetStrideFS & " " & GetStrideOM
+'End Sub
+'
+'Public Function GetStrideFS() As Long 'Anzahl an Bytes pro Zeile
+'    Dim BytesPerPixel As Long: BytesPerPixel = m_bpp / 8
+'    Select Case m_bpp
+'    Case 8:        GetStrideFS = (m_Width + 3) And Not 3
+'    Case 16, 24:   GetStrideFS = ((m_Width * BytesPerPixel) + BytesPerPixel) And Not BytesPerPixel
+'    Case 32:       GetStrideFS = m_Width * BytesPerPixel
+'    End Select
+'End Function
+'
+'Public Function GetStrideOM() As Long 'Anzahl an Bytes pro Zeile inkl Padbytes
+'    GetStrideOM = m_Width * m_bpp / 8
+'    Dim m As Byte: m = GetStrideOM Mod 4: If m > 0 Then m = 4 - m
+'    GetStrideOM = GetStrideOM + m
+'End Function
+'
+
+
+
 Public Property Get Height() As Long
     Height = m_BmpInfo.bmiHeader.biHeight
 End Property
@@ -955,8 +1046,8 @@ Public Property Get Pixel24(ByVal X As Long, ByVal Y As Long) As Long
     Dim BitsPerByte   As Long: BitsPerByte = 8
     Dim BytesPerPixel As Long: BytesPerPixel = BitsPerPixel / BitsPerByte ' 3
     Dim W1 As Long: W1 = W * BytesPerPixel
-    Dim stride As Long: stride = W1 + (W1 Mod 4)
-    Dim i As Long: i = (H - 1 - Y) * stride + X * BytesPerPixel
+    Dim Stride As Long: Stride = W1 + (W1 Mod 4)
+    Dim i As Long: i = (H - 1 - Y) * Stride + X * BytesPerPixel
     'Dim BGRA As BGRA
     Dim RGBA As RGBA
     With RGBA
