@@ -9,6 +9,14 @@ Begin VB.Form Form1
    ScaleHeight     =   3015
    ScaleWidth      =   9375
    StartUpPosition =   3  'Windows-Standard
+   Begin VB.CommandButton Command6 
+      Caption         =   "Test6"
+      Height          =   375
+      Left            =   6720
+      TabIndex        =   12
+      Top             =   1320
+      Width           =   1335
+   End
    Begin VB.CommandButton Command5 
       Caption         =   "Fill Test5"
       Height          =   375
@@ -180,6 +188,10 @@ Sub FillExample5()
     FillBytes m_PixelDataRGB, "51 51 51 51 51 51 51 51 51 4D 28 2C 2D 40 51 51 51 0A 0C 0D 0F 11 13 26 4C 51 46 1D 31 1C 51 51 51 0B 38 38 38 29 25 4B 51 51 4A 1A 35 1C 51 51 51 0C 39 39 2B 12 4B 51 51 51 42 23 30 3E 51 51 51 0C 3A 2E 35 14 3F 49 49 44 1A 34 22 43 51 51 51 0D 2A 10 16 36 21 17 18 1F 32 2F 3C 4F 51 51 51 0E 20 47 3D 15 30 37 37 33 24 3B 48 51 51 51 51 1E 4B 51 50 45 27 18 19 1B 41 4E 51 51 51 51 51 4B 51 51 51 51 51 51 51 51 51 51 51 51 51 51"
     UpdateView
 End Sub
+Sub FillExample6()
+    'Read BitmapRGB.data
+    'Read BitampRLE.data
+End Sub
 
 Private Sub Command1_Click()
     FillExample1
@@ -195,6 +207,9 @@ Private Sub Command4_Click()
 End Sub
 Private Sub Command5_Click()
     FillExample5
+End Sub
+Private Sub Command6_Click()
+    FillExample6
 End Sub
 
 Public Sub FillBytes(Dst_buffer() As Byte, ByVal s As String)

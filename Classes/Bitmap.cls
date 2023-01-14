@@ -253,23 +253,17 @@ End Type         ' Sum: 16/24
 'End Type
 
 #If VBA7 Then
-    Private Declare PtrSafe Function CreateDIBSection Lib "gdi32" ( _
-        ByVal hdc As LongPtr, ByVal pbmi As LongPtr, ByVal usage As Long, ByVal ppvBits As LongPtr, ByVal hSection As LongPtr, ByVal offset As Long) As Long
-    
-    Private Declare PtrSafe Function SetDIBits Lib "gdi32" ( _
-        ByVal hdc As LongPtr, ByVal hbitmap As LongPtr, ByVal nStartScan As Long, ByVal nNumScans As Long, ByRef lpBits As Any, ByVal lpBI As LongPtr, ByVal wUsage As Long) As Long
-    
-    Private Declare PtrSafe Function OleCreatePictureIndirect Lib "oleaut32" ( _
-        ByRef lpPictDesc As PICTDESC, ByRef riid As GUID, ByVal fOwn As Long, ByRef lplpvObj As Object) As Long
+    Private Declare PtrSafe Function CreateDIBSection Lib "gdi32" (ByVal hdc As LongPtr, ByVal pbmi As LongPtr, ByVal usage As Long, ByVal ppvBits As LongPtr, ByVal hSection As LongPtr, ByVal offset As Long) As Long
+    Private Declare PtrSafe Function SetDIBits Lib "gdi32" (ByVal hdc As LongPtr, ByVal hbitmap As LongPtr, ByVal nStartScan As Long, ByVal nNumScans As Long, ByRef lpBits As Any, ByVal lpBI As LongPtr, ByVal wUsage As Long) As Long
+    Private Declare PtrSafe Function OleCreatePictureIndirect Lib "oleaut32" (ByRef lpPictDesc As PICTDESC, ByRef riid As GUID, ByVal fOwn As Long, ByRef lplpvObj As Object) As Long
+    Private Declare PtrSafe Sub RtlMoveMemory Lib "kernel32" (pDst As Any, pDst As Any, ByVal bytLength As Long)
+    Private Declare PtrSafe Sub RtlFillMemory Lib "kernel32" (pDst As Any, ByVal bytLength As Long, ByVal fill As Byte)
 #Else
-    Private Declare Function CreateDIBSection Lib "gdi32" ( _
-        ByVal hdc As LongPtr, ByVal pbmi As LongPtr, ByVal usage As Long, ByVal ppvBits As LongPtr, ByVal hSection As LongPtr, ByVal Offset As Long) As Long
-    
-    Private Declare Function SetDIBits Lib "gdi32" ( _
-        ByVal hdc As LongPtr, ByVal hBitmap As LongPtr, ByVal nStartScan As Long, ByVal nNumScans As Long, ByRef lpBits As Any, ByVal lpBI As LongPtr, ByVal wUsage As Long) As Long
-    
-    Private Declare Function OleCreatePictureIndirect Lib "oleaut32" ( _
-        ByRef lpPictDesc As PICTDESC, ByRef riid As GUID, ByVal fOwn As Long, ByRef lplpvObj As Object) As Long
+    Private Declare Function CreateDIBSection Lib "gdi32" (ByVal hdc As LongPtr, ByVal pbmi As LongPtr, ByVal usage As Long, ByVal ppvBits As LongPtr, ByVal hSection As LongPtr, ByVal Offset As Long) As Long
+    Private Declare Function SetDIBits Lib "gdi32" (ByVal hdc As LongPtr, ByVal hBitmap As LongPtr, ByVal nStartScan As Long, ByVal nNumScans As Long, ByRef lpBits As Any, ByVal lpBI As LongPtr, ByVal wUsage As Long) As Long
+    Private Declare Function OleCreatePictureIndirect Lib "oleaut32" (ByRef lpPictDesc As PICTDESC, ByRef riid As GUID, ByVal fOwn As Long, ByRef lplpvObj As Object) As Long
+    Private Declare Sub RtlMoveMemory Lib "kernel32" (pDst As Any, pDst As Any, ByVal bytLength As Long)
+    Private Declare Sub RtlFillMemory Lib "kernel32" (pDst As Any, ByVal bytLength As Long, ByVal fill As Byte)
 #End If
 Private m_PFN     As String
 'Private m_PNMType As EPNMType ' P2: Daten als Text gespeichert, P5: Daten binär gespeichert
@@ -354,7 +348,7 @@ Friend Sub NewWH(ByVal Width As Long, ByVal Height As Long, ByVal PixelFormat As
     End With
 End Sub
 
-Friend Sub NewC(other As bitmap)
+Friend Sub NewC(other As Bitmap)
     m_PFN = other.FileName
     '1. copy the complete bitmap-header-stuff
     RtlMoveMemory m_BmpHead, ByVal other.HeaderPtr, 1164
@@ -364,8 +358,8 @@ Friend Sub NewC(other As bitmap)
     RtlMoveMemory m_data(0), ByVal other.DataPtr, bytSize
 End Sub
 
-Public Function Clone() As bitmap
-    Set Clone = New bitmap
+Public Function Clone() As Bitmap
+    Set Clone = New Bitmap
     Clone.NewC Me
 End Function
 
@@ -385,7 +379,7 @@ End Sub
 Public Property Get FileName() As String
     FileName = m_PFN
 End Property
-'Publci property get
+
 Public Property Get HeaderPtr() As LongPtr
     HeaderPtr = VarPtr(m_BmpHead)
 End Property
@@ -409,7 +403,18 @@ Try: On Error GoTo Catch
     Open m_PFN For Binary Access Read As FNr
     If Not IsBitmap(FNr) Then sErr = "Unknown FileHeader: " & m_BmpHead.bfType: GoTo Catch
     ReadBmpInfo FNr
-    If Not ReadData(FNr) Then sErr = "Reading pixel data failed": GoTo Catch
+    If ReadData(FNr) Then
+        If Me.PixelFormat = EPixelFormat.Format8bppIndexed Then
+            If m_BmpInfo.bmiHeader.biCompression = BI_RLE8 Then
+                Dim buffer_RLEDecoded() As Byte
+                If RLE8_Decode(Me.Width, Me.Height, m_data, buffer_RLEDecoded) Then
+                    m_data = buffer_RLEDecoded
+                End If
+            End If
+        End If
+    Else
+        sErr = "Reading pixel data failed": GoTo Catch
+    End If
     GoTo Finally
 Catch:
     MsgBox "Error reading file: " & vbCrLf & m_PFN & vbCrLf & sErr
@@ -457,9 +462,18 @@ Try: On Error GoTo Catch
                 .Palette.bmiColors(i) = aColor
             Next
         ElseIf .biSize > 40 Then ' = 108
-            Get FNr, , .bmiHeaderV4
-            If .biSize > 108 Then ' = 124
-                Get FNr, , .bmiHeaderV5
+            If .biSize = 56 Then
+                With .bmiHeaderV4
+                    Get FNr, , .bV4RedMask
+                    Get FNr, , .bV4GreenMask
+                    Get FNr, , .bV4BlueMask
+                    Get FNr, , .bV4AlphaMask
+                End With
+            Else
+                Get FNr, , .bmiHeaderV4
+                If .biSize > 108 Then ' = 124
+                    Get FNr, , .bmiHeaderV5
+                End If
             End If
         End If
     End With
@@ -518,6 +532,70 @@ Catch:
     MsgBox Err.Number & " " & "Error reading data" & vbCrLf & Err.Description
 End Function
 
+Private Function RLE8_Decode(ByVal W As Long, ByVal H As Long, buffer_in() As Byte, buffer_out() As Byte) As Boolean
+'https://learn.microsoft.com/en-us/windows/win32/gdi/bitmap-compression
+Try: On Error GoTo Catch
+    Dim Stride As Long: Stride = CalcStride(W, 8)
+    'Dim Stride As Long: Stride = GetStride(W, 8)
+    Dim Size_of_buffer_out As Long: Size_of_buffer_out = Stride * H
+    Dim i As Long, ui As Long: ui = UBound(buffer_in)
+    Dim o As Long, uo As Long: uo = Size_of_buffer_out - 1: ReDim buffer_out(0 To uo)
+    Dim d As Byte: d = Stride - W
+    Dim Byte1 As Byte, Byte2 As Byte, Size As Byte, fill As Byte
+    Dim dRi As Byte, dUp As Byte
+    Do While i <= ui
+        'read 2 bytes
+        Byte1 = buffer_in(i): i = i + 1: If ui <= i Then Exit Do
+        Byte2 = buffer_in(i): i = i + 1: If ui <= i Then Exit Do
+        Select Case Byte2
+        Case 0: 'End of line
+                'Striding-Padbytes in Ausgabe einfügen, bzw einfach den Ausgabe-Index weitersetzen
+                o = o + d
+        Case 1: 'End of Bitmap
+                Exit Do
+        Case 2: 'delta mode
+            dRi = buffer_in(i): i = i + 1: If ui <= i Then Exit Do
+            dUp = buffer_in(i): i = i + 1: If ui <= i Then Exit Do
+            'jump to the position
+            'todo
+        Case Else
+            If Byte1 = 0 Then
+                'Absolute mode
+                Size = Byte2
+                RtlMoveMemory buffer_out(o), buffer_in(i), Size
+                i = i + Size: If ui <= i Then Exit Do
+                o = o + Size: If uo <= o Then Exit Do
+                If IsOdd(Size) Then i = i + 1
+                'do the padding
+                '
+            Else
+                'Encoded mode
+                'now fill the outputbuffer size-times with the same pixel
+                Size = Byte1
+                fill = Byte2
+                RtlFillMemory buffer_out(o), Size, fill
+                o = o + Size
+            End If
+        End Select
+    Loop
+    RLE8_Decode = True
+    Exit Function
+Catch:
+    MsgBox Err.Description
+End Function
+Function IsOdd(ByVal n As Byte) As Boolean
+    'gibt zurück ob die Zahl n ungerade ist
+    IsOdd = n Mod 2
+End Function
+Public Property Get CalcStride(ByVal W As Long, ByVal BitsPerPixel As Byte) As Long
+    'calculates the number of bytes in one horizontal line of pixels,
+    'including the number of pad-bytes for the 4-aligned result
+    CalcStride = W * BitsPerPixel / 8
+    Dim m As Long: m = CalcStride Mod 4: If m > 0 Then m = 4 - m
+    CalcStride = CalcStride + m
+End Property
+
+
 Friend Function ToPicture() As StdPicture
 Try: On Error GoTo Catch
     Dim sErr As String, hr As Long
@@ -527,6 +605,7 @@ Try: On Error GoTo Catch
             Dim bi As BITMAPINFOV3
             bi.biSize = m_BmpInfo.biSize
             bi.bmiHeader = m_BmpInfo.bmiHeader
+            bi.bmiHeader.biCompression = BI_RGB
             bi.Palette = m_BmpInfo.Palette
             pBI = VarPtr(bi)
         Else
@@ -768,10 +847,11 @@ Public Property Let Width(ByVal Value As Long)
 End Property
 
 Public Property Get Stride() As Long
-    Dim W As Long: W = Me.Width
-    Stride = W * Me.BitsPerPixel / 8
-    Dim m As Long: m = Stride Mod 4: If m > 0 Then m = 4 - m
-    Stride = Stride + m
+    Stride = CalcStride(Me.Width, Me.BitsPerPixel)
+'    Dim W As Long: W = Me.Width
+'    Stride = W * Me.BitsPerPixel / 8
+'    Dim m As Long: m = Stride Mod 4: If m > 0 Then m = 4 - m
+'    Stride = Stride + m
 End Property
 
 'Private Function GetStrideFS() As Long

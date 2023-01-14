@@ -1,10 +1,10 @@
 Attribute VB_Name = "MRLE"
 Option Explicit
-'https://learn.microsoft.com/en-us/windows/win32/gdi/bitmap-compression
 Private Declare Sub RtlMoveMemory Lib "kernel32" (pDst As Any, pDst As Any, ByVal bytLength As Long)
 Private Declare Sub RtlFillMemory Lib "kernel32" (pDst As Any, ByVal bytLength As Long, ByVal fill As Byte)
 
 Public Function RLE8_Decode(ByVal W As Long, ByVal H As Long, buffer_in() As Byte, buffer_out() As Byte) As Boolean
+'https://learn.microsoft.com/en-us/windows/win32/gdi/bitmap-compression
 Try: On Error GoTo Catch
     Dim Stride As Long: Stride = CalcStride(W, 8)
     'Dim Stride As Long: Stride = GetStride(W, 8)
@@ -41,7 +41,7 @@ Try: On Error GoTo Catch
                 '
             Else
                 'Encoded mode
-                'now fill the outputbuffer with the same pixels
+                'now fill the outputbuffer size-times with the same pixel
                 size = Byte1
                 fill = Byte2
                 RtlFillMemory buffer_out(o), size, fill
@@ -54,11 +54,11 @@ Try: On Error GoTo Catch
 Catch:
     MsgBox Err.Description
 End Function
-Public Function IsOdd(ByVal n As Byte) As Boolean
+Function IsOdd(ByVal n As Byte) As Boolean
     'gibt zurück ob die Zahl n ungerade ist
     IsOdd = n Mod 2
 End Function
-Public Function IsEven(ByVal n As Byte) As Boolean
+Function IsEven(ByVal n As Byte) As Boolean
     'gibt zurück ob die Zahl n gerade ist
     IsEven = (n Mod 2) = 0
 End Function
