@@ -84,7 +84,7 @@ Attribute VB_Exposed = False
 Option Explicit
 Private m_Result    As VbMsgBoxResult
 Private m_Bmp       As Bitmap
-Private m_Palette() As Long 'backup copy of bitmaps palette
+Private m_Palette() As Long 'backup copy of Bitmaps palette
 Private m_Index     As Long
 Private m_Owner     As FMain
 
@@ -103,7 +103,7 @@ End Function
 
 Private Sub BtnOK_Click()
     m_Result = vbOK
-    'Take all the changes and write it to the bitmap-palette
+    'Take all the changes and write it to the Bitmap-palette
     Unload Me
 End Sub
 Private Sub BtnCancel_Click()

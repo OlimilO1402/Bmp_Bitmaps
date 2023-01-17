@@ -105,7 +105,6 @@ Begin VB.Form FMain
       BorderStyle     =   0  'Kein
       Height          =   6735
       Left            =   4080
-      OLEDragMode     =   1  'Automatisch
       OLEDropMode     =   1  'Manuell
       ScaleHeight     =   449
       ScaleMode       =   3  'Pixel
@@ -170,14 +169,27 @@ Begin VB.Form FMain
    End
    Begin VB.Menu mnuFile 
       Caption         =   "&File"
+      Begin VB.Menu mnuFileNew 
+         Caption         =   "&New..."
+         Shortcut        =   ^N
+      End
       Begin VB.Menu mnuFileOpen 
-         Caption         =   "&Open"
+         Caption         =   "&Open..."
+         Shortcut        =   ^O
+      End
+      Begin VB.Menu mnuFileSave 
+         Caption         =   "&Save"
+         Shortcut        =   ^S
+      End
+      Begin VB.Menu mnuFileSaveAs 
+         Caption         =   "Save &As..."
       End
       Begin VB.Menu mnuFileSep1 
          Caption         =   "-"
       End
       Begin VB.Menu mnuFileExit 
          Caption         =   "E&xit"
+         Shortcut        =   ^Q
       End
    End
    Begin VB.Menu mnuHelp 
@@ -194,7 +206,7 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
 'Private m_PFN As String
-Private m_Bmp As bitmap
+Private m_Bmp As Bitmap
 Private m_bPickAColor As Boolean
 
 Public Function Clone() As FMain
@@ -202,7 +214,7 @@ Public Function Clone() As FMain
     Clone.NewC m_Bmp
 End Function
 
-Friend Sub NewC(other As bitmap)
+Friend Sub NewC(other As Bitmap)
     Set m_Bmp = other.Clone
     Me.Show
 End Sub
@@ -215,7 +227,9 @@ End Sub
 
 Private Sub Command1_Click()
     'save the data to disk
-    m_Bmp.SavePixelData
+    'm_Bmp.SavePixelData
+    'Set m_Bmp = MNew.BitmapWH(753, 445, Format16bppArgb1555)
+    'UpdateView
 End Sub
 
 Private Sub Form_Load()
@@ -252,9 +266,14 @@ End Sub
 
 Private Sub BtnPalette_Click()
     FPalette.Move Me.Left + Me.Width / 2 - FPalette.Width / 2, Me.Top + Me.Height / 2 - FPalette.Height / 2
-    If FPalette.ShowDialog(Me, m_Bmp) = vbOK Then
-        UpdateView
-    End If
+    If FPalette.ShowDialog(Me, m_Bmp) = vbCancel Then Exit Sub
+    UpdateView
+End Sub
+
+Private Sub mnuFileNew_Click()
+    FDlgNewPicture.Move Me.Left + Me.Width / 2 - FDlgNewPicture.Width / 2, Me.Top + Me.Height / 2 - FDlgNewPicture.Height / 2
+    If FDlgNewPicture.ShowDialog(Me, m_Bmp) = vbCancel Then Exit Sub
+    UpdateView
 End Sub
 
 Private Sub mnuFileOpen_Click()
@@ -262,7 +281,7 @@ Private Sub mnuFileOpen_Click()
     OFD.Filter = "Bitmaps (*.bmp)|*.bmp|All files (*.*)|*.*"
     If OFD.ShowDialog(Me) = vbCancel Then Exit Sub
     Dim PFN As String: PFN = OFD.FileName
-    Set m_Bmp = MNew.bitmap(PFN)
+    Set m_Bmp = MNew.Bitmap(PFN)
     UpdateView
 End Sub
 
@@ -299,7 +318,7 @@ Private Sub AllOLEDragDrop(Data As DataObject, Effect As Long, Button As Integer
     Dim PFN As String: PFN = Data.Files(1)
     Dim ext As String: ext = LCase(Right(PFN, 3))
     If ext = "bmp" Then
-        Set m_Bmp = MNew.bitmap(PFN)
+        Set m_Bmp = MNew.Bitmap(PFN)
         UpdateView
     ElseIf ext = "png" Then
         Set Picture1.Picture = MLoadPng.LoadPictureGDIp(PFN)

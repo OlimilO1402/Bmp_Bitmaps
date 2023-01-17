@@ -26,7 +26,7 @@ Private Type GUID
     Data4(0 To 7) As Byte
 End Type
 
-'Declare a UDT to store the bitmap information
+'Declare a UDT to store the Bitmap information
 Private Type PICTDESC
     Size As Long
     Type As Long
@@ -45,15 +45,15 @@ End Type
 'Windows API calls into the GDI+ library
 #If VBA7 Then
     Private Declare PtrSafe Function GdiplusStartup Lib "GDIPlus" (token As LongPtr, inputbuf As GdiplusStartupInput, Optional ByVal outputbuf As LongPtr = 0) As Long
-    Private Declare PtrSafe Function GdipCreateBitmapFromFile Lib "GDIPlus" (ByVal FileName As LongPtr, bitmap As LongPtr) As Long
-    Private Declare PtrSafe Function GdipCreateHBITMAPFromBitmap Lib "GDIPlus" (ByVal bitmap As LongPtr, hbmReturn As LongPtr, ByVal background As LongPtr) As Long
+    Private Declare PtrSafe Function GdipCreateBitmapFromFile Lib "GDIPlus" (ByVal FileName As LongPtr, pBitmap As LongPtr) As Long
+    Private Declare PtrSafe Function GdipCreateHBITMAPFromBitmap Lib "GDIPlus" (ByVal Bitmap As LongPtr, hbmReturn As LongPtr, ByVal background As LongPtr) As Long
     Private Declare PtrSafe Function GdipDisposeImage Lib "GDIPlus" (ByVal image As LongPtr) As Long
     Private Declare PtrSafe Sub GdiplusShutdown Lib "GDIPlus" (ByVal token As LongPtr)
     Private Declare PtrSafe Function OleCreatePictureIndirect Lib "oleaut32" (PicDesc As PICTDESC, RefIID As GUID, ByVal fPictureOwnsHandle As Long, IPic As IPicture) As Long
 #Else
     Private Declare Function GdiplusStartup Lib "GDIPlus" (token As LongPtr, inputbuf As GdiplusStartupInput, Optional ByVal outputbuf As LongPtr = 0) As Long
-    Private Declare Function GdipCreateBitmapFromFile Lib "GDIPlus" (ByVal FileName As LongPtr, bitmap As LongPtr) As Long
-    Private Declare Function GdipCreateHBITMAPFromBitmap Lib "GDIPlus" (ByVal bitmap As LongPtr, hbmReturn As LongPtr, ByVal background As LongPtr) As Long
+    Private Declare Function GdipCreateBitmapFromFile Lib "GDIPlus" (ByVal FileName As LongPtr, pBitmap As LongPtr) As Long
+    Private Declare Function GdipCreateHBITMAPFromBitmap Lib "GDIPlus" (ByVal Bitmap As LongPtr, hbmReturn As LongPtr, ByVal background As LongPtr) As Long
     Private Declare Function GdipDisposeImage Lib "GDIPlus" (ByVal image As LongPtr) As Long
     Private Declare Sub GdiplusShutdown Lib "GDIPlus" (ByVal token As LongPtr)
     Private Declare Function OleCreatePictureIndirect Lib "oleaut32" (PicDesc As PICTDESC, RefIID As GUID, ByVal fPictureOwnsHandle As Long, IPic As IPicture) As Long
@@ -75,19 +75,19 @@ Public Function LoadPictureGDIp(ByVal sFilename As String) As StdPicture
     'Load the image
     Dim hImage As LongPtr
     If GdipCreateBitmapFromFile(StrPtr(sFilename), hImage) <> ERROR_SUCCESS Then
-        MsgBox "Could not create bitmap from file: " & vbCrLf & sFilename
+        MsgBox "Could not create Bitmap from file: " & vbCrLf & sFilename
         Exit Function
     End If
     
-    'Create a bitmap handle from the GDI image
+    'Create a Bitmap handle from the GDI image
     Dim hBitmap   As LongPtr
     'lResult = GdipCreateHBITMAPFromBitmap(hGdiImage, hBitmap, 0)
     If GdipCreateHBITMAPFromBitmap(hImage, hBitmap, 0) <> ERROR_SUCCESS Then
-        MsgBox "Could not create handle from bitmap: " & hBitmap
+        MsgBox "Could not create handle from Bitmap: " & hBitmap
         Exit Function
     End If
     
-    'Create the IPicture object from the bitmap handle
+    'Create the IPicture object from the Bitmap handle
     Set LoadPictureGDIp = CreateStdPicture(hBitmap)
     
     'Tidy up

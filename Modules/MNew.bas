@@ -1,7 +1,7 @@
 Attribute VB_Name = "MNew"
 Option Explicit
 #If False Then
-    Bitmap 'otherwise it turns to start with lowercase letter "bitmap"
+    Bitmap
 #End If
 
 Public Function Bitmap(aPFN As String) As Bitmap
