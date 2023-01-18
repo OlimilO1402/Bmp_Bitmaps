@@ -11,14 +11,6 @@ Begin VB.Form FMain
    ScaleMode       =   3  'Pixel
    ScaleWidth      =   993
    StartUpPosition =   3  'Windows-Standard
-   Begin VB.CommandButton Command1 
-      Caption         =   "Command1"
-      Height          =   375
-      Left            =   13320
-      TabIndex        =   9
-      Top             =   0
-      Width           =   1215
-   End
    Begin VB.CommandButton BtnClone 
       Caption         =   "Clone >>"
       BeginProperty Font 
@@ -192,6 +184,12 @@ Begin VB.Form FMain
          Shortcut        =   ^Q
       End
    End
+   Begin VB.Menu mnuEdit 
+      Caption         =   "&Edit"
+      Begin VB.Menu mnuEditResize 
+         Caption         =   "Resize"
+      End
+   End
    Begin VB.Menu mnuHelp 
       Caption         =   " &? "
       Begin VB.Menu mnuHelpInfo 
@@ -209,6 +207,12 @@ Option Explicit
 Private m_Bmp As Bitmap
 Private m_bPickAColor As Boolean
 
+Private Sub Form_Load()
+    BtnPalette.Enabled = False
+    BtnPickAColor.Enabled = False
+    UpdateFormCaption
+End Sub
+
 Public Function Clone() As FMain
     Set Clone = New FMain
     Clone.NewC m_Bmp
@@ -223,19 +227,6 @@ Private Sub BtnClone_Click()
     If m_Bmp Is Nothing Then Exit Sub
     Dim NewForm As FMain: Set NewForm = Me.Clone
     NewForm.UpdateView
-End Sub
-
-Private Sub Command1_Click()
-    'save the data to disk
-    'm_Bmp.SavePixelData
-    'Set m_Bmp = MNew.BitmapWH(753, 445, Format16bppArgb1555)
-    'UpdateView
-End Sub
-
-Private Sub Form_Load()
-    BtnPalette.Enabled = False
-    BtnPickAColor.Enabled = False
-    UpdateFormCaption
 End Sub
 
 Private Sub UpdateFormCaption()
@@ -270,12 +261,31 @@ Private Sub BtnPalette_Click()
     UpdateView
 End Sub
 
-Private Sub mnuFileNew_Click()
-    FDlgNewPicture.Move Me.Left + Me.Width / 2 - FDlgNewPicture.Width / 2, Me.Top + Me.Height / 2 - FDlgNewPicture.Height / 2
-    If FDlgNewPicture.ShowDialog(Me, m_Bmp) = vbCancel Then Exit Sub
+Private Sub mnuEditResize_Click()
+    MiddlePosDlg FDlgNewPicture
+    Dim Bmp As Bitmap
+    If Not m_Bmp Is Nothing Then Set Bmp = m_Bmp.Clone
+    If FDlgNewPicture.ShowDialog(Me, Bmp) = vbCancel Then Exit Sub
+    Set m_Bmp = Bmp
     UpdateView
 End Sub
 
+Private Sub mnuFileNew_Click()
+    MiddlePosDlg FDlgNewPicture
+    Dim Bmp As Bitmap
+    'If Not m_Bmp Is Nothing Then Set Bmp = m_Bmp.Clone
+    If FDlgNewPicture.ShowDialog(Me, Bmp) = vbCancel Then Exit Sub
+    Set m_Bmp = Bmp
+    UpdateView
+End Sub
+
+Private Sub MiddlePosDlg(Frm As Form)
+    Dim W As Single: W = Frm.Width
+    Dim H As Single: H = Frm.Height
+    Dim L As Single: L = Me.Left + (Me.Width - W) / 2
+    Dim T As Single: T = Me.Top + (Me.Height - H) / 2
+    Frm.Move L, T
+End Sub
 Private Sub mnuFileOpen_Click()
     Dim OFD As OpenFileDialog: Set OFD = New OpenFileDialog
     OFD.Filter = "Bitmaps (*.bmp)|*.bmp|All files (*.*)|*.*"
