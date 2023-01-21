@@ -72,6 +72,12 @@ Private Type TByt2
     Value1 As Byte
 End Type
 
+Private Type TByt4 'used to convert 16bpp-color to 32bpp-color
+    Value0 As Byte
+    Value1 As Byte
+    Reserv As Integer
+End Type
+
 Private Type TInt
     Value As Integer
 End Type
@@ -81,16 +87,16 @@ Private Type TLng
 End Type
 
 Private Type BGRA '
-    b As Byte
-    g As Byte
-    r As Byte
+    B As Byte
+    G As Byte
+    R As Byte
     a As Byte
 End Type
 
 Private Type RGBA
-    r As Byte
-    g As Byte
-    b As Byte
+    R As Byte
+    G As Byte
+    B As Byte
     a As Byte
 End Type
 
@@ -276,10 +282,11 @@ Private m_PFN     As String
 'Private m_PNMType As EPNMType ' P2: Daten als Text gespeichert, P5: Daten binär gespeichert
 Private m_BmpHead As BITMAPFILEHEADER
 Private m_BmpInfo As BITMAPINFO
-'Private m_Stride  As Long 'Width in bytes of one picture-row including padbytes
 Private m_PicGUID As GUID
 Private m_PicDesc As PICTDESC
 Private m_data()  As Byte 'the pixel-data
+'private membervariables related to property Pixel:
+'Private m_Stride  As Long 'Width in bytes of one picture-row including padbytes
 
 Private Sub Class_Initialize()
     'Debug.Print LenB(m_BmpHead) '  16
@@ -377,16 +384,16 @@ Friend Sub NewWH(ByVal Width As Long, ByVal Height As Long, ByVal PixelFormat As
                 .bmiColors(i) = New_BGRA(0, 0, 255, 0):     i = i + 1:    .bmiColors(i) = New_BGRA(255, 0, 255, 0):   i = i + 1
                 .bmiColors(i) = New_BGRA(0, 255, 255, 0):   i = i + 1:    .bmiColors(i) = New_BGRA(255, 255, 255, 0): 'i = i + 1
         Case 8
-                Dim r As Integer, g As Integer, b As Integer
+                Dim R As Integer, G As Integer, B As Integer
                 For i = 0 To 5
                     For j = 0 To 5
                         For k = 0 To 5
-                            .bmiColors(c) = New_BGRA(CByte(r), CByte(g), CByte(b), 0)
-                            c = c + 1: b = b + 51
+                            .bmiColors(c) = New_BGRA(CByte(R), CByte(G), CByte(B), 0)
+                            c = c + 1: B = B + 51
                         Next
-                        b = 0: r = r + 51
+                        B = 0: R = R + 51
                     Next
-                    b = 0: r = 0: g = g + 51
+                    B = 0: R = 0: G = G + 51
                 Next
         End Select
     End With
@@ -543,39 +550,39 @@ Try: On Error GoTo Catch
 Catch: MsgBox "ReadBmpInfo " & sErr
 End Function
 
-Private Function New_BGRA(ByVal r As Byte, ByVal g As Byte, ByVal b As Byte, ByVal a As Byte) As BGRA
+Private Function New_BGRA(ByVal R As Byte, ByVal G As Byte, ByVal B As Byte, ByVal a As Byte) As BGRA
     With New_BGRA
-        .r = r: .g = g: .b = b: .a = a
+        .R = R: .G = G: .B = B: .a = a
     End With
 End Function
 
 Private Function BGRA_ToStr(this As BGRA) As String
     Dim s As String
     With this
-        s = "  BGRA{&H" & Hex2(.b) & Hex2(.g) & Hex2(.r) & Hex2(.a) & "}"
+        s = "  BGRA{&H" & Hex2(.B) & Hex2(.G) & Hex2(.R) & Hex2(.a) & "}"
     End With
     BGRA_ToStr = s
 End Function
 
-Private Function Hex2(b As Byte) As String
-    Hex2 = Hex(b): If Len(Hex2) < 2 Then Hex2 = "0" & Hex2
+Private Function Hex2(B As Byte) As String
+    Hex2 = Hex(B): If Len(Hex2) < 2 Then Hex2 = "0" & Hex2
 End Function
 
 Private Function BGRA_ToRGBA(this As BGRA) As RGBA
     With this
         BGRA_ToRGBA.a = .a
-        BGRA_ToRGBA.b = .b
-        BGRA_ToRGBA.g = .g
-        BGRA_ToRGBA.r = .r
+        BGRA_ToRGBA.B = .B
+        BGRA_ToRGBA.G = .G
+        BGRA_ToRGBA.R = .R
     End With
 End Function
 
 Private Function RGBA_ToBGRA(this As RGBA) As BGRA
     With this
         RGBA_ToBGRA.a = .a
-        RGBA_ToBGRA.b = .b
-        RGBA_ToBGRA.g = .g
-        RGBA_ToBGRA.r = .r
+        RGBA_ToBGRA.B = .B
+        RGBA_ToBGRA.G = .G
+        RGBA_ToBGRA.R = .R
     End With
 End Function
 
@@ -646,7 +653,7 @@ Catch:
     MsgBox Err.Description
 End Function
 
-Function IsOdd(ByVal n As Byte) As Boolean
+Private Function IsOdd(ByVal n As Long) As Boolean
     'gibt zurück ob die Zahl n ungerade ist
     IsOdd = n Mod 2
 End Function
@@ -909,13 +916,25 @@ Public Property Get Stride() As Long
 End Property
 
 Private Function CalcStride(ByVal W As Long, ByVal BitsPerPixel As Byte) As Long
-    'calculates the number of bytes in one horizontal line of pixels,
-    'including the number of pad-bytes for the 4-aligned result
-    CalcStride = W * BitsPerPixel / 8
-    Dim m As Long: m = CalcStride Mod 4: If m > 0 Then m = 4 - m
-    CalcStride = CalcStride + m
+    Dim BytesPerPixel As Long: BytesPerPixel = BitsPerPixel \ 8
+    Select Case BitsPerPixel
+    Case 1, 4:      CalcStride = W * BytesPerPixel
+                    Dim m As Long: m = CalcStride Mod 4: If m > 0 Then m = 4 - m
+                    CalcStride = CalcStride + m
+    'Case 4:
+    Case 8:         CalcStride = (W + 3) And Not 3
+    Case 16, 24:    CalcStride = ((W * BytesPerPixel) + BytesPerPixel) And Not BytesPerPixel
+    Case 32:        CalcStride = W * BytesPerPixel
+    End Select
 End Function
 
+'Private Function CalcStride(ByVal W As Long, ByVal BitsPerPixel As Byte) As Long
+'    'calculates the number of bytes in one horizontal line of pixels,
+'    'including the number of pad-bytes for the 4-aligned result
+'    CalcStride = W * BitsPerPixel / 8
+'    Dim m As Long: m = CalcStride Mod 4: If m > 0 Then m = 4 - m
+'    CalcStride = CalcStride + m
+'End Function
 'Private Function GetStrideFS() As Long
 '    Dim W As Long: W = Me.Width
 '    Dim BytesPerPixel As Long: BytesPerPixel = m_bpp / 8
@@ -1104,8 +1123,10 @@ Public Property Get Pixel(ByVal X As Long, ByVal Y As Long) As Long
     Case EPixelFormat.Format1bppIndexed:    Pixel = Me.Pixel1(X, Y)
     Case EPixelFormat.Format4bppIndexed:    Pixel = Me.Pixel4(X, Y)
     Case EPixelFormat.Format8bppIndexed:    Pixel = Me.Pixel8(X, Y)
-    Case EPixelFormat.Format16bppArgb1555, EPixelFormat.Format16bppGrayScale, EPixelFormat.Format16bppRgb555, EPixelFormat.Format16bppRgb565
-                                            Pixel = Me.Pixel16(X, Y)
+    Case EPixelFormat.Format16bppArgb1555:  Pixel = Me.Pixel16Argb1555(X, Y)
+    Case EPixelFormat.Format16bppGrayScale: Pixel = Me.Pixel16Grayscale(X, Y)
+    Case EPixelFormat.Format16bppRgb555:    Pixel = Me.Pixel16Rgb555(X, Y)
+    Case EPixelFormat.Format16bppRgb565:    Pixel = Me.Pixel16Rgb565(X, Y)
     Case EPixelFormat.Format24bppRgb:       Pixel = Me.Pixel24(X, Y)
     Case EPixelFormat.Format32bppArgb, EPixelFormat.Format32bppPArgb, EPixelFormat.Format32bppRgb
                                             Pixel = Me.Pixel32(X, Y)
@@ -1170,50 +1191,74 @@ End Property
 '    'm_data=0
 'End Property
 
-Public Property Get Pixel16(ByVal X As Long, ByVal Y As Long) As Long
-    Dim W As Long: W = Me.Width:     If X < 0 Or W <= X Then Exit Property
-    Dim H As Long: H = Me.Height:    If Y < 0 Or H <= Y Then Exit Property
-    Dim s As Long: s = Me.Stride
-    'Dim i As Long: i = ((H - 1 - Y) * W + X) * 2
-    Dim i As Long: i = ((H - 1 - Y) * s + X * 2) ' * 2
-    'Dim b1 As Byte: b1 = m_data(i)
-    'Dim b2 As Byte: b2 = m_data(i + 1)
-    Dim tb As TByt2
-    tb.Value1 = m_data(i)
-    tb.Value0 = m_data(i + 1)
-    Dim ti As TInt: LSet ti = tb
-    'now we have to extract the bits and expand it to 255
-    'Dim r As Byte, g As Byte, b As Byte, a As Byte
-    b = b2 And &H1F * 255 \ &H1F
-    Dim bb As BGRA
-    bb.b = b2 And &H1F * 255 \ &H1F
-    
-    bb.g = b2
-    Dim L As TLng: LSet L = bb
-    'l.Value=rgb(
-    Pixel16 = L.Value
-    'Pixel16=
-End Property
-'Public Property Let Pixel16(ByVal X As Long, ByVal Y As Long, Value As Long)
-'    'm_data=0
+'Public Property Get Pixel16(ByVal X As Long, ByVal Y As Long) As Long
+'    Dim W As Long: W = Me.Width:     If X < 0 Or W <= X Then Exit Property
+'    Dim H As Long: H = Me.Height:    If Y < 0 Or H <= Y Then Exit Property
+'    Dim s As Long: s = Me.Stride
+'    'Dim i As Long: i = ((H - 1 - Y) * W + X) * 2
+'    Dim i As Long: i = ((H - 1 - Y) * s + X * 2) ' * 2
+'    'Dim b1 As Byte: b1 = m_data(i)
+'    'Dim b2 As Byte: b2 = m_data(i + 1)
+'    Dim tb As TByt2
+'    tb.Value1 = m_data(i)
+'    tb.Value0 = m_data(i + 1)
+'    Dim ti As TInt: LSet ti = tb
+'    'now we have to extract the bits and expand it to 255
+'    'Dim r As Byte, g As Byte, b As Byte, a As Byte
+'    'B = b2 And &H1F * 255 \ &H1F
+'    'Dim bb As BGRA
+'    'bb.B = b2 And &H1F * 255 \ &H1F
+'
+'    'bb.G = b2
+'    'Dim L As TLng: LSet L = bb
+'    'l.Value=rgb(
+'    'Pixel16 = L.Value
+'    'Pixel16=
 'End Property
+''Public Property Let Pixel16(ByVal X As Long, ByVal Y As Long, Value As Long)
+''    'm_data=0
+''End Property
+
+Public Property Get Pixel16Argb1555(ByVal X As Long, ByVal Y As Long) As Long
+    Dim W As Long: W = Me.Width:    If X < 0 Or W <= X Then Exit Property
+    Dim H As Long: H = Me.Height:   If Y < 0 Or H <= Y Then Exit Property
+    'Dim BitsPerPixel  As Long: BitsPerPixel = 16
+    'Dim BitsPerByte   As Long: BitsPerByte = 8
+    Dim BytesPerPixel As Long: BytesPerPixel = 2 'BitsPerPixel / 8 ' 2
+    Dim s As Long: s = Me.Stride
+    Dim i As Long: i = (H - 1 - Y) * s + X * BytesPerPixel
+    
+End Property
+
+Public Property Get Pixel16Grayscale(ByVal X As Long, ByVal Y As Long) As Long
+    '
+End Property
+
+Public Property Get Pixel16Rgb555(ByVal X As Long, ByVal Y As Long) As Long
+    '
+End Property
+
+Public Property Get Pixel16Rgb565(ByVal X As Long, ByVal Y As Long) As Long
+    '
+End Property
+
 
 Public Property Get Pixel24(ByVal X As Long, ByVal Y As Long) As Long
     Dim W As Long: W = Me.Width:    If X < 0 Or W <= X Then Exit Property
     Dim H As Long: H = Me.Height:   If Y < 0 Or H <= Y Then Exit Property
     'W = W + (W Mod 4)
-    Dim BitsPerPixel  As Long: BitsPerPixel = 24
-    Dim BitsPerByte   As Long: BitsPerByte = 8
-    Dim BytesPerPixel As Long: BytesPerPixel = BitsPerPixel / BitsPerByte ' 3
-    Dim W1 As Long: W1 = W * BytesPerPixel
+    'Dim BitsPerPixel  As Long: BitsPerPixel = 24
+    'Dim BitsPerByte   As Long: BitsPerByte = 8
+    Dim BytesPerPixel As Long: BytesPerPixel = 3 'BitsPerPixel / 8 'BitsPerByte ' 3
+    'Dim W1 As Long: W1 = W * BytesPerPixel
     Dim s As Long: s = Me.Stride
     Dim i As Long: i = (H - 1 - Y) * s + X * BytesPerPixel
     'Dim BGRA As BGRA
     Dim RGBA As RGBA
     With RGBA
-        .r = m_data(i + 2)
-        .g = m_data(i + 1)
-        .b = m_data(i + 0)
+        .R = m_data(i + 2)
+        .G = m_data(i + 1)
+        .B = m_data(i + 0)
     End With
     Dim L As TLng: LSet L = RGBA 'BGRA
     Pixel24 = L.Value
@@ -1233,9 +1278,9 @@ Public Property Get Pixel32(ByVal X As Long, ByVal Y As Long) As Long
     'Debug.Print UBound(m_data)
     With RGBA
         '.A = m_data(i + 3)
-        .r = m_data(i + 2)
-        .g = m_data(i + 1)
-        .b = m_data(i + 0)
+        .R = m_data(i + 2)
+        .G = m_data(i + 1)
+        .B = m_data(i + 0)
     End With
     Dim L As TLng: LSet L = RGBA
     Pixel32 = L.Value

@@ -24,24 +24,7 @@ Begin VB.Form FMain
       EndProperty
       Height          =   375
       Left            =   11760
-      TabIndex        =   8
-      Top             =   0
-      Width           =   1335
-   End
-   Begin VB.CommandButton BtnPalette 
-      Caption         =   "Palette"
-      BeginProperty Font 
-         Name            =   "Tahoma"
-         Size            =   9
-         Charset         =   0
-         Weight          =   400
-         Underline       =   0   'False
-         Italic          =   0   'False
-         Strikethrough   =   0   'False
-      EndProperty
-      Height          =   375
-      Left            =   10440
-      TabIndex        =   6
+      TabIndex        =   7
       Top             =   0
       Width           =   1335
    End
@@ -136,7 +119,7 @@ Begin VB.Form FMain
       EndProperty
       Height          =   255
       Left            =   7200
-      TabIndex        =   7
+      TabIndex        =   6
       Top             =   45
       Width           =   1575
    End
@@ -189,6 +172,9 @@ Begin VB.Form FMain
       Begin VB.Menu mnuEditResize 
          Caption         =   "Resize"
       End
+      Begin VB.Menu mnuEditPalette 
+         Caption         =   "Palette"
+      End
    End
    Begin VB.Menu mnuHelp 
       Caption         =   " &? "
@@ -208,7 +194,7 @@ Private m_Bmp As Bitmap
 Private m_bPickAColor As Boolean
 
 Private Sub Form_Load()
-    BtnPalette.Enabled = False
+    mnuEditPalette.Enabled = False
     BtnPickAColor.Enabled = False
     UpdateFormCaption
 End Sub
@@ -255,7 +241,8 @@ Private Sub BtnPickAColor_Click()
     m_bPickAColor = True
 End Sub
 
-Private Sub BtnPalette_Click()
+Private Sub mnuEditPalette_Click()
+    If m_Bmp Is Nothing Then Exit Sub
     FPalette.Move Me.Left + Me.Width / 2 - FPalette.Width / 2, Me.Top + Me.Height / 2 - FPalette.Height / 2
     If FPalette.ShowDialog(Me, m_Bmp) = vbCancel Then Exit Sub
     UpdateView
@@ -263,19 +250,19 @@ End Sub
 
 Private Sub mnuEditResize_Click()
     MiddlePosDlg FDlgNewPicture
-    Dim Bmp As Bitmap
-    If Not m_Bmp Is Nothing Then Set Bmp = m_Bmp.Clone
-    If FDlgNewPicture.ShowDialog(Me, Bmp) = vbCancel Then Exit Sub
-    Set m_Bmp = Bmp
+    Dim bmp As Bitmap
+    If Not m_Bmp Is Nothing Then Set bmp = m_Bmp.Clone
+    If FDlgNewPicture.ShowDialog(Me, bmp) = vbCancel Then Exit Sub
+    Set m_Bmp = bmp
     UpdateView
 End Sub
 
 Private Sub mnuFileNew_Click()
     MiddlePosDlg FDlgNewPicture
-    Dim Bmp As Bitmap
+    Dim bmp As Bitmap
     'If Not m_Bmp Is Nothing Then Set Bmp = m_Bmp.Clone
-    If FDlgNewPicture.ShowDialog(Me, Bmp) = vbCancel Then Exit Sub
-    Set m_Bmp = Bmp
+    If FDlgNewPicture.ShowDialog(Me, bmp) = vbCancel Then Exit Sub
+    Set m_Bmp = bmp
     UpdateView
 End Sub
 
@@ -343,7 +330,7 @@ Public Sub UpdateView()
     Label1.Caption = "File loading time t: " & dt & "sec;"
     UpdateFormCaption
     Text1.Text = m_Bmp.ToStr
-    BtnPalette.Enabled = m_Bmp.IsIndexed
+    mnuEditPalette.Enabled = m_Bmp.IsIndexed
     BtnPickAColor.Enabled = True
     BtnClone.Enabled = True
 End Sub

@@ -2,17 +2,44 @@ VERSION 5.00
 Begin VB.Form FPalette 
    BorderStyle     =   5  'Änderbares Werkzeugfenster
    Caption         =   "Palette"
-   ClientHeight    =   4800
+   ClientHeight    =   6720
    ClientLeft      =   10320
    ClientTop       =   4785
    ClientWidth     =   4335
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   320
+   ScaleHeight     =   448
    ScaleMode       =   3  'Pixel
    ScaleWidth      =   289
    ShowInTaskbar   =   0   'False
+   Begin VB.PictureBox PanelCurrent 
+      BorderStyle     =   0  'Kein
+      Height          =   375
+      Left            =   120
+      ScaleHeight     =   25
+      ScaleMode       =   3  'Pixel
+      ScaleWidth      =   273
+      TabIndex        =   3
+      Top             =   4560
+      Width           =   4095
+      Begin VB.Label LblSelected 
+         AutoSize        =   -1  'True
+         Caption         =   ". . . ."
+         Height          =   195
+         Left            =   480
+         TabIndex        =   5
+         Top             =   120
+         Width           =   315
+      End
+      Begin VB.Shape ShpSelected 
+         BackStyle       =   1  'Undurchsichtig
+         Height          =   375
+         Left            =   0
+         Top             =   0
+         Width           =   375
+      End
+   End
    Begin VB.CommandButton BtnCancel 
       Cancel          =   -1  'True
       Caption         =   "&Cancel"
@@ -28,7 +55,7 @@ Begin VB.Form FPalette
       Height          =   375
       Left            =   2280
       TabIndex        =   2
-      Top             =   4320
+      Top             =   5640
       Width           =   1575
    End
    Begin VB.CommandButton BtnOK 
@@ -46,7 +73,7 @@ Begin VB.Form FPalette
       Height          =   375
       Left            =   480
       TabIndex        =   1
-      Top             =   4320
+      Top             =   5640
       Width           =   1575
    End
    Begin VB.PictureBox PanelPalette 
@@ -60,7 +87,7 @@ Begin VB.Form FPalette
       ScaleMode       =   3  'Pixel
       ScaleWidth      =   273
       TabIndex        =   0
-      Top             =   120
+      Top             =   360
       Width           =   4095
       Begin VB.Shape ShPalette 
          BackColor       =   &H00FFFFFF&
@@ -75,6 +102,15 @@ Begin VB.Form FPalette
          Width           =   255
       End
    End
+   Begin VB.Label LblCurrent 
+      AutoSize        =   -1  'True
+      Caption         =   ". . . ."
+      Height          =   195
+      Left            =   120
+      TabIndex        =   4
+      Top             =   120
+      Width           =   315
+   End
 End
 Attribute VB_Name = "FPalette"
 Attribute VB_GlobalNameSpace = False
@@ -86,14 +122,15 @@ Private m_Result    As VbMsgBoxResult
 Private m_Bmp       As Bitmap
 Private m_Palette() As Long 'backup copy of Bitmaps palette
 Private m_Index     As Long
+Private m_SelIndex  As Long
 Private m_Owner     As FMain
 
-Public Function ShowDialog(Owner As FMain, Bmp As Bitmap) As VbMsgBoxResult
+Public Function ShowDialog(Owner As FMain, bmp As Bitmap) As VbMsgBoxResult
     'Here now as a modal dialog.
     'maybe also would be nice as a modeless dialog?
     'to see the effect of changing palette-colors immediately
     Set m_Owner = Owner
-    Set m_Bmp = Bmp
+    Set m_Bmp = bmp
     If Not m_Bmp.IsIndexed Then Exit Function
     SavePalette m_Bmp
     LoadSHPalette m_Bmp.PaletteCount
@@ -101,11 +138,31 @@ Public Function ShowDialog(Owner As FMain, Bmp As Bitmap) As VbMsgBoxResult
     ShowDialog = m_Result
 End Function
 
+Private Sub UpdateView(Optional ByVal SelectedColorAsWell As Boolean = False)
+    If m_Index < 0 Then Exit Sub
+    ShPalette(m_Index).BorderStyle = 1
+    ShPalette(m_Index).BorderColor = &H8000000D
+    Dim Color As Long: Color = ShPalette(m_Index).BackColor
+    LblCurrent.Caption = "Index: " & m_Index & " " & Color_ToStr(Color)
+    If Not SelectedColorAsWell Then Exit Sub
+    Dim SelColor As Long: SelColor = ShPalette(m_SelIndex).BackColor
+    ShpSelected.BackColor = SelColor
+    LblSelected.Caption = "Index: " & m_Index & " " & Color_ToStr(SelColor)
+End Sub
+
+Private Function Color_ToStr(ByVal this As Long) As String
+    Dim R As Long: R = (this And &HFF&)
+    Dim G As Long: G = (this And &HFF00&) \ &H100&
+    Dim B As Long: B = (this And &HFF0000) \ &H10000
+    Color_ToStr = "R=" & R & ", G=" & G & ", B=" & B
+End Function
+
 Private Sub BtnOK_Click()
     m_Result = vbOK
     'Take all the changes and write it to the Bitmap-palette
     Unload Me
 End Sub
+
 Private Sub BtnCancel_Click()
     m_Result = vbCancel
     Dim i As Long
@@ -115,12 +172,12 @@ Private Sub BtnCancel_Click()
     Unload Me
 End Sub
 
-Sub SavePalette(Bmp As Bitmap)
-    Dim u As Long: u = Bmp.PaletteCount - 1
+Sub SavePalette(bmp As Bitmap)
+    Dim u As Long: u = bmp.PaletteCount - 1
     ReDim m_Palette(0 To u)
     Dim i As Long
     For i = 0 To u
-        m_Palette(i) = Bmp.PaletteColor(i)
+        m_Palette(i) = bmp.PaletteColor(i)
     Next
 End Sub
 
@@ -161,22 +218,31 @@ Private Sub PanelPalette_MouseMove(Button As Integer, Shift As Integer, X As Sin
     m_Index = GetShapeIndex(X, Y)
     SetBorderStyleTransparent
     If m_Index < 0 Then Exit Sub
-    Me.Caption = "Palette index: " & m_Index
-    ShPalette(m_Index).BorderStyle = 1
-    ShPalette(m_Index).BorderColor = &H8000000D
+    UpdateView
+End Sub
+
+Private Sub PanelPalette_Click()
+    m_SelIndex = m_Index
+    UpdateView True
+End Sub
+
+Private Sub SetNewColor(ByVal NewColor As Long)
+    ShPalette(m_Index).BackColor = NewColor
+    m_Bmp.PaletteColor(m_Index) = NewColor
+    m_Owner.UpdateView
 End Sub
 
 Private Sub PanelPalette_DblClick()
     If m_Index < 0 Then Exit Sub
     Dim oldColor As Long: oldColor = m_Bmp.PaletteColor(m_Index)
     Dim CD As ColorDialog: Set CD = New ColorDialog
-    CD.Color = oldColor 'm_Bmp.PaletteColor(m_Index) 'm_Palette(m_Index)
+    CD.Color = oldColor
     If CD.ShowDialog(Me) = vbCancel Then Exit Sub
-    Dim newColor As Long: newColor = CD.Color
-    If oldColor = newColor Then Exit Sub
-    ShPalette(m_Index).BackColor = newColor
-    m_Bmp.PaletteColor(m_Index) = newColor
-    m_Owner.UpdateView
+    Dim NewColor As Long: NewColor = CD.Color
+    If oldColor = NewColor Then Exit Sub
+    SetNewColor NewColor
+    m_SelIndex = m_Index
+    UpdateView True
 End Sub
 
 Private Sub SetBorderStyleTransparent()
