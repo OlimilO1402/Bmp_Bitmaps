@@ -324,16 +324,16 @@ Friend Sub NewWH(ByVal Width As Long, ByVal Height As Long, ByVal PixelFormat As
 '        '.bfOffBits
 '    End With
     Dim bpp As Byte: bpp = CByte((PixelFormat And &HFF00&) / &H100)
-    Dim cuci As Integer, bm As Integer, gm As Integer, rm As Integer, am As Integer
+    Dim cuci As Integer, bm As Long, gm As Long, rm As Long, am As Long
     Dim v As Single: v = 3
     Select Case PixelFormat
     Case EPixelFormat.Format1bppIndexed:    cuci = 2
     Case EPixelFormat.Format4bppIndexed:    cuci = 16
     Case EPixelFormat.Format8bppIndexed:    cuci = 256
-    Case EPixelFormat.Format16bppArgb1555:  bm = &H1F: gm = &H3E0: rm = &H7C00: am = &H8000: v = 4
-    Case EPixelFormat.Format16bppGrayScale: bm = &H1F: gm = &H3E0: rm = &H7C00: am = &H8000: v = 4
-    Case EPixelFormat.Format16bppRgb565:    bm = &H1F: gm = &H7E0: rm = &HF800: am = &H0:    v = 4
-    Case EPixelFormat.Format16bppRgb555:    bm = &H1F: gm = &H3E0: rm = &H7C00: am = &H0:    v = 4
+    Case EPixelFormat.Format16bppArgb1555:  bm = &H1F&: gm = &H3E0&: rm = &H7C00&: am = &H8000&: v = 4
+    Case EPixelFormat.Format16bppGrayScale: bm = &H1F&: gm = &H3E0&: rm = &H7C00&: am = &H8000&: v = 4
+    Case EPixelFormat.Format16bppRgb565:    bm = &H1F&: gm = &H7E0&: rm = &HF800&: am = &H0&:    v = 4
+    Case EPixelFormat.Format16bppRgb555:    bm = &H1F6: gm = &H3E0&: rm = &H7C00&: am = &H0&:    v = 4
     Case EPixelFormat.Format24bppRgb: v = 4
     Case Else: v = 5 'bpp = 32
     'Case EPixelFormat.Format32bppArgb:    '    'bpp = 32
@@ -945,7 +945,7 @@ Public Property Get Stride() As Long
 End Property
 
 Private Function CalcStride(ByVal W As Long, ByVal BitsPerPixel As Byte) As Long
-    Dim BytesPerPixel As Long: BytesPerPixel = BitsPerPixel \ 8
+    Dim BytesPerPixel As Single: BytesPerPixel = BitsPerPixel / 8
     Select Case BitsPerPixel
     Case 1, 4:      CalcStride = W * BytesPerPixel
                     Dim m As Long: m = CalcStride Mod 4: If m > 0 Then m = 4 - m

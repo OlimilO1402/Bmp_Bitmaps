@@ -252,6 +252,12 @@ Option Explicit
 Private m_Bmp As Bitmap
 Private m_bPickAColor As Boolean
 
+Private Sub BtnSelColorChangeForeBack_Click()
+    Dim Color As Long: Color = Me.PbSelColorBack.BackColor
+    Me.PbSelColorBack.BackColor = Me.PbSelColorFore.BackColor
+    Me.PbSelColorFore.BackColor = Color
+End Sub
+
 Private Sub Form_Load()
     mnuEditPalette.Enabled = False
     BtnPickAColor.Enabled = False
@@ -284,11 +290,11 @@ End Sub
 Private Sub Form_Resize()
     Dim L As Single
     Dim T As Single: T = Text1.Top
-    Dim w As Single: w = Text1.Width - L
-    Dim h As Single: h = Me.ScaleHeight - T
-    If w > 0 And h > 0 Then Text1.Move L, T, w, h
-    L = w:    w = Me.ScaleWidth - w
-    If w > 0 And h > 0 Then PBBitmap.Move L, T, w, h
+    Dim W As Single: W = Text1.Width - L
+    Dim H As Single: H = Me.ScaleHeight - T
+    If W > 0 And H > 0 Then Text1.Move L, T, W, H
+    L = W:    W = Me.ScaleWidth - W
+    If W > 0 And H > 0 Then PBBitmap.Move L, T, W, H
 End Sub
 
 Private Sub BtnPickAColor_Click()
@@ -321,10 +327,10 @@ Private Sub mnuFileNew_Click()
 End Sub
 
 Private Sub MiddlePosDlg(Frm As Form)
-    Dim w As Single: w = Frm.Width
-    Dim h As Single: h = Frm.Height
-    Dim L As Single: L = Me.Left + (Me.Width - w) / 2
-    Dim T As Single: T = Me.Top + (Me.Height - h) / 2
+    Dim W As Single: W = Frm.Width
+    Dim H As Single: H = Frm.Height
+    Dim L As Single: L = Me.Left + (Me.Width - W) / 2
+    Dim T As Single: T = Me.Top + (Me.Height - H) / 2
     Frm.Move L, T
 End Sub
 Private Sub mnuFileOpen_Click()
