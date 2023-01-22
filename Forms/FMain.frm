@@ -376,7 +376,7 @@ Private Sub PBBitmap_MouseMove(Button As Integer, Shift As Integer, X As Single,
         PBCurColor.BackColor = Color
         Dim s As String
         If m_Bmp.IsIndexed Then
-            s = "Index: " & m_Bmp.PalettePixelIndex(X, Y)
+            s = "Index: " & m_Bmp.PalettePixelIndex(X, Y) & vbCrLf
         End If
         s = s & "X: " & X & "; Y: " & Y & vbCrLf & Color_ToStr(Color)
         LblCurColor.Caption = s
