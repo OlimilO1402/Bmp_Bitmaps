@@ -145,6 +145,17 @@ Public Type BITMAPINFOHEADER
     biClrImportant  As Long    ' Specifies the number of color indices that are considered important for displaying the bitmap. If this value is zero, all colors are important.
 End Type
 
+'for Reading OS/2-Bitmaps we have to Compare the BITMAPINFOHEADER to the BitmapCoreHeader
+'Public Type BITMAPCOREHEADER
+'    bcSize       As Long    ' The number of bytes required by the structure.
+'    bcWidth      As Integer ' The width of the bitmap, in pixels.
+'    bcHeight     As Integer ' The height of the bitmap, in pixels.
+'    bcPlanes     As Integer ' The number of planes for the target device. This value must be 1.
+'    bcBitCount   As Integer ' The number of bits-per-pixel. This value must be 1, 4, 8, or 24.
+'End Type
+'biSize is the same datatype int32
+'but biWidth and biHeight is int16 in os2-bmp and int32 in win-bmp
+
 'https://learn.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-bitmapv4header
 'typedef struct {
 '  DWORD        bV4Size;

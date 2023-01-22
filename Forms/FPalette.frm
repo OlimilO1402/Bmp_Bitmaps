@@ -1,15 +1,15 @@
 VERSION 5.00
 Begin VB.Form FPalette 
-   BorderStyle     =   5  'Änderbares Werkzeugfenster
+   BorderStyle     =   4  'Festes Werkzeugfenster
    Caption         =   "Palette"
-   ClientHeight    =   6720
-   ClientLeft      =   10320
-   ClientTop       =   4785
+   ClientHeight    =   5535
+   ClientLeft      =   10245
+   ClientTop       =   4710
    ClientWidth     =   4335
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   448
+   ScaleHeight     =   369
    ScaleMode       =   3  'Pixel
    ScaleWidth      =   289
    ShowInTaskbar   =   0   'False
@@ -55,7 +55,7 @@ Begin VB.Form FPalette
       Height          =   375
       Left            =   2280
       TabIndex        =   2
-      Top             =   5640
+      Top             =   5040
       Width           =   1575
    End
    Begin VB.CommandButton BtnOK 
@@ -73,7 +73,7 @@ Begin VB.Form FPalette
       Height          =   375
       Left            =   480
       TabIndex        =   1
-      Top             =   5640
+      Top             =   5040
       Width           =   1575
    End
    Begin VB.PictureBox PanelPalette 
@@ -153,22 +153,24 @@ End Sub
 Private Function Color_ToStr(ByVal this As Long) As String
     Dim R As Long: R = (this And &HFF&)
     Dim G As Long: G = (this And &HFF00&) \ &H100&
-    Dim B As Long: B = (this And &HFF0000) \ &H10000
-    Color_ToStr = "R=" & R & ", G=" & G & ", B=" & B
+    Dim b As Long: b = (this And &HFF0000) \ &H10000
+    Color_ToStr = "R=" & R & ", G=" & G & ", B=" & b
 End Function
 
 Private Sub BtnOK_Click()
     m_Result = vbOK
-    'Take all the changes and write it to the Bitmap-palette
+    'yes we take all the changes and write it to the Bitmap-palette
     Unload Me
 End Sub
 
 Private Sub BtnCancel_Click()
     m_Result = vbCancel
+    'no we don't want the changes we write the old state back to the Bitmap-palette
     Dim i As Long
     For i = 0 To UBound(m_Palette)
         m_Bmp.PaletteColor(i) = m_Palette(i)
     Next
+    m_Owner.UpdateView
     Unload Me
 End Sub
 
@@ -207,7 +209,8 @@ Sub LoadSHPalette(ByVal n As Long)
     Next
     Dim PH As Single: PH = IIf(n < 255, 1, 16) * H0
     PanelPalette.Height = PH
-    BtnOK.Top = PanelPalette.Top + PH + 8
+    PanelCurrent.Top = PanelPalette.Top + PH + 8
+    BtnOK.Top = PanelPalette.Top + PH + 8 + PanelCurrent.Height + 8
     BtnCancel.Top = BtnOK.Top
     Dim borders As Single: borders = Me.Height - (Me.ScaleHeight * Screen.TwipsPerPixelY)
     Dim SH As Single: SH = BtnOK.Top + BtnOK.Height + 8

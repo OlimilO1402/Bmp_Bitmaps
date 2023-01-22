@@ -1,37 +1,327 @@
 VERSION 5.00
 Begin VB.Form Form1 
    Caption         =   "Form1"
-   ClientHeight    =   3015
+   ClientHeight    =   1935
    ClientLeft      =   120
    ClientTop       =   465
-   ClientWidth     =   7935
+   ClientWidth     =   9660
    LinkTopic       =   "Form1"
-   ScaleHeight     =   3015
-   ScaleWidth      =   7935
+   ScaleHeight     =   1935
+   ScaleWidth      =   9660
    StartUpPosition =   3  'Windows-Standard
-   Begin VB.CommandButton Command4 
-      Caption         =   "Command4"
-      Height          =   375
-      Left            =   4920
-      TabIndex        =   3
-      Top             =   120
-      Width           =   1455
+   Begin VB.PictureBox Picture1 
+      Height          =   1095
+      Left            =   120
+      ScaleHeight     =   69
+      ScaleMode       =   3  'Pixel
+      ScaleWidth      =   517
+      TabIndex        =   4
+      Top             =   600
+      Width           =   7815
+      Begin VB.Shape Shape1 
+         BackStyle       =   1  'Undurchsichtig
+         BorderStyle     =   0  'Transparent
+         Height          =   495
+         Index           =   0
+         Left            =   0
+         Top             =   0
+         Width           =   495
+      End
+      Begin VB.Shape Shape1 
+         BackStyle       =   1  'Undurchsichtig
+         BorderStyle     =   0  'Transparent
+         Height          =   495
+         Index           =   1
+         Left            =   480
+         Top             =   0
+         Width           =   495
+      End
+      Begin VB.Shape Shape1 
+         BackStyle       =   1  'Undurchsichtig
+         BorderStyle     =   0  'Transparent
+         Height          =   495
+         Index           =   2
+         Left            =   960
+         Top             =   0
+         Width           =   495
+      End
+      Begin VB.Shape Shape1 
+         BackStyle       =   1  'Undurchsichtig
+         BorderStyle     =   0  'Transparent
+         Height          =   495
+         Index           =   3
+         Left            =   1440
+         Top             =   0
+         Width           =   495
+      End
+      Begin VB.Shape Shape1 
+         BackStyle       =   1  'Undurchsichtig
+         BorderStyle     =   0  'Transparent
+         Height          =   495
+         Index           =   4
+         Left            =   1920
+         Top             =   0
+         Width           =   495
+      End
+      Begin VB.Shape Shape1 
+         BackStyle       =   1  'Undurchsichtig
+         BorderStyle     =   0  'Transparent
+         Height          =   495
+         Index           =   5
+         Left            =   2400
+         Top             =   0
+         Width           =   495
+      End
+      Begin VB.Shape Shape1 
+         BackStyle       =   1  'Undurchsichtig
+         BorderStyle     =   0  'Transparent
+         Height          =   495
+         Index           =   6
+         Left            =   2880
+         Top             =   0
+         Width           =   495
+      End
+      Begin VB.Shape Shape1 
+         BackStyle       =   1  'Undurchsichtig
+         BorderStyle     =   0  'Transparent
+         Height          =   495
+         Index           =   7
+         Left            =   3360
+         Top             =   0
+         Width           =   495
+      End
+      Begin VB.Shape Shape1 
+         BackStyle       =   1  'Undurchsichtig
+         BorderStyle     =   0  'Transparent
+         Height          =   495
+         Index           =   8
+         Left            =   3840
+         Top             =   0
+         Width           =   495
+      End
+      Begin VB.Shape Shape1 
+         BackStyle       =   1  'Undurchsichtig
+         BorderStyle     =   0  'Transparent
+         Height          =   495
+         Index           =   9
+         Left            =   4320
+         Top             =   0
+         Width           =   495
+      End
+      Begin VB.Shape Shape1 
+         BackStyle       =   1  'Undurchsichtig
+         BorderStyle     =   0  'Transparent
+         Height          =   495
+         Index           =   10
+         Left            =   4800
+         Top             =   0
+         Width           =   495
+      End
+      Begin VB.Shape Shape1 
+         BackStyle       =   1  'Undurchsichtig
+         BorderStyle     =   0  'Transparent
+         Height          =   495
+         Index           =   11
+         Left            =   5280
+         Top             =   0
+         Width           =   495
+      End
+      Begin VB.Shape Shape1 
+         BackStyle       =   1  'Undurchsichtig
+         BorderStyle     =   0  'Transparent
+         Height          =   495
+         Index           =   12
+         Left            =   5760
+         Top             =   0
+         Width           =   495
+      End
+      Begin VB.Shape Shape1 
+         BackStyle       =   1  'Undurchsichtig
+         BorderStyle     =   0  'Transparent
+         Height          =   495
+         Index           =   13
+         Left            =   6240
+         Top             =   0
+         Width           =   495
+      End
+      Begin VB.Shape Shape1 
+         BackStyle       =   1  'Undurchsichtig
+         BorderStyle     =   0  'Transparent
+         Height          =   495
+         Index           =   14
+         Left            =   6720
+         Top             =   0
+         Width           =   495
+      End
+      Begin VB.Shape Shape1 
+         BackStyle       =   1  'Undurchsichtig
+         BorderStyle     =   0  'Transparent
+         Height          =   495
+         Index           =   15
+         Left            =   7200
+         Top             =   0
+         Width           =   495
+      End
+      Begin VB.Shape Shape1 
+         BackStyle       =   1  'Undurchsichtig
+         BorderStyle     =   0  'Transparent
+         Height          =   495
+         Index           =   16
+         Left            =   0
+         Top             =   480
+         Width           =   495
+      End
+      Begin VB.Shape Shape1 
+         BackStyle       =   1  'Undurchsichtig
+         BorderStyle     =   0  'Transparent
+         Height          =   495
+         Index           =   17
+         Left            =   480
+         Top             =   480
+         Width           =   495
+      End
+      Begin VB.Shape Shape1 
+         BackStyle       =   1  'Undurchsichtig
+         BorderStyle     =   0  'Transparent
+         Height          =   495
+         Index           =   18
+         Left            =   960
+         Top             =   480
+         Width           =   495
+      End
+      Begin VB.Shape Shape1 
+         BackStyle       =   1  'Undurchsichtig
+         BorderStyle     =   0  'Transparent
+         Height          =   495
+         Index           =   19
+         Left            =   1440
+         Top             =   480
+         Width           =   495
+      End
+      Begin VB.Shape Shape1 
+         BackStyle       =   1  'Undurchsichtig
+         BorderStyle     =   0  'Transparent
+         Height          =   495
+         Index           =   20
+         Left            =   1920
+         Top             =   480
+         Width           =   495
+      End
+      Begin VB.Shape Shape1 
+         BackStyle       =   1  'Undurchsichtig
+         BorderStyle     =   0  'Transparent
+         Height          =   495
+         Index           =   21
+         Left            =   2400
+         Top             =   480
+         Width           =   495
+      End
+      Begin VB.Shape Shape1 
+         BackStyle       =   1  'Undurchsichtig
+         BorderStyle     =   0  'Transparent
+         Height          =   495
+         Index           =   22
+         Left            =   2880
+         Top             =   480
+         Width           =   495
+      End
+      Begin VB.Shape Shape1 
+         BackStyle       =   1  'Undurchsichtig
+         BorderStyle     =   0  'Transparent
+         Height          =   495
+         Index           =   23
+         Left            =   3360
+         Top             =   480
+         Width           =   495
+      End
+      Begin VB.Shape Shape1 
+         BackStyle       =   1  'Undurchsichtig
+         BorderStyle     =   0  'Transparent
+         Height          =   495
+         Index           =   24
+         Left            =   3840
+         Top             =   480
+         Width           =   495
+      End
+      Begin VB.Shape Shape1 
+         BackStyle       =   1  'Undurchsichtig
+         BorderStyle     =   0  'Transparent
+         Height          =   495
+         Index           =   25
+         Left            =   4320
+         Top             =   480
+         Width           =   495
+      End
+      Begin VB.Shape Shape1 
+         BackStyle       =   1  'Undurchsichtig
+         BorderStyle     =   0  'Transparent
+         Height          =   495
+         Index           =   26
+         Left            =   4800
+         Top             =   480
+         Width           =   495
+      End
+      Begin VB.Shape Shape1 
+         BackStyle       =   1  'Undurchsichtig
+         BorderStyle     =   0  'Transparent
+         Height          =   495
+         Index           =   27
+         Left            =   5280
+         Top             =   480
+         Width           =   495
+      End
+      Begin VB.Shape Shape1 
+         BackStyle       =   1  'Undurchsichtig
+         BorderStyle     =   0  'Transparent
+         Height          =   495
+         Index           =   28
+         Left            =   5760
+         Top             =   480
+         Width           =   495
+      End
+      Begin VB.Shape Shape1 
+         BackStyle       =   1  'Undurchsichtig
+         BorderStyle     =   0  'Transparent
+         Height          =   495
+         Index           =   29
+         Left            =   6240
+         Top             =   480
+         Width           =   495
+      End
+      Begin VB.Shape Shape1 
+         BackStyle       =   1  'Undurchsichtig
+         BorderStyle     =   0  'Transparent
+         Height          =   495
+         Index           =   30
+         Left            =   6720
+         Top             =   480
+         Width           =   495
+      End
+      Begin VB.Shape Shape1 
+         BackStyle       =   1  'Undurchsichtig
+         BorderStyle     =   0  'Transparent
+         Height          =   495
+         Index           =   31
+         Left            =   7200
+         Top             =   480
+         Width           =   495
+      End
    End
    Begin VB.CommandButton Command3 
       Caption         =   "Clear"
       Height          =   375
-      Left            =   120
+      Left            =   3960
       TabIndex        =   2
-      Top             =   1680
-      Width           =   2175
+      Top             =   120
+      Width           =   1935
    End
    Begin VB.CommandButton Command2 
       Caption         =   "16bpp RGB565"
       Height          =   375
-      Left            =   2400
+      Left            =   2040
       TabIndex        =   1
       Top             =   120
-      Width           =   2175
+      Width           =   1815
    End
    Begin VB.CommandButton Command1 
       Caption         =   "16bpp ARGB1555"
@@ -39,295 +329,15 @@ Begin VB.Form Form1
       Left            =   120
       TabIndex        =   0
       Top             =   120
-      Width           =   2175
+      Width           =   1815
    End
-   Begin VB.Shape Shape1 
-      BackStyle       =   1  'Undurchsichtig
-      BorderStyle     =   0  'Transparent
-      Height          =   495
-      Index           =   31
-      Left            =   7320
-      Top             =   1080
-      Width           =   495
-   End
-   Begin VB.Shape Shape1 
-      BackStyle       =   1  'Undurchsichtig
-      BorderStyle     =   0  'Transparent
-      Height          =   495
-      Index           =   30
-      Left            =   6840
-      Top             =   1080
-      Width           =   495
-   End
-   Begin VB.Shape Shape1 
-      BackStyle       =   1  'Undurchsichtig
-      BorderStyle     =   0  'Transparent
-      Height          =   495
-      Index           =   29
-      Left            =   6360
-      Top             =   1080
-      Width           =   495
-   End
-   Begin VB.Shape Shape1 
-      BackStyle       =   1  'Undurchsichtig
-      BorderStyle     =   0  'Transparent
-      Height          =   495
-      Index           =   28
-      Left            =   5880
-      Top             =   1080
-      Width           =   495
-   End
-   Begin VB.Shape Shape1 
-      BackStyle       =   1  'Undurchsichtig
-      BorderStyle     =   0  'Transparent
-      Height          =   495
-      Index           =   27
-      Left            =   5400
-      Top             =   1080
-      Width           =   495
-   End
-   Begin VB.Shape Shape1 
-      BackStyle       =   1  'Undurchsichtig
-      BorderStyle     =   0  'Transparent
-      Height          =   495
-      Index           =   26
-      Left            =   4920
-      Top             =   1080
-      Width           =   495
-   End
-   Begin VB.Shape Shape1 
-      BackStyle       =   1  'Undurchsichtig
-      BorderStyle     =   0  'Transparent
-      Height          =   495
-      Index           =   25
-      Left            =   4440
-      Top             =   1080
-      Width           =   495
-   End
-   Begin VB.Shape Shape1 
-      BackStyle       =   1  'Undurchsichtig
-      BorderStyle     =   0  'Transparent
-      Height          =   495
-      Index           =   24
-      Left            =   3960
-      Top             =   1080
-      Width           =   495
-   End
-   Begin VB.Shape Shape1 
-      BackStyle       =   1  'Undurchsichtig
-      BorderStyle     =   0  'Transparent
-      Height          =   495
-      Index           =   23
-      Left            =   3480
-      Top             =   1080
-      Width           =   495
-   End
-   Begin VB.Shape Shape1 
-      BackStyle       =   1  'Undurchsichtig
-      BorderStyle     =   0  'Transparent
-      Height          =   495
-      Index           =   22
-      Left            =   3000
-      Top             =   1080
-      Width           =   495
-   End
-   Begin VB.Shape Shape1 
-      BackStyle       =   1  'Undurchsichtig
-      BorderStyle     =   0  'Transparent
-      Height          =   495
-      Index           =   21
-      Left            =   2520
-      Top             =   1080
-      Width           =   495
-   End
-   Begin VB.Shape Shape1 
-      BackStyle       =   1  'Undurchsichtig
-      BorderStyle     =   0  'Transparent
-      Height          =   495
-      Index           =   20
-      Left            =   2040
-      Top             =   1080
-      Width           =   495
-   End
-   Begin VB.Shape Shape1 
-      BackStyle       =   1  'Undurchsichtig
-      BorderStyle     =   0  'Transparent
-      Height          =   495
-      Index           =   19
-      Left            =   1560
-      Top             =   1080
-      Width           =   495
-   End
-   Begin VB.Shape Shape1 
-      BackStyle       =   1  'Undurchsichtig
-      BorderStyle     =   0  'Transparent
-      Height          =   495
-      Index           =   18
-      Left            =   1080
-      Top             =   1080
-      Width           =   495
-   End
-   Begin VB.Shape Shape1 
-      BackStyle       =   1  'Undurchsichtig
-      BorderStyle     =   0  'Transparent
-      Height          =   495
-      Index           =   17
-      Left            =   600
-      Top             =   1080
-      Width           =   495
-   End
-   Begin VB.Shape Shape1 
-      BackStyle       =   1  'Undurchsichtig
-      BorderStyle     =   0  'Transparent
-      Height          =   495
-      Index           =   16
-      Left            =   120
-      Top             =   1080
-      Width           =   495
-   End
-   Begin VB.Shape Shape1 
-      BackStyle       =   1  'Undurchsichtig
-      BorderStyle     =   0  'Transparent
-      Height          =   495
-      Index           =   15
-      Left            =   7320
-      Top             =   600
-      Width           =   495
-   End
-   Begin VB.Shape Shape1 
-      BackStyle       =   1  'Undurchsichtig
-      BorderStyle     =   0  'Transparent
-      Height          =   495
-      Index           =   14
-      Left            =   6840
-      Top             =   600
-      Width           =   495
-   End
-   Begin VB.Shape Shape1 
-      BackStyle       =   1  'Undurchsichtig
-      BorderStyle     =   0  'Transparent
-      Height          =   495
-      Index           =   13
-      Left            =   6360
-      Top             =   600
-      Width           =   495
-   End
-   Begin VB.Shape Shape1 
-      BackStyle       =   1  'Undurchsichtig
-      BorderStyle     =   0  'Transparent
-      Height          =   495
-      Index           =   12
-      Left            =   5880
-      Top             =   600
-      Width           =   495
-   End
-   Begin VB.Shape Shape1 
-      BackStyle       =   1  'Undurchsichtig
-      BorderStyle     =   0  'Transparent
-      Height          =   495
-      Index           =   11
-      Left            =   5400
-      Top             =   600
-      Width           =   495
-   End
-   Begin VB.Shape Shape1 
-      BackStyle       =   1  'Undurchsichtig
-      BorderStyle     =   0  'Transparent
-      Height          =   495
-      Index           =   10
-      Left            =   4920
-      Top             =   600
-      Width           =   495
-   End
-   Begin VB.Shape Shape1 
-      BackStyle       =   1  'Undurchsichtig
-      BorderStyle     =   0  'Transparent
-      Height          =   495
-      Index           =   9
-      Left            =   4440
-      Top             =   600
-      Width           =   495
-   End
-   Begin VB.Shape Shape1 
-      BackStyle       =   1  'Undurchsichtig
-      BorderStyle     =   0  'Transparent
-      Height          =   495
-      Index           =   8
-      Left            =   3960
-      Top             =   600
-      Width           =   495
-   End
-   Begin VB.Shape Shape1 
-      BackStyle       =   1  'Undurchsichtig
-      BorderStyle     =   0  'Transparent
-      Height          =   495
-      Index           =   7
-      Left            =   3480
-      Top             =   600
-      Width           =   495
-   End
-   Begin VB.Shape Shape1 
-      BackStyle       =   1  'Undurchsichtig
-      BorderStyle     =   0  'Transparent
-      Height          =   495
-      Index           =   6
-      Left            =   3000
-      Top             =   600
-      Width           =   495
-   End
-   Begin VB.Shape Shape1 
-      BackStyle       =   1  'Undurchsichtig
-      BorderStyle     =   0  'Transparent
-      Height          =   495
-      Index           =   5
-      Left            =   2520
-      Top             =   600
-      Width           =   495
-   End
-   Begin VB.Shape Shape1 
-      BackStyle       =   1  'Undurchsichtig
-      BorderStyle     =   0  'Transparent
-      Height          =   495
-      Index           =   4
-      Left            =   2040
-      Top             =   600
-      Width           =   495
-   End
-   Begin VB.Shape Shape1 
-      BackStyle       =   1  'Undurchsichtig
-      BorderStyle     =   0  'Transparent
-      Height          =   495
-      Index           =   3
-      Left            =   1560
-      Top             =   600
-      Width           =   495
-   End
-   Begin VB.Shape Shape1 
-      BackStyle       =   1  'Undurchsichtig
-      BorderStyle     =   0  'Transparent
-      Height          =   495
-      Index           =   2
-      Left            =   1080
-      Top             =   600
-      Width           =   495
-   End
-   Begin VB.Shape Shape1 
-      BackStyle       =   1  'Undurchsichtig
-      BorderStyle     =   0  'Transparent
-      Height          =   495
-      Index           =   1
-      Left            =   600
-      Top             =   600
-      Width           =   495
-   End
-   Begin VB.Shape Shape1 
-      BackStyle       =   1  'Undurchsichtig
-      BorderStyle     =   0  'Transparent
-      Height          =   495
-      Index           =   0
-      Left            =   120
-      Top             =   600
-      Width           =   495
+   Begin VB.Label Label1 
+      Caption         =   "Move th mouse over the picturebox"
+      Height          =   1575
+      Left            =   8040
+      TabIndex        =   3
+      Top             =   120
+      Width           =   1335
    End
 End
 Attribute VB_Name = "Form1"
@@ -366,14 +376,12 @@ Private Function Color16bppBGRA1555_ToColor32(ByVal Value As Long) As Long
 '    GreenMask = &H3E0   ' 5 bit
 '      RedMask = &H7C00  ' 5 bit
 '    AlphaMask = &H8000  ' 1 bit
-    Dim r As Long, g As Long, b As Long, a As Long
-    'Const Mask5Bit As Long = &H1F&
-    'Const Mask6Bit As Long = &H2F&
-    b = ((Value And BlueMask) * 256) \ &H1F '1F ' Mask5Bit
-    g = (((Value And GreenMask) / BlueMask) * 256) \ &H20 'Mask5Bit
-    r = (((Value And RedMask) / GreenMask) * 256) \ &H20 'Mask5Bit
-    a = ((Value And AlphaMask) / RedMask) * 256 ' alpha is only 1 bit, so it is 0 or 1, resp 0 or 255
-    Color16bppBGRA1555_ToColor32 = RGB(r, g, b)
+    Dim R As Long, G As Long, B As Long, a As Long
+    B = ((Value And BlueMask) * 256) \ &H1F&
+    G = (((Value And GreenMask) \ &H20&) * 256) \ &H1F&
+    R = (((Value And RedMask) \ &H400&) * 256) \ &H1F&
+    a = (((Value And AlphaMask) \ &H8000&) * 256) \ &H1F& ' alpha is only 1 bit, so it is 0 or 1, resp 0 or 255
+    Color16bppBGRA1555_ToColor32 = RGB(R, G, B)
 End Function
 
 Private Function Color16bppBGR565_ToColor32(ByVal Value As Long) As Long
@@ -381,15 +389,12 @@ Private Function Color16bppBGR565_ToColor32(ByVal Value As Long) As Long
 '    GreenMask = &H7E0   ' 6 bit
 '      RedMask = &HF800  ' 5 bit
 '    AlphaMask = &H0     ' ----
-    Dim r As Long, g As Long, b As Long, a As Long
-    'Const Mask5Bit As Long = &H1F&
-    'Const Mask6Bit As Long = &H3F&
-    'Const ShL11    As Long = &H7FF&
-    b = ((Value And BlueMask) * 256) \ &H1F
-    g = (((Value And GreenMask) / BlueMask) * 256) \ &H40
-    r = (((Value And RedMask) / GreenMask) * 256) \ &H20
-    'a = (Value And AlphaMask) / RedMask * 255 ' alpha is not included
-    Color16bppBGR565_ToColor32 = RGB(r, g, b)
+    Dim R As Long, G As Long, B As Long, a As Long
+    B = ((Value And BlueMask) * 256) \ &H1F&
+    G = (((Value And GreenMask) \ &H20&) * 256) \ &H3F&
+    R = (((Value And RedMask) \ &H800&) * 256) \ &H1F&
+    'a = ' alpha is not included
+    Color16bppBGR565_ToColor32 = RGB(R, G, B)
 End Function
 
 Sub SetColors_BGRA1555()
@@ -541,3 +546,14 @@ Private Sub Command4_Click()
     Debug.Print 2 ^ 11
 End Sub
 
+Private Sub Picture1_MouseMove(Button As Integer, Shift As Integer, X As Single, Y As Single)
+    Dim Color As Long
+    Color = Picture1.Point(X, Y)
+    Dim R As Long: R = (Color And &HFF&)
+    Dim G As Long: G = (Color And &HFF00&) \ &H100&
+    Dim B As Long: B = (Color And &HFF0000) \ &H10000
+    Label1.Caption = "&&H" & Hex(Color) & vbCrLf & _
+    "R: " & R & " (&&H" & Hex(R) & ")" & vbCrLf & _
+                     "G: " & G & " (&&H" & Hex(G) & ")" & vbCrLf & _
+                     "B: " & B & " (&&H" & Hex(B) & ")"
+End Sub

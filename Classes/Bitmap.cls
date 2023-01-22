@@ -87,7 +87,7 @@ Private Type TLng
 End Type
 
 Private Type BGRA '
-    B As Byte
+    b As Byte
     G As Byte
     R As Byte
     a As Byte
@@ -96,7 +96,7 @@ End Type
 Private Type RGBA
     R As Byte
     G As Byte
-    B As Byte
+    b As Byte
     a As Byte
 End Type
 
@@ -384,16 +384,16 @@ Friend Sub NewWH(ByVal Width As Long, ByVal Height As Long, ByVal PixelFormat As
                 .bmiColors(i) = New_BGRA(0, 0, 255, 0):     i = i + 1:    .bmiColors(i) = New_BGRA(255, 0, 255, 0):   i = i + 1
                 .bmiColors(i) = New_BGRA(0, 255, 255, 0):   i = i + 1:    .bmiColors(i) = New_BGRA(255, 255, 255, 0): 'i = i + 1
         Case 8
-                Dim R As Integer, G As Integer, B As Integer
+                Dim R As Integer, G As Integer, b As Integer
                 For i = 0 To 5
                     For j = 0 To 5
                         For k = 0 To 5
-                            .bmiColors(c) = New_BGRA(CByte(R), CByte(G), CByte(B), 0)
-                            c = c + 1: B = B + 51
+                            .bmiColors(c) = New_BGRA(CByte(R), CByte(G), CByte(b), 0)
+                            c = c + 1: b = b + 51
                         Next
-                        B = 0: R = R + 51
+                        b = 0: R = R + 51
                     Next
-                    B = 0: R = 0: G = G + 51
+                    b = 0: R = 0: G = G + 51
                 Next
         End Select
     End With
@@ -517,31 +517,56 @@ Try: On Error GoTo Catch
     Dim sErr As String
     With m_BmpInfo
         Get FNr, , .biSize
-        ReadBmpInfo = .biSize = 40 Or .biSize = 56 Or .biSize = 108 Or .biSize = 124
-        If Not ReadBmpInfo Then sErr = "Header-size not in the range (40, 108, 124): " & .biSize: GoTo Catch
-        Get FNr, , .bmiHeader
-        If .biSize = 40 Then
-            Dim bic As Long: bic = .bmiHeader.biBitCount
-            Dim bcu As Long: bcu = .bmiHeader.biClrUsed
-            If (bic = 1 Or bic = 4 Or bic = 8) Then If bcu = 0 Then .bmiHeader.biClrUsed = 2 ^ bic
-            Dim i As Long, aColor As BGRA
-            For i = 0 To .bmiHeader.biClrUsed - 1
-                Get FNr, , aColor
-                'Debug.Print BGRA_ToStr(aColor)
+        ReadBmpInfo = .biSize = 12 Or .biSize = 40 Or .biSize = 56 Or .biSize = 108 Or .biSize = 124
+        'biSize=12  => BitmapCoreHeader    -> OS/2-Bitmap
+        'biSize=40  => BitmapHeader_v3     -> Windows-Bitmap
+        'biSize=56  => BitmapInfoHeader_v4 -> without CSType-Info
+        'biSize=108 => BitmapInfoHeader_v4 -> with CSType-Info
+        'biSize=124 => BitmapInfoHeader_v5
+        If Not ReadBmpInfo Then sErr = "Header-size not in the range (12, 40, 56, 108, 124): " & .biSize: GoTo Catch
+        Dim i As Long, aColor As BGRA
+        If .biSize = 12 Then
+            Dim W As Integer: Get FNr, , W
+            Dim H As Integer: Get FNr, , H
+            .bmiHeader.biWidth = CLng(W)
+            .bmiHeader.biHeight = CLng(H)
+            Get FNr, , .bmiHeader.biPlanes
+            Get FNr, , .bmiHeader.biBitCount
+            Dim n As Long: n = 2 ^ .bmiHeader.biBitCount
+            .bmiHeader.biClrUsed = n
+            .bmiHeader.biClrImportant = n
+            .bmiHeader.biXPelsPerMeter = 3779
+            .bmiHeader.biYPelsPerMeter = 3779
+            For i = 0 To n - 1
+                Get FNr, , aColor.b
+                Get FNr, , aColor.G
+                Get FNr, , aColor.R
                 .Palette.bmiColors(i) = aColor
             Next
-        ElseIf .biSize > 40 Then ' = 108
-            If .biSize = 56 Then
-                With .bmiHeaderV4
-                    Get FNr, , .bV4RedMask
-                    Get FNr, , .bV4GreenMask
-                    Get FNr, , .bV4BlueMask
-                    Get FNr, , .bV4AlphaMask
-                End With
-            Else
-                Get FNr, , .bmiHeaderV4
-                If .biSize > 108 Then ' = 124
-                    Get FNr, , .bmiHeaderV5
+        Else
+            Get FNr, , .bmiHeader
+            If .biSize = 40 Then
+                Dim bic As Long: bic = .bmiHeader.biBitCount
+                Dim bcu As Long: bcu = .bmiHeader.biClrUsed
+                If (bic = 1 Or bic = 4 Or bic = 8) Then If bcu = 0 Then .bmiHeader.biClrUsed = 2 ^ bic
+                For i = 0 To .bmiHeader.biClrUsed - 1
+                    Get FNr, , aColor
+                    'Debug.Print BGRA_ToStr(aColor)
+                    .Palette.bmiColors(i) = aColor
+                Next
+            ElseIf .biSize > 40 Then ' = 108
+                If .biSize = 56 Then
+                    With .bmiHeaderV4
+                        Get FNr, , .bV4RedMask
+                        Get FNr, , .bV4GreenMask
+                        Get FNr, , .bV4BlueMask
+                        Get FNr, , .bV4AlphaMask
+                    End With
+                Else
+                    Get FNr, , .bmiHeaderV4
+                    If .biSize > 108 Then ' = 124
+                        Get FNr, , .bmiHeaderV5
+                    End If
                 End If
             End If
         End If
@@ -550,28 +575,28 @@ Try: On Error GoTo Catch
 Catch: MsgBox "ReadBmpInfo " & sErr
 End Function
 
-Private Function New_BGRA(ByVal R As Byte, ByVal G As Byte, ByVal B As Byte, ByVal a As Byte) As BGRA
+Private Function New_BGRA(ByVal R As Byte, ByVal G As Byte, ByVal b As Byte, ByVal a As Byte) As BGRA
     With New_BGRA
-        .R = R: .G = G: .B = B: .a = a
+        .R = R: .G = G: .b = b: .a = a
     End With
 End Function
 
-Private Function BGRA_ToStr(this As BGRA) As String
-    Dim s As String
+Private Function BGRA_ToStr(this As BGRA, Optional ByVal skipAlpha As Boolean = False) As String
+    Dim s As String: s = "  BGR" & IIf(skipAlpha, "", "A")
     With this
-        s = "  BGRA{&H" & Hex2(.B) & Hex2(.G) & Hex2(.R) & Hex2(.a) & "}"
+        s = s & "{&H" & Hex2(.b) & Hex2(.G) & Hex2(.R) & IIf(skipAlpha, "", Hex2(.a)) & "}"
     End With
     BGRA_ToStr = s
 End Function
 
-Private Function Hex2(B As Byte) As String
-    Hex2 = Hex(B): If Len(Hex2) < 2 Then Hex2 = "0" & Hex2
+Private Function Hex2(b As Byte) As String
+    Hex2 = Hex(b): If Len(Hex2) < 2 Then Hex2 = "0" & Hex2
 End Function
 
 Private Function BGRA_ToRGBA(this As BGRA) As RGBA
     With this
         BGRA_ToRGBA.a = .a
-        BGRA_ToRGBA.B = .B
+        BGRA_ToRGBA.b = .b
         BGRA_ToRGBA.G = .G
         BGRA_ToRGBA.R = .R
     End With
@@ -580,7 +605,7 @@ End Function
 Private Function RGBA_ToBGRA(this As RGBA) As BGRA
     With this
         RGBA_ToBGRA.a = .a
-        RGBA_ToBGRA.B = .B
+        RGBA_ToBGRA.b = .b
         RGBA_ToBGRA.G = .G
         RGBA_ToBGRA.R = .R
     End With
@@ -618,7 +643,7 @@ Try: On Error GoTo Catch
         Byte2 = buffer_in(i): i = i + 1: If ui <= i Then Exit Do
         Select Case Byte2
         Case 0: 'End of line
-                'Striding-Padbytes in Ausgabe einfügen, bzw einfach den Ausgabe-Index weitersetzen
+                'insert padbytes -> just set the output-Index
                 o = o + d
         Case 1: 'End of Bitmap
                 Exit Do
@@ -663,9 +688,12 @@ Try: On Error GoTo Catch
     Dim sErr As String, hr As Long
     With m_PicDesc
         Dim pBI As LongPtr
-        If m_BmpInfo.biSize = 40 Then
+        'If m_BmpInfo.biSize = 40 Then
+        If m_BmpInfo.biSize <= 40 Then
             Dim bi As BITMAPINFOV3
-            bi.biSize = m_BmpInfo.biSize
+            'if m_BmpInfo.biSize = 12 then
+            'bi.biSize = 40 'm_BmpInfo.biSize
+            bi.biSize = 40 'm_BmpInfo.biSize
             bi.bmiHeader = m_BmpInfo.bmiHeader
             bi.bmiHeader.biCompression = BI_RGB
             bi.Palette = m_BmpInfo.Palette
@@ -694,7 +722,7 @@ End Function
 
 Public Property Get BitmapInfoVersion() As Single
     With m_BmpInfo
-        BitmapInfoVersion = IIf(.biSize = 40, 3, IIf(.biSize = 56, 3.5, IIf(.biSize = 108, 4, IIf(.biSize = 124, 5, -1))))
+        BitmapInfoVersion = IIf(.biSize = 12, 2, IIf(.biSize = 40, 3, IIf(.biSize = 56, 3.5, IIf(.biSize = 108, 4, IIf(.biSize = 124, 5, -1)))))
     End With
 End Property
 'Private m_BmpHead As BITMAPFILEHEADER
@@ -713,7 +741,7 @@ Private Function BITMAPFILEHEADER_ToStr(this As BITMAPFILEHEADER) As String
     With this
         s = s & "Type  : "
         Select Case .bfType
-        Case &H4D42: s = s & "Windows Bitmap"
+        Case &H4D42: s = s & IIf(Me.IsOS2, "OS/2 Bitmap", "Windows Bitmap")
         Case &H4142: s = s & "OS/2 Bitmap"
         Case &H4943: s = s & "OS/2 color icon"
         Case &H5043: s = s & "OS/2 color pointer"
@@ -745,10 +773,11 @@ Private Function BITMAPINFO_ToStr(this As BITMAPINFO) As String
             s = s & "ColorsUsed    : " & .biClrUsed & vbCrLf
             s = s & "ClrImportant  : " & .biClrImportant & vbCrLf
         End With
-        If v > 2 Then
+        If v >= 2 Then
+            Dim bOS2 As Boolean: bOS2 = Me.IsOS2
             Dim i As Long
             For i = 0 To .bmiHeader.biClrUsed - 1
-                s = s & BGRA_ToStr(.Palette.bmiColors(i)) & vbCrLf
+                s = s & BGRA_ToStr(.Palette.bmiColors(i), bOS2) & vbCrLf
             Next
         End If
         If v > 3 Then
@@ -1039,12 +1068,12 @@ Public Function Resize(ByVal NewWidth As Long, ByVal NewHeight As Long) As Boole
 End Function
 
 Public Property Get IsOS2() As Boolean
-    Dim T As Integer: T = m_BmpHead.bfType
-    IsOS2 = (T = &H4142) Or (T = &H4943) Or (T = &H5043) Or (T = &H4349) Or (T = &H5450)
-    If T = &H4D42 Then
-        'If BM then only if bfSize is less than 40
-        If m_BmpHead.bfSize < 40 Then IsOS2 = True
-    End If
+    Dim T As Long: T = m_BmpHead.bfType
+    IsOS2 = (T = &H4142&) Or (T = &H4943&) Or (T = &H5043&) Or (T = &H4349&) Or (T = &H5450&) Or ((T = &H4D42&) And (m_BmpInfo.biSize < 40))
+    'If T = &H4D42& Then
+    '    'If BM then only if bfSize is less than 40
+    '    If m_BmpHead.bfSize < 40 Then IsOS2 = True
+    'End If
     '&H4D42 = 19778 "BM" ' Windows 3.1x, 95, NT, . . . also for OS/2
     '&H4142 = 16706 "BA" ' OS/2 struct Bitmap array
     '&H4943 = 18755 "CI" ' OS/2 struct color icon
@@ -1077,22 +1106,22 @@ Public Property Let PaletteColor(ByVal Index As Long, ByVal Value As Long)
     m_BmpInfo.Palette.bmiColors(Index) = BGRA
 End Property
 
-Public Property Get PixelPaletteIndex(ByVal X As Long, ByVal Y As Long) As Long
+Public Property Get PalettePixelIndex(ByVal X As Long, ByVal Y As Long) As Long
     If Not Me.IsIndexed Then Exit Property
     Dim W As Long: W = Me.Width:     If X < 0 Or W <= X Then Exit Property
     Dim H As Long: H = Me.Height:    If Y < 0 Or H <= Y Then Exit Property
     Select Case Me.PixelFormat
-    Case EPixelFormat.Format1bppIndexed:    PixelPaletteIndex = PixelPaletteIndex1(X, Y)
-    Case EPixelFormat.Format4bppIndexed:    PixelPaletteIndex = PixelPaletteIndex4(X, Y)
-    Case EPixelFormat.Format8bppIndexed:    PixelPaletteIndex = PixelPaletteIndex8(X, Y)
+    Case EPixelFormat.Format1bppIndexed:    PalettePixelIndex = PalettePixelIndex1(X, Y)
+    Case EPixelFormat.Format4bppIndexed:    PalettePixelIndex = PalettePixelIndex4(X, Y)
+    Case EPixelFormat.Format8bppIndexed:    PalettePixelIndex = PalettePixelIndex8(X, Y)
     End Select
 End Property
 
-Private Property Get PixelPaletteIndex1(ByVal X As Long, ByVal Y As Long) As Long
+Private Property Get PalettePixelIndex1(ByVal X As Long, ByVal Y As Long) As Long
     'n.y.i.
 End Property
 
-Private Property Get PixelPaletteIndex4(ByVal X As Long, ByVal Y As Long) As Long
+Private Property Get PalettePixelIndex4(ByVal X As Long, ByVal Y As Long) As Long
     Dim W As Long: W = m_BmpInfo.bmiHeader.biWidth
     'Dim S As Long: S = Me.Stride
     Dim H As Long: H = m_BmpInfo.bmiHeader.biHeight
@@ -1107,15 +1136,15 @@ Private Property Get PixelPaletteIndex4(ByVal X As Long, ByVal Y As Long) As Lon
         i = &HF0 And m_data(i)
         i = i / &H10
     End If
-    PixelPaletteIndex4 = i
+    PalettePixelIndex4 = i
 End Property
 
-Private Property Get PixelPaletteIndex8(ByVal X As Long, ByVal Y As Long) As Long
+Private Property Get PalettePixelIndex8(ByVal X As Long, ByVal Y As Long) As Long
     'Dim W As Long: W = m_BmpInfo.bmiHeader.biWidth
     Dim s As Long: s = Me.Stride
     Dim H As Long: H = m_BmpInfo.bmiHeader.biHeight
     'Dim i As Long: i = (H - 1 - Y) * W + X: PixelPaletteIndex8 = m_data(i)
-    Dim i As Long: i = (H - 1 - Y) * s + X: PixelPaletteIndex8 = m_data(i)
+    Dim i As Long: i = (H - 1 - Y) * s + X: PalettePixelIndex8 = m_data(i)
 End Property
 
 Public Property Get Pixel(ByVal X As Long, ByVal Y As Long) As Long
@@ -1154,7 +1183,7 @@ Public Property Get Pixel4(ByVal X As Long, ByVal Y As Long) As Long
     Dim H As Long: H = Me.Height:    If Y < 0 Or H <= Y Then Exit Property
     'Dim si As Single: si = ((H - 1 - Y) * W + X) / 2
     'Dim i  As Long:    i = Int(si)
-    Dim i  As Long:    i = PixelPaletteIndex4(X, Y)
+    Dim i  As Long:    i = PalettePixelIndex4(X, Y)
     'Debug.Print UBound(m_data)
     'If si = CSng(i) Then
     '    'the lower nibble
@@ -1219,6 +1248,32 @@ End Property
 ''    'm_data=0
 ''End Property
 
+Private Function Color16bppBGRA1555_ToColor32(ByVal Value As Long) As Long
+'     BlueMask = &H1F    ' 5 bit
+'    GreenMask = &H3E0   ' 5 bit
+'      RedMask = &H7C00  ' 5 bit
+'    AlphaMask = &H8000  ' 1 bit
+    Dim R As Long, G As Long, b As Long, a As Long
+    b = ((Value And &H1F&) * 256) \ &H1F&
+    G = (((Value And &H3E0&) \ &H20&) * 256) \ &H1F&
+    R = (((Value And &H7C00&) \ &H400&) * 256) \ &H1F&
+    a = (((Value And &H8000&) \ &H8000&) * 256) ' alpha is only 1 bit, so it is 0 or 1, resp 0 or 255
+    Color16bppBGRA1555_ToColor32 = RGB(R, G, b)
+End Function
+
+Private Function Color16bppBGR565_ToColor32(ByVal Value As Long) As Long
+'     BlueMask = &H1F    ' 5 bit
+'    GreenMask = &H7E0   ' 6 bit
+'      RedMask = &HF800  ' 5 bit
+'    AlphaMask = &H0     ' ----
+    Dim R As Long, G As Long, b As Long, a As Long
+    b = ((Value And &H1F&) * 256) \ &H1F&
+    G = (((Value And &H7E0&) \ &H20&) * 256) \ &H3F&
+    R = (((Value And &HF800&) \ &H800&) * 256) \ &H1F&
+    'a = ' alpha is not included
+    Color16bppBGR565_ToColor32 = RGB(R, G, b)
+End Function
+
 Public Property Get Pixel16Argb1555(ByVal X As Long, ByVal Y As Long) As Long
     Dim W As Long: W = Me.Width:    If X < 0 Or W <= X Then Exit Property
     Dim H As Long: H = Me.Height:   If Y < 0 Or H <= Y Then Exit Property
@@ -1227,7 +1282,9 @@ Public Property Get Pixel16Argb1555(ByVal X As Long, ByVal Y As Long) As Long
     Dim BytesPerPixel As Long: BytesPerPixel = 2 'BitsPerPixel / 8 ' 2
     Dim s As Long: s = Me.Stride
     Dim i As Long: i = (H - 1 - Y) * s + X * BytesPerPixel
-    
+    Dim tb As TByt4: tb.Value0 = m_data(i): tb.Value1 = m_data(i + 1)
+    Dim tl As TLng: LSet tl = tb
+    Pixel16Argb1555 = Color16bppBGRA1555_ToColor32(tl.Value)
 End Property
 
 Public Property Get Pixel16Grayscale(ByVal X As Long, ByVal Y As Long) As Long
@@ -1235,11 +1292,29 @@ Public Property Get Pixel16Grayscale(ByVal X As Long, ByVal Y As Long) As Long
 End Property
 
 Public Property Get Pixel16Rgb555(ByVal X As Long, ByVal Y As Long) As Long
-    '
+    Dim W As Long: W = Me.Width:    If X < 0 Or W <= X Then Exit Property
+    Dim H As Long: H = Me.Height:   If Y < 0 Or H <= Y Then Exit Property
+    'Dim BitsPerPixel  As Long: BitsPerPixel = 16
+    'Dim BitsPerByte   As Long: BitsPerByte = 8
+    Dim BytesPerPixel As Long: BytesPerPixel = 2 'BitsPerPixel / 8 ' 2
+    Dim s As Long: s = Me.Stride
+    Dim i As Long: i = (H - 1 - Y) * s + X * BytesPerPixel
+    Dim tb As TByt4: tb.Value0 = m_data(i): tb.Value1 = m_data(i + 1)
+    Dim tl As TLng: LSet tl = tb
+    Pixel16Rgb555 = Color16bppBGRA1555_ToColor32(tl.Value)
 End Property
 
 Public Property Get Pixel16Rgb565(ByVal X As Long, ByVal Y As Long) As Long
-    '
+    Dim W As Long: W = Me.Width:    If X < 0 Or W <= X Then Exit Property
+    Dim H As Long: H = Me.Height:   If Y < 0 Or H <= Y Then Exit Property
+    'Dim BitsPerPixel  As Long: BitsPerPixel = 16
+    'Dim BitsPerByte   As Long: BitsPerByte = 8
+    Dim BytesPerPixel As Long: BytesPerPixel = 2 'BitsPerPixel / 8 ' 2
+    Dim s As Long: s = Me.Stride
+    Dim i As Long: i = (H - 1 - Y) * s + X * BytesPerPixel
+    Dim tb As TByt4: tb.Value0 = m_data(i): tb.Value1 = m_data(i + 1)
+    Dim tl As TLng: LSet tl = tb
+    Pixel16Rgb565 = Color16bppBGR565_ToColor32(tl.Value)
 End Property
 
 
@@ -1258,7 +1333,7 @@ Public Property Get Pixel24(ByVal X As Long, ByVal Y As Long) As Long
     With RGBA
         .R = m_data(i + 2)
         .G = m_data(i + 1)
-        .B = m_data(i + 0)
+        .b = m_data(i + 0)
     End With
     Dim L As TLng: LSet L = RGBA 'BGRA
     Pixel24 = L.Value
@@ -1280,7 +1355,7 @@ Public Property Get Pixel32(ByVal X As Long, ByVal Y As Long) As Long
         '.A = m_data(i + 3)
         .R = m_data(i + 2)
         .G = m_data(i + 1)
-        .B = m_data(i + 0)
+        .b = m_data(i + 0)
     End With
     Dim L As TLng: LSet L = RGBA
     Pixel32 = L.Value
