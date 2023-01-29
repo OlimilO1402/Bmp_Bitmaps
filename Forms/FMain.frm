@@ -22,36 +22,16 @@ Begin VB.Form FMain
       TabIndex        =   2
       Top             =   0
       Width           =   1215
-      Begin VB.PictureBox PBSelectForeBackColor 
-         Appearance      =   0  '2D
-         BackColor       =   &H80000005&
-         ForeColor       =   &H80000008&
-         Height          =   570
-         Left            =   300
-         ScaleHeight     =   540
-         ScaleWidth      =   585
-         TabIndex        =   11
-         Top             =   5415
-         Width           =   615
-      End
-      Begin VB.CommandButton BtnSelColorChangeForeBack 
-         Caption         =   "^>"
-         Height          =   360
-         Left            =   120
-         TabIndex        =   10
-         Top             =   5010
-         Width           =   375
-      End
       Begin VB.PictureBox PbSelColorFore 
          Appearance      =   0  '2D
          BackColor       =   &H80000005&
          ForeColor       =   &H80000008&
-         Height          =   570
+         Height          =   450
          Left            =   120
-         ScaleHeight     =   540
+         ScaleHeight     =   420
          ScaleWidth      =   585
          TabIndex        =   8
-         Top             =   4440
+         Top             =   4200
          Width           =   615
       End
       Begin VB.PictureBox PbSelColorBack 
@@ -61,10 +41,18 @@ Begin VB.Form FMain
          Height          =   570
          Left            =   480
          ScaleHeight     =   540
-         ScaleWidth      =   585
+         ScaleWidth      =   465
          TabIndex        =   9
-         Top             =   4800
-         Width           =   615
+         Top             =   4440
+         Width           =   495
+      End
+      Begin VB.CommandButton BtnSelColorChangeForeBack 
+         Caption         =   "^>"
+         Height          =   360
+         Left            =   120
+         TabIndex        =   10
+         Top             =   4650
+         Width           =   360
       End
       Begin VB.CommandButton BtnPickAColor 
          Caption         =   "Pick a Color"
@@ -112,38 +100,20 @@ Begin VB.Form FMain
          ScaleHeight     =   1485
          ScaleWidth      =   720
          TabIndex        =   7
-         Top             =   2880
+         Top             =   2640
          Width           =   720
       End
       Begin VB.PictureBox PBCurColor 
          Appearance      =   0  '2D
          BackColor       =   &H80000005&
          ForeColor       =   &H80000008&
-         Height          =   570
+         Height          =   435
          Left            =   300
-         ScaleHeight     =   540
+         ScaleHeight     =   405
          ScaleWidth      =   585
          TabIndex        =   5
-         Top             =   780
+         Top             =   765
          Width           =   615
-      End
-      Begin VB.Label LblSelColor 
-         Alignment       =   2  'Zentriert
-         Caption         =   ". . ."
-         BeginProperty Font 
-            Name            =   "Tahoma"
-            Size            =   8.25
-            Charset         =   0
-            Weight          =   400
-            Underline       =   0   'False
-            Italic          =   0   'False
-            Strikethrough   =   0   'False
-         EndProperty
-         Height          =   1395
-         Left            =   0
-         TabIndex        =   12
-         Top             =   6075
-         Width           =   1215
       End
       Begin VB.Label LblCurColor 
          Alignment       =   2  'Zentriert
@@ -160,7 +130,7 @@ Begin VB.Form FMain
          Height          =   1395
          Left            =   0
          TabIndex        =   6
-         Top             =   1440
+         Top             =   1200
          Width           =   1215
       End
    End
@@ -265,6 +235,10 @@ Private Sub Form_Load()
     UpdateFormCaption
 End Sub
 
+Private Function Hex2(b As Byte) As String
+    Hex2 = Hex(b): If Len(Hex2) < 2 Then Hex2 = "0" & Hex2
+End Function
+
 Public Function Clone() As FMain
     Set Clone = New FMain
     Clone.NewC m_Bmp
@@ -358,29 +332,39 @@ End Sub
 
 Private Sub PbColorSelect_MouseDown(Button As Integer, Shift As Integer, X As Single, Y As Single)
     Select Case Button
-    Case MouseButtonConstants.vbLeftButton:  PbSelColorFore.BackColor = PBSelectForeBackColor.BackColor
-    Case MouseButtonConstants.vbRightButton: PbSelColorBack.BackColor = PBSelectForeBackColor.BackColor
+    Case MouseButtonConstants.vbLeftButton:  PbSelColorFore.BackColor = PBCurColor.BackColor
+    Case MouseButtonConstants.vbRightButton: PbSelColorBack.BackColor = PBCurColor.BackColor
     End Select
 End Sub
 
 Private Sub PbColorSelect_MouseMove(Button As Integer, Shift As Integer, X As Single, Y As Single)
     Dim Color As Long: Color = PbColorSelect.Point(X, Y)
-    PBSelectForeBackColor.BackColor = Color
-    LblSelColor.Caption = "X: " & X & "; Y: " & Y & vbCrLf & Color_ToStr(Color)
+    PBCurColor.BackColor = Color
+    LblCurColor.Caption = MouseCoordsNColor_ToStr(X, Y, Color)
 End Sub
 
 Private Sub PBBitmap_MouseMove(Button As Integer, Shift As Integer, X As Single, Y As Single)
     If m_Bmp Is Nothing Then Exit Sub
-    If m_bPickAColor Then
-        Dim Color As Long: Color = m_Bmp.Pixel(X, Y)
-        PBCurColor.BackColor = Color
-        Dim s As String
-        If m_Bmp.IsIndexed Then
-            s = "Index: " & m_Bmp.PalettePixelIndex(X, Y) & vbCrLf
-        End If
-        s = s & "X: " & X & "; Y: " & Y & vbCrLf & Color_ToStr(Color)
-        LblCurColor.Caption = s
+    If Not m_bPickAColor Then Exit Sub
+    Dim Color As Long: Color = m_Bmp.Pixel(X, Y)
+    PBCurColor.BackColor = Color
+    Dim s As String
+    If m_Bmp.IsIndexed Then
+        s = "Index: " & m_Bmp.PalettePixelIndex(X, Y) & vbCrLf
     End If
+    s = s & MouseCoordsNColor_ToStr(X, Y, Color)
+    LblCurColor.Caption = s
+End Sub
+Private Function MouseCoordsNColor_ToStr(X As Single, Y As Single, ByVal Color As Long) As String
+    MouseCoordsNColor_ToStr = "X;Y: " & X & ";" & Y & vbCrLf & Color_ToStr(Color)
+End Function
+    
+Private Sub PBBitmap_MouseDown(Button As Integer, Shift As Integer, X As Single, Y As Single)
+    If Not m_bPickAColor Then Exit Sub
+    Select Case Button
+    Case MouseButtonConstants.vbLeftButton:  PbSelColorFore.BackColor = PBCurColor.BackColor
+    Case MouseButtonConstants.vbRightButton: PbSelColorBack.BackColor = PBCurColor.BackColor
+    End Select
 End Sub
 
 Private Function Color_ToStr(ByVal this As Long) As String
@@ -388,9 +372,12 @@ Private Function Color_ToStr(ByVal this As Long) As String
     Dim G As Long: G = (this And &HFF00&) \ &H100&
     Dim b As Long: b = (this And &HFF0000) \ &H10000
     Dim hexprefix As String: hexprefix = "&&H"
-    Color_ToStr = "R=" & R & " (" & hexprefix & Hex(R) & ")" & vbCrLf & _
-                  "G=" & G & " (" & hexprefix & Hex(G) & ")" & vbCrLf & _
-                  "B=" & b & " (" & hexprefix & Hex(b) & ")"
+    Dim sR As String: sR = CStr(R): sR = Space$(3 - Len(sR)) & sR
+    Dim sG As String: sG = CStr(G): sG = Space$(3 - Len(sG)) & sG
+    Dim sB As String: sB = CStr(b): sB = Space$(3 - Len(sB)) & sB
+    Color_ToStr = "R=" & sR & " (" & hexprefix & Hex2(CByte(R)) & ")" & vbCrLf & _
+                  "G=" & sG & " (" & hexprefix & Hex2(CByte(G)) & ")" & vbCrLf & _
+                  "B=" & sB & " (" & hexprefix & Hex2(CByte(b)) & ")"
 End Function
 
 
@@ -402,9 +389,20 @@ Private Sub PBBitmap_OLEDragDrop(Data As DataObject, Effect As Long, Button As I
     AllOLEDragDrop Data, Effect, Button, Shift, X, Y
 End Sub
 
-Private Sub Picture4_Click()
-
+Private Sub PbSelColorBack_Click()
+    Dim Color As Long: Color = PbSelColorBack.BackColor
+    PbSelColorBack.BackColor = ColorDlg(Color)
 End Sub
+
+Private Sub PbSelColorFore_Click()
+    Dim Color As Long: Color = PbSelColorFore.BackColor
+    PbSelColorFore.BackColor = ColorDlg(Color)
+End Sub
+
+Private Function ColorDlg(ByVal CurColor As Long) As Long
+    Dim CD As ColorDialog: Set CD = New ColorDialog: CD.Color = CurColor
+    ColorDlg = IIf(CD.ShowDialog(Me) = vbOK, CD.Color, CurColor)
+End Function
 
 Private Sub Text1_OLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, X As Single, Y As Single)
     AllOLEDragDrop Data, Effect, Button, Shift, X, Y

@@ -82,6 +82,11 @@ Private Type TInt
     Value As Integer
 End Type
 
+Private Type TInt2
+    Value0 As Integer
+    Value1 As Integer
+End Type
+
 Private Type TLng
     Value As Long
 End Type
@@ -279,7 +284,6 @@ End Type         ' Sum: 16/24
     Private Declare Sub RtlFillMemory Lib "kernel32" (pDst As Any, ByVal bytLength As Long, ByVal fill As Byte)
 #End If
 Private m_PFN     As String
-'Private m_PNMType As EPNMType ' P2: Daten als Text gespeichert, P5: Daten binär gespeichert
 Private m_BmpHead As BITMAPFILEHEADER
 Private m_BmpInfo As BITMAPINFO
 Private m_PicGUID As GUID
@@ -463,13 +467,13 @@ Public Property Let PixelPerMeterY(ByVal Value As Long)
     m_BmpInfo.bmiHeader.biYPelsPerMeter = Value
 End Property
 
-
 Public Sub Read(aPFN As String)
     m_PFN = aPFN
 Try: On Error GoTo Catch
     Dim sErr As String
     Dim FNr As Integer: FNr = FreeFile
     Open m_PFN For Binary Access Read As FNr
+    Debug.Print Seek(FNr) & " " & LOF(FNr)
     If Not IsBitmap(FNr) Then sErr = "Unknown FileHeader: " & m_BmpHead.bfType: GoTo Catch
     ReadBmpInfo FNr
     If ReadData(FNr) Then
@@ -514,9 +518,11 @@ End Function
 
 Private Function ReadBmpInfo(ByVal FNr As Integer) As Boolean
 Try: On Error GoTo Catch
+    Debug.Print Seek(FNr) & " " & LOF(FNr)
     Dim sErr As String
     With m_BmpInfo
         Get FNr, , .biSize
+        Debug.Print .biSize
         ReadBmpInfo = .biSize = 12 Or .biSize = 40 Or .biSize = 56 Or .biSize = 108 Or .biSize = 124
         'biSize=12  => BitmapCoreHeader    -> OS/2-Bitmap
         'biSize=40  => BitmapHeader_v3     -> Windows-Bitmap
@@ -530,19 +536,30 @@ Try: On Error GoTo Catch
             Dim H As Integer: Get FNr, , H
             .bmiHeader.biWidth = CLng(W)
             .bmiHeader.biHeight = CLng(H)
-            Get FNr, , .bmiHeader.biPlanes
-            Get FNr, , .bmiHeader.biBitCount
-            Dim n As Long: n = 2 ^ .bmiHeader.biBitCount
-            .bmiHeader.biClrUsed = n
-            .bmiHeader.biClrImportant = n
+            Dim pl As Integer: Get FNr, , pl
+            Dim bc As Integer: Get FNr, , bc
+            .bmiHeader.biPlanes = pl
+            .bmiHeader.biBitCount = bc
             .bmiHeader.biXPelsPerMeter = 3779
             .bmiHeader.biYPelsPerMeter = 3779
-            For i = 0 To n - 1
-                Get FNr, , aColor.b
-                Get FNr, , aColor.G
-                Get FNr, , aColor.R
-                .Palette.bmiColors(i) = aColor
-            Next
+            Dim n As Long
+            If bc < 24 Then
+                n = 2 ^ bc
+                .bmiHeader.biClrUsed = n
+                .bmiHeader.biClrImportant = n
+                For i = 0 To n - 1
+                    Get FNr, , aColor.b
+                    Get FNr, , aColor.G
+                    Get FNr, , aColor.R
+                    .Palette.bmiColors(i) = aColor
+                Next
+            'Else
+                'm_BmpHead.bfOffBits = Seek(FNr) - 1
+                'n = LOF(FNr) - Seek(FNr)
+                'ReDim m_data(0 To n - 1)
+                'Get FNr, , m_data
+            End If
+            
         Else
             Get FNr, , .bmiHeader
             If .biSize = 40 Then
@@ -571,6 +588,7 @@ Try: On Error GoTo Catch
             End If
         End If
     End With
+    Debug.Print Seek(FNr) & " " & LOF(FNr)
     Exit Function
 Catch: MsgBox "ReadBmpInfo " & sErr
 End Function
@@ -589,7 +607,7 @@ Private Function BGRA_ToStr(this As BGRA, Optional ByVal skipAlpha As Boolean = 
     BGRA_ToStr = s
 End Function
 
-Private Function Hex2(b As Byte) As String
+Private Function Hex2(ByVal b As Byte) As String
     Hex2 = Hex(b): If Len(Hex2) < 2 Then Hex2 = "0" & Hex2
 End Function
 
@@ -613,14 +631,17 @@ End Function
 
 Private Function ReadData(FNr As Integer) As Boolean
 Try: On Error GoTo Catch
+    Debug.Print Seek(FNr) & " " & LOF(FNr)
     Dim Offset As Long: Offset = Seek(FNr) - 1
     'der Offset muss 4 aligned sein?hmmm ist gar nicht der Fall????
+    Debug.Print "m_BmpHead.bfOffBits: " & m_BmpHead.bfOffBits & " == Offset=" & Offset
     ReadData = Offset = m_BmpHead.bfOffBits
     If Not ReadData Then GoTo Catch
     Dim u As Long: u = LOF(FNr) - Offset - 1
     ReDim m_data(0 To u) As Byte
     Get FNr, , m_data
     ReadData = True
+    Debug.Print Seek(FNr) & " " & LOF(FNr)
     Exit Function
 Catch:
     MsgBox Err.Number & " " & "Error reading data" & vbCrLf & Err.Description
@@ -683,6 +704,59 @@ Private Function IsOdd(ByVal n As Long) As Boolean
     IsOdd = n Mod 2
 End Function
 
+'Private Function CalcOffset() As Long
+'    Dim v As Single: v = Me.BitmapInfoVersion
+'    Select Case v
+'    Case 2:
+'    Case 3:
+'    Case 3.5:
+'    Case 4:
+'    Case 5:
+'    End Select
+'End Function
+'
+'Private Function CalcSize() As Long
+'    CalcSize = CalcOffset + UBound(m_data) + 1
+'End Function
+
+Private Function Save(Optional ByVal aPFN As String = "") As Boolean
+Try: On Error GoTo Catch
+    Dim sErr As String
+    If Len(aPFN) = 0 Then aPFN = m_PFN
+    Dim FNr As Integer: FNr = FreeFile
+    Open aPFN For Binary Access Write As FNr
+    'now write all stuff
+    'calculate filelen and biOffset
+    Put FNr, , m_BmpHead '.bfType
+    'Put FNr, , m_BmpHead.bfSize
+    With m_BmpInfo
+        Put FNr, , .biSize
+        If .biSize = 12 Then
+            If .bmiHeader.biWidth >= 65536 Then
+                sErr = "Width is too large: " & .bmiHeader.biWidth & vbCrLf & "For OS/2-Bitmap max width is 65536 pixel"
+                GoTo Catch
+            End If
+            If .bmiHeader.biHeight >= 65536 Then
+                sErr = "Height is too large: " & .bmiHeader.biHeight & vbCrLf & "For OS/2-Bitmap max height is 65536 pixel"
+                GoTo Catch
+            End If
+            Dim tl As TLng, ti2 As TInt2
+            tl.Value = .bmiHeader.biWidth:  LSet ti2 = tl
+            Put FNr, , ti2.Value0
+            tl.Value = .bmiHeader.biHeight: LSet ti2 = tl
+            Put FNr, , ti2.Value0
+            'tl.Value =
+            
+        End If
+        Put FNr, , .bmiHeader
+    End With
+    GoTo Finally
+Catch:
+    MsgBox Err.Description & vbCrLf & sErr
+Finally:
+    Close FNr
+End Function
+
 Friend Function ToPicture() As StdPicture
 Try: On Error GoTo Catch
     Dim sErr As String, hr As Long
@@ -720,14 +794,25 @@ Public Function ToStr() As String
     ToStr = BITMAPFILEHEADER_ToStr(m_BmpHead) & vbCrLf & BITMAPINFO_ToStr(m_BmpInfo)
 End Function
 
+
+'| %: integer  || &: long     || @: currency || !: single   || #: double   || $: string   |
 Public Property Get BitmapInfoVersion() As Single
     With m_BmpInfo
-        BitmapInfoVersion = IIf(.biSize = 12, 2, IIf(.biSize = 40, 3, IIf(.biSize = 56, 3.5, IIf(.biSize = 108, 4, IIf(.biSize = 124, 5, -1)))))
+        BitmapInfoVersion = IIf(.biSize = 12, 2!, IIf(.biSize = 40, 3!, IIf(.biSize = 56, 3.5!, IIf(.biSize = 108, 4!, IIf(.biSize = 124, 5, -1)))))
     End With
 End Property
+Public Property Let BitmapInfoVersion(ByVal Value As Single)
+    Select Case Value
+    Case 2!:   m_BmpInfo.biSize = 12   'OS/2
+    Case 3!:   m_BmpInfo.biSize = 40   '24bpp or indexed
+    Case 3.5!: m_BmpInfo.biSize = 56   '32bpp wo cstype
+    Case 4!:   m_BmpInfo.biSize = 108  '16bpp
+    Case 5!:   m_BmpInfo.biSize = 124  '32,48,64bpp
+    End Select
+End Property
+
 'Private m_BmpHead As BITMAPFILEHEADER
 'Private m_BmpInfo As BITMAPINFO
-
 '    bfType      As Integer ' 2 ' "BM" = 66, 77 = &H424D = 16973
 '    bfSize      As Long    ' 4 ' Größe der BMP-Datei in Byte. (unzuverlässig)
 '    bfReserved1 As Integer ' 2 '
