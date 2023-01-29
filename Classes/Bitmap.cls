@@ -719,7 +719,7 @@ End Function
 '    CalcSize = CalcOffset + UBound(m_data) + 1
 'End Function
 
-Private Function Save(Optional ByVal aPFN As String = "") As Boolean
+Public Function Save(Optional ByVal aPFN As String = "") As Boolean
 Try: On Error GoTo Catch
     Dim sErr As String
     If Len(aPFN) = 0 Then aPFN = m_PFN
@@ -731,25 +731,58 @@ Try: On Error GoTo Catch
     'Put FNr, , m_BmpHead.bfSize
     With m_BmpInfo
         Put FNr, , .biSize
-        If .biSize = 12 Then
+        Dim pl As Long: pl = .bmiHeader.biPlanes
+        Dim bc As Long: bc = .bmiHeader.biBitCount
+        If .biSize < 56 Then
+            Dim i As Long, u As Long: u = 2 ^ bc - 1
+        End If
+        If 12 = .biSize Then
             If .bmiHeader.biWidth >= 65536 Then
-                sErr = "Width is too large: " & .bmiHeader.biWidth & vbCrLf & "For OS/2-Bitmap max width is 65536 pixel"
+                sErr = "For OS/2-bitmap width is too big: " & .bmiHeader.biWidth & vbCrLf & ", max width is 65535 pixel"
                 GoTo Catch
             End If
             If .bmiHeader.biHeight >= 65536 Then
-                sErr = "Height is too large: " & .bmiHeader.biHeight & vbCrLf & "For OS/2-Bitmap max height is 65536 pixel"
+                sErr = "For OS/2-bitmap height is too big: " & .bmiHeader.biHeight & vbCrLf & ", max height is 65535 pixel"
                 GoTo Catch
             End If
             Dim tl As TLng, ti2 As TInt2
-            tl.Value = .bmiHeader.biWidth:  LSet ti2 = tl
-            Put FNr, , ti2.Value0
-            tl.Value = .bmiHeader.biHeight: LSet ti2 = tl
-            Put FNr, , ti2.Value0
-            'tl.Value =
-            
+            tl.Value = .bmiHeader.biWidth:  LSet ti2 = tl: Put FNr, , ti2.Value0
+            tl.Value = .bmiHeader.biHeight: LSet ti2 = tl: Put FNr, , ti2.Value0
+            Put FNr, , .bmiHeader.biPlanes    'Int16
+            Put FNr, , .bmiHeader.biBitCount  'Int16
+            If .bmiHeader.biBitCount < 16 Then
+                For i = 0 To u
+                    Put FNr, , .Palette.bmiColors(i).b
+                    Put FNr, , .Palette.bmiColors(i).G
+                    Put FNr, , .Palette.bmiColors(i).R
+                Next
+            End If
+        ElseIf 12 < .biSize Then
+            Put FNr, , .bmiHeader
+            If 40 = .biSize Then
+                For i = 0 To u
+                    Put FNr, , .Palette.bmiColors(i)
+                Next
+            End If
         End If
-        Put FNr, , .bmiHeader
+        If 40 < .biSize Then
+            Put FNr, , .bmiHeaderV4.bV4RedMask
+            Put FNr, , .bmiHeaderV4.bV4GreenMask
+            Put FNr, , .bmiHeaderV4.bV4BlueMask
+            Put FNr, , .bmiHeaderV4.bV4AlphaMask
+        End If
+        If 56 < .biSize Then
+            Put FNr, , .bmiHeaderV4.bV4CSType
+            Put FNr, , .bmiHeaderV4.bV4Endpoints
+            Put FNr, , .bmiHeaderV4.bV4GammaRed
+            Put FNr, , .bmiHeaderV4.bV4GammaGreen
+            Put FNr, , .bmiHeaderV4.bV4GammaBlue
+        End If
+        If 108 < .biSize Then
+            Put FNr, , .bmiHeaderV5
+        End If
     End With
+    Put FNr, , m_data
     GoTo Finally
 Catch:
     MsgBox Err.Description & vbCrLf & sErr

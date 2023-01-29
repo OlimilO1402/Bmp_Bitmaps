@@ -11,6 +11,33 @@ Begin VB.Form FMain
    ScaleMode       =   3  'Pixel
    ScaleWidth      =   993
    StartUpPosition =   3  'Windows-Standard
+   Begin VB.PictureBox PanelBmp 
+      Height          =   6735
+      Left            =   4200
+      ScaleHeight     =   445
+      ScaleMode       =   3  'Pixel
+      ScaleWidth      =   589
+      TabIndex        =   11
+      Top             =   0
+      Width           =   8895
+      Begin VB.PictureBox PBBitmap 
+         Appearance      =   0  '2D
+         AutoRedraw      =   -1  'True
+         BackColor       =   &H00400040&
+         BorderStyle     =   0  'Kein
+         ForeColor       =   &H80000008&
+         Height          =   6495
+         Left            =   0
+         OLEDropMode     =   1  'Manuell
+         ScaleHeight     =   433
+         ScaleMode       =   3  'Pixel
+         ScaleWidth      =   577
+         TabIndex        =   12
+         ToolTipText     =   "Drag'n'drop pictures of filetype *.bmp to the window."
+         Top             =   0
+         Width           =   8655
+      End
+   End
    Begin VB.PictureBox PnlSideRight 
       Align           =   4  'Rechts ausrichten
       BorderStyle     =   0  'Kein
@@ -19,9 +46,17 @@ Begin VB.Form FMain
       ScaleHeight     =   578
       ScaleMode       =   3  'Pixel
       ScaleWidth      =   81
-      TabIndex        =   2
+      TabIndex        =   1
       Top             =   0
       Width           =   1215
+      Begin VB.CommandButton Command1 
+         Caption         =   "Test Safe"
+         Height          =   735
+         Left            =   240
+         TabIndex        =   10
+         Top             =   5400
+         Width           =   735
+      End
       Begin VB.PictureBox PbSelColorFore 
          Appearance      =   0  '2D
          BackColor       =   &H80000005&
@@ -30,7 +65,7 @@ Begin VB.Form FMain
          Left            =   120
          ScaleHeight     =   420
          ScaleWidth      =   585
-         TabIndex        =   8
+         TabIndex        =   7
          Top             =   4200
          Width           =   615
       End
@@ -42,7 +77,7 @@ Begin VB.Form FMain
          Left            =   480
          ScaleHeight     =   540
          ScaleWidth      =   465
-         TabIndex        =   9
+         TabIndex        =   8
          Top             =   4440
          Width           =   495
       End
@@ -50,7 +85,7 @@ Begin VB.Form FMain
          Caption         =   "^>"
          Height          =   360
          Left            =   120
-         TabIndex        =   10
+         TabIndex        =   9
          Top             =   4650
          Width           =   360
       End
@@ -67,7 +102,7 @@ Begin VB.Form FMain
          EndProperty
          Height          =   375
          Left            =   0
-         TabIndex        =   4
+         TabIndex        =   3
          Top             =   360
          Width           =   1215
       End
@@ -84,7 +119,7 @@ Begin VB.Form FMain
          EndProperty
          Height          =   375
          Left            =   0
-         TabIndex        =   3
+         TabIndex        =   2
          Top             =   0
          Width           =   1215
       End
@@ -99,7 +134,7 @@ Begin VB.Form FMain
          Picture         =   "FMain.frx":1782
          ScaleHeight     =   1485
          ScaleWidth      =   720
-         TabIndex        =   7
+         TabIndex        =   6
          Top             =   2640
          Width           =   720
       End
@@ -111,7 +146,7 @@ Begin VB.Form FMain
          Left            =   300
          ScaleHeight     =   405
          ScaleWidth      =   585
-         TabIndex        =   5
+         TabIndex        =   4
          Top             =   765
          Width           =   615
       End
@@ -129,7 +164,7 @@ Begin VB.Form FMain
          EndProperty
          Height          =   1395
          Left            =   0
-         TabIndex        =   6
+         TabIndex        =   5
          Top             =   1200
          Width           =   1215
       End
@@ -148,25 +183,10 @@ Begin VB.Form FMain
       Left            =   0
       MultiLine       =   -1  'True
       ScrollBars      =   3  'Beides
-      TabIndex        =   1
-      ToolTipText     =   "Drag'n'drop pictures of filetype *.bmp to the window."
-      Top             =   0
-      Width           =   4215
-   End
-   Begin VB.PictureBox PBBitmap 
-      AutoRedraw      =   -1  'True
-      BackColor       =   &H00400040&
-      BorderStyle     =   0  'Kein
-      Height          =   6735
-      Left            =   4200
-      OLEDropMode     =   1  'Manuell
-      ScaleHeight     =   449
-      ScaleMode       =   3  'Pixel
-      ScaleWidth      =   513
       TabIndex        =   0
       ToolTipText     =   "Drag'n'drop pictures of filetype *.bmp to the window."
       Top             =   0
-      Width           =   7695
+      Width           =   4215
    End
    Begin VB.Menu mnuFile 
       Caption         =   "&File"
@@ -218,9 +238,17 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
-'Private m_PFN As String
 Private m_Bmp As Bitmap
 Private m_bPickAColor As Boolean
+Private m_PFNTests As Collection
+
+Private Sub Form_Load()
+    PFNTests_AddFiles
+    mnuEditPalette.Enabled = False
+    BtnPickAColor.Enabled = False
+    BtnClone.Enabled = False
+    UpdateFormCaption
+End Sub
 
 Private Sub BtnSelColorChangeForeBack_Click()
     Dim Color As Long: Color = Me.PbSelColorBack.BackColor
@@ -228,11 +256,38 @@ Private Sub BtnSelColorChangeForeBack_Click()
     Me.PbSelColorFore.BackColor = Color
 End Sub
 
-Private Sub Form_Load()
-    mnuEditPalette.Enabled = False
-    BtnPickAColor.Enabled = False
-    BtnClone.Enabled = False
-    UpdateFormCaption
+Private Sub Command1_Click()
+    Dim FNm As String, Path0 As String: Path0 = App.Path & "\bmps\"
+    Dim PFN As String, Path1 As String
+    Path1 = "OS2\"
+    FNm = "011_OS2RGB_1BPPIndexed_BlackWhite.bmp"
+    PFN = Path0 & Path1 & FNm
+    'pfn = "\\SOLS_DS\Daten\GitHubRepos\VB\Bmp_Bitmaps\bmps\OS2\012_OS2RGB_4BPPIndexed_16Colors.bmp"
+    'pfn = "\\SOLS_DS\Daten\GitHubRepos\VB\Bmp_Bitmaps\bmps\OS2\SleepingIceBear08bppIndexed.bmp"
+    'pfn = "\\SOLS_DS\Daten\GitHubRepos\VB\Bmp_Bitmaps\bmps\OS2\SleepingIceBear24bppRGB.bmp"
+    'pfn = "\\SOLS_DS\Daten\GitHubRepos\VB\Bmp_Bitmaps\bmps\Win\RGB\01BPP\010_WinRGB_1BPPIndexed_BlackWhite.bmp"
+    PFN = "\\SOLS_DS\Daten\GitHubRepos\VB\Bmp_Bitmaps\bmps\Win\RGB\01BPP\SleepingIceBear01bppIndexed_psp5.bmp"
+    Dim bmp As Bitmap: Set bmp = MNew.Bitmap(PFN)
+    bmp.Save PFN & ".bmp"
+End Sub
+
+Private Sub PFNTests_AddFiles()
+    Set m_PFNTests = New Collection
+    Dim FNm As String, Path0 As String: Path0 = App.Path & "\bmps\"
+    Dim PFN As String, Path1 As String, Path As String
+    
+    Path1 = "OS2\":    Path = Path0 & Path1
+    
+    FNm = "011_OS2RGB_1BPPIndexed_BlackWhite.bmp":    m_PFNTests.Add Path & FNm
+    FNm = "012_OS2RGB_4BPPIndexed_16Colors.bmp":      m_PFNTests.Add Path & FNm
+    FNm = "SleepingIceBear08bppIndexed.bmp":          m_PFNTests.Add Path & FNm
+    FNm = "SleepingIceBear24bppRGB.bmp":              m_PFNTests.Add Path & FNm
+    
+    Path1 = "Win\RGB\01BPP\":    Path = Path0 & Path1
+    
+    FNm = "010_WinRGB_1BPPIndexed_BlackWhite.bmp":    m_PFNTests.Add Path & FNm
+    FNm = "SleepingIceBear01bppIndexed_psp5.bmp":     m_PFNTests.Add Path & FNm
+    
 End Sub
 
 Private Function Hex2(b As Byte) As String
@@ -267,8 +322,9 @@ Private Sub Form_Resize()
     Dim W As Single: W = Text1.Width - L
     Dim H As Single: H = Me.ScaleHeight - T
     If W > 0 And H > 0 Then Text1.Move L, T, W, H
-    L = W:    W = Me.ScaleWidth - W
-    If W > 0 And H > 0 Then PBBitmap.Move L, T, W, H
+    L = W:    W = Me.ScaleWidth - W - PnlSideRight.Width
+    If W > 0 And H > 0 Then PanelBmp.Move L, T, W, H
+    If W > 0 And H > 0 Then PBBitmap.Move 0, 0, W, H
 End Sub
 
 Private Sub BtnPickAColor_Click()
@@ -308,11 +364,34 @@ Private Sub MiddlePosDlg(Frm As Form)
     Frm.Move L, T
 End Sub
 Private Sub mnuFileOpen_Click()
-    Dim OFD As OpenFileDialog: Set OFD = New OpenFileDialog
-    OFD.Filter = "Bitmaps (*.bmp)|*.bmp|All files (*.*)|*.*"
-    If OFD.ShowDialog(Me) = vbCancel Then Exit Sub
-    Dim PFN As String: PFN = OFD.FileName
+    'Dim OFD As OpenFileDialog: Set OFD = New OpenFileDialog
+    'OFD.Filter = "Bitmaps (*.bmp)|*.bmp|All files (*.*)|*.*"
+    'If OFD.ShowDialog(Me) = vbCancel Then Exit Sub
+    'Dim PFN As String: PFN = OFD.FileName
+    Dim FD As New OpenFileDialog
+    If Not m_Bmp Is Nothing Then FD.FileName = m_Bmp.FileName
+    Dim PFN As String: PFN = MMain.GetFileName(FD)
+    If Len(PFN) = 0 Then Exit Sub
     Set m_Bmp = MNew.Bitmap(PFN)
+    UpdateView
+End Sub
+
+Private Sub mnuFileSave_Click()
+Try: On Error GoTo Catch
+    If m_Bmp Is Nothing Then Exit Sub
+    m_Bmp.Save
+    GoTo Finally
+Catch:
+    MsgBox Err.Description
+Finally:
+End Sub
+
+Private Sub mnuFileSaveAs_Click()
+    Dim FD As New SaveFileDialog
+    If Not m_Bmp Is Nothing Then FD.FileName = m_Bmp.FileName
+    Dim PFN As String: PFN = MMain.GetFileName(FD)
+    If Len(PFN) = 0 Then Exit Sub
+    m_Bmp.Save PFN
     UpdateView
 End Sub
 

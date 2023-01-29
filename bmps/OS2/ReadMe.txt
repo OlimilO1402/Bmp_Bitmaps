@@ -1,0 +1,1 @@
+there is no RLE-encoding for OS/2-bitmaps 
