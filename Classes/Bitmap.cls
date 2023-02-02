@@ -473,7 +473,7 @@ Try: On Error GoTo Catch
     Dim sErr As String
     Dim FNr As Integer: FNr = FreeFile
     Open m_PFN For Binary Access Read As FNr
-    Debug.Print Seek(FNr) & " " & LOF(FNr)
+    'Debug.Print Seek(FNr) & " " & LOF(FNr)
     If Not IsBitmap(FNr) Then sErr = "Unknown FileHeader: " & m_BmpHead.bfType: GoTo Catch
     ReadBmpInfo FNr
     If ReadData(FNr) Then
@@ -518,11 +518,11 @@ End Function
 
 Private Function ReadBmpInfo(ByVal FNr As Integer) As Boolean
 Try: On Error GoTo Catch
-    Debug.Print Seek(FNr) & " " & LOF(FNr)
+    'Debug.Print Seek(FNr) & " " & LOF(FNr)
     Dim sErr As String
     With m_BmpInfo
         Get FNr, , .biSize
-        Debug.Print .biSize
+        'Debug.Print .biSize
         ReadBmpInfo = .biSize = 12 Or .biSize = 40 Or .biSize = 56 Or .biSize = 108 Or .biSize = 124
         'biSize=12  => BitmapCoreHeader    -> OS/2-Bitmap
         'biSize=40  => BitmapHeader_v3     -> Windows-Bitmap
@@ -588,7 +588,7 @@ Try: On Error GoTo Catch
             End If
         End If
     End With
-    Debug.Print Seek(FNr) & " " & LOF(FNr)
+    'Debug.Print Seek(FNr) & " " & LOF(FNr)
     Exit Function
 Catch: MsgBox "ReadBmpInfo " & sErr
 End Function
@@ -631,17 +631,17 @@ End Function
 
 Private Function ReadData(FNr As Integer) As Boolean
 Try: On Error GoTo Catch
-    Debug.Print Seek(FNr) & " " & LOF(FNr)
+    'Debug.Print Seek(FNr) & " " & LOF(FNr)
     Dim Offset As Long: Offset = Seek(FNr) - 1
     'der Offset muss 4 aligned sein?hmmm ist gar nicht der Fall????
-    Debug.Print "m_BmpHead.bfOffBits: " & m_BmpHead.bfOffBits & " == Offset=" & Offset
+    'Debug.Print "m_BmpHead.bfOffBits: " & m_BmpHead.bfOffBits & " == Offset=" & Offset
     ReadData = Offset = m_BmpHead.bfOffBits
     If Not ReadData Then GoTo Catch
     Dim u As Long: u = LOF(FNr) - Offset - 1
     ReDim m_data(0 To u) As Byte
     Get FNr, , m_data
     ReadData = True
-    Debug.Print Seek(FNr) & " " & LOF(FNr)
+    'Debug.Print Seek(FNr) & " " & LOF(FNr)
     Exit Function
 Catch:
     MsgBox Err.Number & " " & "Error reading data" & vbCrLf & Err.Description
@@ -733,7 +733,7 @@ Try: On Error GoTo Catch
         Put FNr, , .biSize
         Dim pl As Long: pl = .bmiHeader.biPlanes
         Dim bc As Long: bc = .bmiHeader.biBitCount
-        If .biSize < 56 Then
+        If .biSize < 56 And bc < 16 Then
             Dim i As Long, u As Long: u = 2 ^ bc - 1
         End If
         If 12 = .biSize Then
@@ -750,7 +750,7 @@ Try: On Error GoTo Catch
             tl.Value = .bmiHeader.biHeight: LSet ti2 = tl: Put FNr, , ti2.Value0
             Put FNr, , .bmiHeader.biPlanes    'Int16
             Put FNr, , .bmiHeader.biBitCount  'Int16
-            If .bmiHeader.biBitCount < 16 Then
+            If bc < 16 Then
                 For i = 0 To u
                     Put FNr, , .Palette.bmiColors(i).b
                     Put FNr, , .Palette.bmiColors(i).G
@@ -758,28 +758,50 @@ Try: On Error GoTo Catch
                 Next
             End If
         ElseIf 12 < .biSize Then
-            Put FNr, , .bmiHeader
-            If 40 = .biSize Then
-                For i = 0 To u
-                    Put FNr, , .Palette.bmiColors(i)
-                Next
+            With .bmiHeader
+                Put FNr, , .biWidth
+                Put FNr, , .biHeight
+                Put FNr, , .biPlanes
+                Put FNr, , .biBitCount
+                Dim comp As Long: comp = .biCompression
+                If comp = BI_RLE8 Then
+                    MsgBox "RLE encoding is not yet implemented!"
+                    comp = BI_RGB
+                End If
+                Put FNr, , comp
+                Put FNr, , .biSizeImage
+                Put FNr, , .biXPelsPerMeter
+                Put FNr, , .biYPelsPerMeter
+                Put FNr, , .biClrUsed
+                Put FNr, , .biClrImportant
+            End With
+            If bc < 16 Then
+                With .Palette
+                    For i = 0 To u
+                        Put FNr, , .bmiColors(i)
+                    Next
+                End With
             End If
-        End If
-        If 40 < .biSize Then
-            Put FNr, , .bmiHeaderV4.bV4RedMask
-            Put FNr, , .bmiHeaderV4.bV4GreenMask
-            Put FNr, , .bmiHeaderV4.bV4BlueMask
-            Put FNr, , .bmiHeaderV4.bV4AlphaMask
-        End If
-        If 56 < .biSize Then
-            Put FNr, , .bmiHeaderV4.bV4CSType
-            Put FNr, , .bmiHeaderV4.bV4Endpoints
-            Put FNr, , .bmiHeaderV4.bV4GammaRed
-            Put FNr, , .bmiHeaderV4.bV4GammaGreen
-            Put FNr, , .bmiHeaderV4.bV4GammaBlue
-        End If
-        If 108 < .biSize Then
-            Put FNr, , .bmiHeaderV5
+            If 40 < .biSize Then
+                With .bmiHeaderV4
+                    Put FNr, , .bV4RedMask
+                    Put FNr, , .bV4GreenMask
+                    Put FNr, , .bV4BlueMask
+                    Put FNr, , .bV4AlphaMask
+                End With
+                If 56 < .biSize Then
+                    With .bmiHeaderV4
+                        Put FNr, , .bV4CSType
+                        Put FNr, , .bV4Endpoints
+                        Put FNr, , .bV4GammaRed
+                        Put FNr, , .bV4GammaGreen
+                        Put FNr, , .bV4GammaBlue
+                    End With
+                    If 108 < .biSize Then
+                        Put FNr, , .bmiHeaderV5
+                    End If
+                End If
+            End If
         End If
     End With
     Put FNr, , m_data

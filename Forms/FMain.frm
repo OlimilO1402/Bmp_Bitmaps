@@ -257,37 +257,103 @@ Private Sub BtnSelColorChangeForeBack_Click()
 End Sub
 
 Private Sub Command1_Click()
-    Dim FNm As String, Path0 As String: Path0 = App.Path & "\bmps\"
-    Dim PFN As String, Path1 As String
-    Path1 = "OS2\"
-    FNm = "011_OS2RGB_1BPPIndexed_BlackWhite.bmp"
-    PFN = Path0 & Path1 & FNm
-    'pfn = "\\SOLS_DS\Daten\GitHubRepos\VB\Bmp_Bitmaps\bmps\OS2\012_OS2RGB_4BPPIndexed_16Colors.bmp"
-    'pfn = "\\SOLS_DS\Daten\GitHubRepos\VB\Bmp_Bitmaps\bmps\OS2\SleepingIceBear08bppIndexed.bmp"
-    'pfn = "\\SOLS_DS\Daten\GitHubRepos\VB\Bmp_Bitmaps\bmps\OS2\SleepingIceBear24bppRGB.bmp"
-    'pfn = "\\SOLS_DS\Daten\GitHubRepos\VB\Bmp_Bitmaps\bmps\Win\RGB\01BPP\010_WinRGB_1BPPIndexed_BlackWhite.bmp"
-    PFN = "\\SOLS_DS\Daten\GitHubRepos\VB\Bmp_Bitmaps\bmps\Win\RGB\01BPP\SleepingIceBear01bppIndexed_psp5.bmp"
-    Dim bmp As Bitmap: Set bmp = MNew.Bitmap(PFN)
-    bmp.Save PFN & ".bmp"
+    Dim v, pfn As String
+    Debug.Print m_PFNTests.Count
+    For Each v In m_PFNTests
+        pfn = v
+        If FileExists(pfn) Then
+            Debug.Print pfn
+            TestBmp pfn
+        Else
+            Debug.Print "File does not exists: " & vbCrLf & pfn
+        End If
+    Next
+End Sub
+
+Private Sub TestBmp(pfn As String)
+Try: On Error GoTo Catch
+    If Len(pfn) = 0 Then Exit Sub
+    Dim bmp0 As Bitmap: Set bmp0 = MNew.Bitmap(pfn)
+    Dim tmppfn As String: tmppfn = Environ("tmp") & "\test.bmp"
+    If FileExists(tmppfn) Then Kill tmppfn
+    bmp0.Save tmppfn
+    Dim data0() As Byte: ReadFileContentBuffer pfn, data0
+    Dim Data1() As Byte: ReadFileContentBuffer tmppfn, Data1
+    Dim L0 As Long: L0 = UBound(data0) + 1
+    Dim l1 As Long: l1 = UBound(Data1) + 1
+    If L0 <> l1 Then
+        MsgBox "The length ist not equal: l0=" & L0 & " <> l1=" & l1
+    End If
+    Dim c As Long: c = RtlCompareMemory(data0(0), Data1(0), L0)
+    Dim diff As Long: diff = Abs(L0 - c)
+    If diff = 0 Then Debug.Print "diff=0 OK data0 and data1 is identical"
+    Exit Sub
+Catch:
+    MsgBox Err.Description
+End Sub
+
+Private Function FileExists(ByVal pfn As String) As Boolean
+    On Error Resume Next
+    FileExists = Not CBool(GetAttr(pfn) And (vbDirectory Or vbVolume))
+    On Error GoTo 0
+End Function
+
+Private Sub ReadFileContentBuffer(pfn As String, Buffer() As Byte)
+Try: On Error GoTo Catch
+    Dim FNr As Integer: FNr = FreeFile
+    Open pfn For Binary Access Read As FNr
+    ReDim Buffer(0 To LOF(FNr) - 1)
+    Get FNr, , Buffer
+    GoTo Finally
+Catch: MsgBox Err.Description
+Finally: Close FNr
 End Sub
 
 Private Sub PFNTests_AddFiles()
     Set m_PFNTests = New Collection
     Dim FNm As String, Path0 As String: Path0 = App.Path & "\bmps\"
-    Dim PFN As String, Path1 As String, Path As String
+    Dim pfn As String, Path1 As String, Path As String
     
     Path1 = "OS2\":    Path = Path0 & Path1
+
+    FNm = "PSPColors_OS2_01bpp.bmp":         m_PFNTests.Add Path & FNm
+    FNm = "PSPColors_OS2_04bpp.bmp":         m_PFNTests.Add Path & FNm
+    FNm = "PSPColors_OS2_08bpp.bmp":         m_PFNTests.Add Path & FNm
+    FNm = "PSPColors_OS2_24bpp.bmp":         m_PFNTests.Add Path & FNm
+    FNm = "SleepPolarBear_OS2_01bpp.bmp":    m_PFNTests.Add Path & FNm
+    FNm = "SleepPolarBear_OS2_04bpp.bmp":    m_PFNTests.Add Path & FNm
+    FNm = "SleepPolarBear_OS2_08bpp.bmp":    m_PFNTests.Add Path & FNm
+    FNm = "SleepPolarBear_OS2_24bpp.bmp":    m_PFNTests.Add Path & FNm
     
-    FNm = "011_OS2RGB_1BPPIndexed_BlackWhite.bmp":    m_PFNTests.Add Path & FNm
-    FNm = "012_OS2RGB_4BPPIndexed_16Colors.bmp":      m_PFNTests.Add Path & FNm
-    FNm = "SleepingIceBear08bppIndexed.bmp":          m_PFNTests.Add Path & FNm
-    FNm = "SleepingIceBear24bppRGB.bmp":              m_PFNTests.Add Path & FNm
-    
-    Path1 = "Win\RGB\01BPP\":    Path = Path0 & Path1
-    
-    FNm = "010_WinRGB_1BPPIndexed_BlackWhite.bmp":    m_PFNTests.Add Path & FNm
-    FNm = "SleepingIceBear01bppIndexed_psp5.bmp":     m_PFNTests.Add Path & FNm
-    
+    Path1 = "Win\RGB\":    Path = Path0 & Path1
+
+    FNm = "PSPColors_Win_01bpp.bmp":                      m_PFNTests.Add Path & FNm
+    FNm = "PSPColors_Win_04bpp.bmp":                      m_PFNTests.Add Path & FNm
+    FNm = "PSPColors_Win_08bpp.bmp":                      m_PFNTests.Add Path & FNm
+    FNm = "PSPColors_Win_16bpp_ARGB1555.bmp":             m_PFNTests.Add Path & FNm
+    FNm = "PSPColors_Win_16bpp_ARGB1555_woCSType.bmp":    m_PFNTests.Add Path & FNm
+    FNm = "PSPColors_Win_16bpp_RGB555.bmp":               m_PFNTests.Add Path & FNm
+    FNm = "PSPColors_Win_16bpp_RGB555_woCSType.bmp":      m_PFNTests.Add Path & FNm
+    FNm = "PSPColors_Win_16bpp_RGB565.bmp":               m_PFNTests.Add Path & FNm
+    FNm = "PSPColors_Win_16bpp_RGB565_woCSType.bmp":      m_PFNTests.Add Path & FNm
+    FNm = "PSPColors_Win_24bpp.bmp":                      m_PFNTests.Add Path & FNm
+    FNm = "PSPColors_Win_32bpp.bmp":                      m_PFNTests.Add Path & FNm
+    FNm = "PSPColors_Win_32bpp_ARGB.bmp":                 m_PFNTests.Add Path & FNm
+    FNm = "PSPColors_Win_32bpp_ARGB_woCSType.bmp":        m_PFNTests.Add Path & FNm
+    FNm = "PSPColors_Win_32bpp_RGB.bmp":                  m_PFNTests.Add Path & FNm
+    FNm = "PSPColors_Win_32bpp_RGB_woCSType.bmp":         m_PFNTests.Add Path & FNm
+
+    FNm = "SleepPolarBear_Win_01bpp.bmp":                 m_PFNTests.Add Path & FNm
+    FNm = "SleepPolarBear_Win_04bpp.bmp":                 m_PFNTests.Add Path & FNm
+    FNm = "SleepPolarBear_Win_08bpp.bmp":                 m_PFNTests.Add Path & FNm
+    FNm = "SleepPolarBear_Win_16bpp_ARGB1555.bmp":        m_PFNTests.Add Path & FNm
+    FNm = "SleepPolarBear_Win_16bpp_RGB555.bmp":          m_PFNTests.Add Path & FNm
+    FNm = "SleepPolarBear_Win_16bpp_RGB565.bmp":          m_PFNTests.Add Path & FNm
+    FNm = "SleepPolarBear_Win_24bpp.bmp":                 m_PFNTests.Add Path & FNm
+    FNm = "SleepPolarBear_Win_32bpp_ARGB.bmp":            m_PFNTests.Add Path & FNm
+    FNm = "SleepPolarBear_Win_32bpp_XRGB.bmp":            m_PFNTests.Add Path & FNm
+    FNm = "SleepPolarBear_Win_32bpp_XRGB_woCSInfo.bmp":   m_PFNTests.Add Path & FNm
+
 End Sub
 
 Private Function Hex2(b As Byte) As String
@@ -311,9 +377,9 @@ Private Sub BtnClone_Click()
 End Sub
 
 Private Sub UpdateFormCaption()
-    Dim PFN As String
-    If Not m_Bmp Is Nothing Then PFN = m_Bmp.FileName
-    Me.Caption = "Bitmaps" & " v" & App.Major & "." & App.Minor & "." & App.Revision & IIf(Len(PFN), " - " & PFN, "")
+    Dim pfn As String
+    If Not m_Bmp Is Nothing Then pfn = m_Bmp.FileName
+    Me.Caption = "Bitmaps" & " v" & App.Major & "." & App.Minor & "." & App.Revision & IIf(Len(pfn), " - " & pfn, "")
 End Sub
 
 Private Sub Form_Resize()
@@ -370,9 +436,9 @@ Private Sub mnuFileOpen_Click()
     'Dim PFN As String: PFN = OFD.FileName
     Dim FD As New OpenFileDialog
     If Not m_Bmp Is Nothing Then FD.FileName = m_Bmp.FileName
-    Dim PFN As String: PFN = MMain.GetFileName(FD)
-    If Len(PFN) = 0 Then Exit Sub
-    Set m_Bmp = MNew.Bitmap(PFN)
+    Dim pfn As String: pfn = MMain.GetFileName(FD)
+    If Len(pfn) = 0 Then Exit Sub
+    Set m_Bmp = MNew.Bitmap(pfn)
     UpdateView
 End Sub
 
@@ -389,9 +455,9 @@ End Sub
 Private Sub mnuFileSaveAs_Click()
     Dim FD As New SaveFileDialog
     If Not m_Bmp Is Nothing Then FD.FileName = m_Bmp.FileName
-    Dim PFN As String: PFN = MMain.GetFileName(FD)
-    If Len(PFN) = 0 Then Exit Sub
-    m_Bmp.Save PFN
+    Dim pfn As String: pfn = MMain.GetFileName(FD)
+    If Len(pfn) = 0 Then Exit Sub
+    m_Bmp.Save pfn
     UpdateView
 End Sub
 
@@ -418,6 +484,7 @@ End Sub
 
 Private Sub PbColorSelect_MouseMove(Button As Integer, Shift As Integer, X As Single, Y As Single)
     Dim Color As Long: Color = PbColorSelect.Point(X, Y)
+    If Color < 0 Then Exit Sub
     PBCurColor.BackColor = Color
     LblCurColor.Caption = MouseCoordsNColor_ToStr(X, Y, Color)
 End Sub
@@ -489,13 +556,13 @@ End Sub
 
 Private Sub AllOLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, X As Single, Y As Single)
     If Not Data.GetFormat(vbCFFiles) Then Exit Sub
-    Dim PFN As String: PFN = Data.Files(1)
-    Dim ext As String: ext = LCase(Right(PFN, 3))
+    Dim pfn As String: pfn = Data.Files(1)
+    Dim ext As String: ext = LCase(Right(pfn, 3))
     If ext = "bmp" Then
-        Set m_Bmp = MNew.Bitmap(PFN)
+        Set m_Bmp = MNew.Bitmap(pfn)
         UpdateView
     ElseIf ext = "png" Then
-        Set PBBitmap.Picture = MLoadPng.LoadPictureGDIp(PFN)
+        Set PBBitmap.Picture = MLoadPng.LoadPictureGDIp(pfn)
     End If
 End Sub
 
