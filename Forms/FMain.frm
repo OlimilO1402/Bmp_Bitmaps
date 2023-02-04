@@ -257,27 +257,27 @@ Private Sub BtnSelColorChangeForeBack_Click()
 End Sub
 
 Private Sub Command1_Click()
-    Dim v, pfn As String
+    Dim v, PFN As String
     Debug.Print m_PFNTests.Count
     For Each v In m_PFNTests
-        pfn = v
-        If FileExists(pfn) Then
-            Debug.Print pfn
-            TestBmp pfn
+        PFN = v
+        If FileExists(PFN) Then
+            Debug.Print PFN
+            TestBmp PFN
         Else
-            Debug.Print "File does not exists: " & vbCrLf & pfn
+            Debug.Print "File does not exists: " & vbCrLf & PFN
         End If
     Next
 End Sub
 
-Private Sub TestBmp(pfn As String)
+Private Sub TestBmp(PFN As String)
 Try: On Error GoTo Catch
-    If Len(pfn) = 0 Then Exit Sub
-    Dim bmp0 As Bitmap: Set bmp0 = MNew.Bitmap(pfn)
+    If Len(PFN) = 0 Then Exit Sub
+    Dim bmp0 As Bitmap: Set bmp0 = MNew.Bitmap(PFN)
     Dim tmppfn As String: tmppfn = Environ("tmp") & "\test.bmp"
     If FileExists(tmppfn) Then Kill tmppfn
     bmp0.Save tmppfn
-    Dim data0() As Byte: ReadFileContentBuffer pfn, data0
+    Dim data0() As Byte: ReadFileContentBuffer PFN, data0
     Dim Data1() As Byte: ReadFileContentBuffer tmppfn, Data1
     Dim L0 As Long: L0 = UBound(data0) + 1
     Dim l1 As Long: l1 = UBound(Data1) + 1
@@ -292,16 +292,16 @@ Catch:
     MsgBox Err.Description
 End Sub
 
-Private Function FileExists(ByVal pfn As String) As Boolean
+Private Function FileExists(ByVal PFN As String) As Boolean
     On Error Resume Next
-    FileExists = Not CBool(GetAttr(pfn) And (vbDirectory Or vbVolume))
+    FileExists = Not CBool(GetAttr(PFN) And (vbDirectory Or vbVolume))
     On Error GoTo 0
 End Function
 
-Private Sub ReadFileContentBuffer(pfn As String, Buffer() As Byte)
+Private Sub ReadFileContentBuffer(PFN As String, Buffer() As Byte)
 Try: On Error GoTo Catch
     Dim FNr As Integer: FNr = FreeFile
-    Open pfn For Binary Access Read As FNr
+    Open PFN For Binary Access Read As FNr
     ReDim Buffer(0 To LOF(FNr) - 1)
     Get FNr, , Buffer
     GoTo Finally
@@ -312,7 +312,7 @@ End Sub
 Private Sub PFNTests_AddFiles()
     Set m_PFNTests = New Collection
     Dim FNm As String, Path0 As String: Path0 = App.Path & "\bmps\"
-    Dim pfn As String, Path1 As String, Path As String
+    Dim PFN As String, Path1 As String, Path As String
     
     Path1 = "OS2\":    Path = Path0 & Path1
 
@@ -377,9 +377,9 @@ Private Sub BtnClone_Click()
 End Sub
 
 Private Sub UpdateFormCaption()
-    Dim pfn As String
-    If Not m_Bmp Is Nothing Then pfn = m_Bmp.FileName
-    Me.Caption = "Bitmaps" & " v" & App.Major & "." & App.Minor & "." & App.Revision & IIf(Len(pfn), " - " & pfn, "")
+    Dim PFN As String
+    If Not m_Bmp Is Nothing Then PFN = m_Bmp.FileName
+    Me.Caption = "Bitmaps" & " v" & App.Major & "." & App.Minor & "." & App.Revision & IIf(Len(PFN), " - " & PFN, "")
 End Sub
 
 Private Sub Form_Resize()
@@ -434,11 +434,12 @@ Private Sub mnuFileOpen_Click()
     'OFD.Filter = "Bitmaps (*.bmp)|*.bmp|All files (*.*)|*.*"
     'If OFD.ShowDialog(Me) = vbCancel Then Exit Sub
     'Dim PFN As String: PFN = OFD.FileName
-    Dim FD As New OpenFileDialog
-    If Not m_Bmp Is Nothing Then FD.FileName = m_Bmp.FileName
-    Dim pfn As String: pfn = MMain.GetFileName(FD)
-    If Len(pfn) = 0 Then Exit Sub
-    Set m_Bmp = MNew.Bitmap(pfn)
+    'Dim FD As New OpenFileDialog
+    'If Not m_Bmp Is Nothing Then FD.FileName = m_Bmp.FileName
+    Dim PFN As String: If Not m_Bmp Is Nothing Then PFN = m_Bmp.FileName
+    PFN = MMain.GetOpenFileName(Me, PFN)
+    If Len(PFN) = 0 Then Exit Sub
+    Set m_Bmp = MNew.Bitmap(PFN)
     UpdateView
 End Sub
 
@@ -453,11 +454,12 @@ Finally:
 End Sub
 
 Private Sub mnuFileSaveAs_Click()
-    Dim FD As New SaveFileDialog
-    If Not m_Bmp Is Nothing Then FD.FileName = m_Bmp.FileName
-    Dim pfn As String: pfn = MMain.GetFileName(FD)
-    If Len(pfn) = 0 Then Exit Sub
-    m_Bmp.Save pfn
+    'Dim FD As New SaveFileDialog
+    'If Not m_Bmp Is Nothing Then FD.FileName = m_Bmp.FileName
+    Dim PFN As String: If Not m_Bmp Is Nothing Then PFN = m_Bmp.FileName
+    PFN = MMain.GetSaveFileName(Me, PFN)
+    If Len(PFN) = 0 Then Exit Sub
+    m_Bmp.Save PFN
     UpdateView
 End Sub
 
@@ -556,13 +558,13 @@ End Sub
 
 Private Sub AllOLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, X As Single, Y As Single)
     If Not Data.GetFormat(vbCFFiles) Then Exit Sub
-    Dim pfn As String: pfn = Data.Files(1)
-    Dim ext As String: ext = LCase(Right(pfn, 3))
+    Dim PFN As String: PFN = Data.Files(1)
+    Dim ext As String: ext = LCase(Right(PFN, 3))
     If ext = "bmp" Then
-        Set m_Bmp = MNew.Bitmap(pfn)
+        Set m_Bmp = MNew.Bitmap(PFN)
         UpdateView
     ElseIf ext = "png" Then
-        Set PBBitmap.Picture = MLoadPng.LoadPictureGDIp(pfn)
+        Set PBBitmap.Picture = MLoadPng.LoadPictureGDIp(PFN)
     End If
 End Sub
 

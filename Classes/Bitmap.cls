@@ -403,6 +403,10 @@ Friend Sub NewWH(ByVal Width As Long, ByVal Height As Long, ByVal PixelFormat As
     End With
 End Sub
 
+Friend Sub NewSP(aStdPicture As StdPicture)
+    
+End Sub
+
 Friend Sub NewC(other As Bitmap)
     m_PFN = other.FileName
     '1. copy the complete Bitmap-header-stuff
