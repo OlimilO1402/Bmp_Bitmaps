@@ -106,14 +106,16 @@ Private Type RGBA
 End Type
 
 'https://learn.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-Bitmap
+'The name "BITMAP" is not suitable here because the class's name is "Bitmap"
+'so we call it BitmapHeader, maybe too much "Header" but anyway deal with it!
 Private Type BitmapHeader
-    bmType       As Long    ' The Bitmap type. This member must be zero.
-    bmWidth      As Long    ' The width, in pixels, of the Bitmap. The width must be greater than zero.
-    bmHeight     As Long    ' The height, in pixels, of the Bitmap. The height must be greater than zero.
-    bmWidthBytes As Long    ' The number of bytes in each scan line. This value must be divisible by 2, because the system assumes that the bit values of a Bitmap form an array that is word aligned.
-    bmPlanes     As Integer ' The count of color planes.
-    bmBitsPixel  As Integer ' The number of bits required to indicate the color of a pixel.
-    bmBits       As Long    ' A pointer to the location of the bit values for the Bitmap. The bmBits member must be a pointer to an array of character (1-byte) values.
+    bmType       As Long    ' 4 ' The Bitmap type. This member must be zero.
+    bmWidth      As Long    ' 4 ' The width, in pixels, of the Bitmap. The width must be greater than zero.
+    bmHeight     As Long    ' 4 ' The height, in pixels, of the Bitmap. The height must be greater than zero.
+    bmWidthBytes As Long    ' 4 ' The number of bytes in each scan line. This value must be divisible by 2, because the system assumes that the bit values of a Bitmap form an array that is word aligned.
+    bmPlanes     As Integer ' 2 ' The count of color planes.
+    bmBitsPixel  As Integer ' 2 ' The number of bits required to indicate the color of a pixel.
+    bmBits       As Long    ' 4 ' A pointer to the location of the bit values for the Bitmap. The bmBits member must be a pointer to an array of character (1-byte) values.
 End Type
 
 'https://docs.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-Bitmapfileheader
@@ -159,6 +161,17 @@ Private Const BI_JPEG      As Long = 4&  ' Specifies that the image is compresse
 Private Const BI_PNG       As Long = 5&  ' Specifies that the image is compressed using the PNG  file interchange format.
 Private Const BI_1632      As Long = &H32333631 ' "1632"
 Private Const LCS_CALIBRATED_RGB As Long = &H0&
+
+'DIB_-constants
+Private Enum DIBColors
+    DIB_RGB_COLORS = &H0&  ' The color table contains literal RGB values.
+    DIB_PAL_COLORS = &H1&  ' The color table consists of an array of 16-bit indexes into the LogPalette object (section 2.2.17) that is currently defined in the playback device context.
+    DIB_PAL_INDICES = &H2& ' No color table exists. The pixels in the DIB are indices into the current logical palette in the playback device context.
+End Enum
+'Private Const DIB_RGB_COLORS As Long = 0
+'Private Const DIB_PAL_COLORS As Long = 1
+'Private Const DIB_PAL_INDICES As Long = 2    'Private Const DIB_PAL_PHYSINDICES As Long = 2
+'Private Const DIB_PAL_LOGINDICES As Long = 4
 
 'https://docs.microsoft.com/en-us/windows/win32/api/wingdi/ns-wingdi-ciexyz
 Private Type CIEXYZ
@@ -236,7 +249,8 @@ Private Type AddBITMAPV5HEADER
     bV5ProfileData   As Long     ' 4
     bV5ProfileSize   As Long     ' 4
     bV5Reserved      As Long     ' 4
-End Type
+    
+End Type                  ' Sum: 124
 
 Private Type TPalette
     bmiColors(0 To 255) As BGRA
@@ -265,23 +279,40 @@ Private Type PICTDESC
     hPal    As LongPtr ' 4, 8 ' HPALETTE
 End Type         ' Sum: 16/24
 
-'Private Type BITMAPCORE
-'    BmpHead As BITMAPFILEHEADER
-'    BmpInfo As BITMAPINFO
-'End Type
-
 #If VBA7 Then
+    'https://learn.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-createdibsection
     Private Declare PtrSafe Function CreateDIBSection Lib "gdi32" (ByVal hdc As LongPtr, ByVal pbmi As LongPtr, ByVal usage As Long, ByVal ppvBits As LongPtr, ByVal hSection As LongPtr, ByVal offset As Long) As Long
-    Private Declare PtrSafe Function SetDIBits Lib "gdi32" (ByVal hdc As LongPtr, ByVal hBitmap As LongPtr, ByVal nStartScan As Long, ByVal nNumScans As Long, ByRef lpBits As Any, ByVal lpBI As LongPtr, ByVal wUsage As Long) As Long
+    'https://learn.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-getdibits
+    Private Declare PtrSafe Function GetDIBits Lib "gdi32" (ByVal aHDC As LongPtr, ByVal hBitmap As LongPtr, ByVal nStartScan As Long, ByVal nNumScans As Long, ByRef lpBits As Any, ByVal lpBI As LongPtr, ByVal wUsage As Long) As Long
+    'https://learn.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-setdibits
+    Private Declare PtrSafe Function SetDIBits Lib "gdi32" (ByVal aHDC As LongPtr, ByVal hBitmap As LongPtr, ByVal nStartScan As Long, ByVal nNumScans As Long, ByRef lpBits As Any, ByVal lpBI As LongPtr, ByVal wUsage As Long) As Long
     Private Declare PtrSafe Function OleCreatePictureIndirect Lib "oleaut32" (ByRef lpPictDesc As PICTDESC, ByRef riid As GUID, ByVal fOwn As Long, ByRef lplpvObj As Object) As Long
+    'https://learn.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-getobjecta
+    Private Declare PtrSafe Function GetObjectW Lib "gdi32" (ByVal hObject As LongPtr, ByVal nCount As Long, ByRef lpObject As Any) As Long
     Private Declare PtrSafe Sub RtlMoveMemory Lib "kernel32" (pDst As Any, pSrc As Any, ByVal bytLength As Long)
     Private Declare PtrSafe Sub RtlFillMemory Lib "kernel32" (pDst As Any, ByVal bytLength As Long, ByVal fill As Byte)
+    
+    ' ----==== USER32 API Deklarationen ====----
+    Private Declare PtrSafe Function GetDC Lib "user32" (ByVal hwnd As LongPtr) As LongPtr
+    Private Declare PtrSafe Function ReleaseDC Lib "user32" (ByVal hwnd As LongPtr, ByVal hDC As LongPtr) As Long
+    
 #Else
-    Private Declare Function CreateDIBSection Lib "gdi32" (ByVal hdc As LongPtr, ByVal pbmi As LongPtr, ByVal usage As Long, ByVal ppvBits As LongPtr, ByVal hSection As LongPtr, ByVal Offset As Long) As Long
-    Private Declare Function SetDIBits Lib "gdi32" (ByVal hdc As LongPtr, ByVal hBitmap As LongPtr, ByVal nStartScan As Long, ByVal nNumScans As Long, ByRef lpBits As Any, ByVal lpBI As LongPtr, ByVal wUsage As Long) As Long
+    'https://learn.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-createdibsection
+    Private Declare Function CreateDIBSection Lib "gdi32" (ByVal hDC As LongPtr, ByVal pbmi As LongPtr, ByVal usage As Long, ByVal ppvBits As LongPtr, ByVal hSection As LongPtr, ByVal Offset As Long) As Long
+    'https://learn.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-getdibits
+    Private Declare Function GetDIBits Lib "gdi32" (ByVal aHDC As LongPtr, ByVal hBitmap As LongPtr, ByVal nStartScan As Long, ByVal nNumScans As Long, ByRef lpBits As Any, ByVal lpBI As LongPtr, ByVal wUsage As Long) As Long
+    'https://learn.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-setdibits
+    Private Declare Function SetDIBits Lib "gdi32" (ByVal aHDC As LongPtr, ByVal hBitmap As LongPtr, ByVal nStartScan As Long, ByVal nNumScans As Long, ByRef lpBits As Any, ByVal lpBI As LongPtr, ByVal wUsage As Long) As Long
     Private Declare Function OleCreatePictureIndirect Lib "oleaut32" (ByRef lpPictDesc As PICTDESC, ByRef riid As GUID, ByVal fOwn As Long, ByRef lplpvObj As Object) As Long
+    'https://learn.microsoft.com/en-us/windows/win32/api/wingdi/nf-wingdi-getobjecta
+    Private Declare Function GetObjectW Lib "gdi32" (ByVal hObject As LongPtr, ByVal nCount As Long, ByRef lpObject As Any) As Long
     Private Declare Sub RtlMoveMemory Lib "kernel32" (pDst As Any, pSrc As Any, ByVal bytLength As Long)
     Private Declare Sub RtlFillMemory Lib "kernel32" (pDst As Any, ByVal bytLength As Long, ByVal fill As Byte)
+    
+    ' ----==== USER32 API Deklarationen ====----
+    Private Declare Function GetDC Lib "user32" (ByVal hwnd As LongPtr) As LongPtr
+    Private Declare Function ReleaseDC Lib "user32" (ByVal hwnd As LongPtr, ByVal hDC As LongPtr) As Long
+    
 #End If
 Private m_PFN     As String
 Private m_BmpHead As BITMAPFILEHEADER
@@ -404,7 +435,66 @@ Friend Sub NewWH(ByVal Width As Long, ByVal Height As Long, ByVal PixelFormat As
 End Sub
 
 Friend Sub NewSP(aStdPicture As StdPicture)
-    
+    Dim hr As Long
+    Dim bmpHead As BitmapHeader
+    hr = GetObjectW(aStdPicture.Handle, LenB(bmpHead), bmpHead)
+    If hr <> 24 Then
+        MsgBox "Could not get object for handle: " & aStdPicture.Handle
+        Exit Sub
+    End If
+    Dim bH As Long:    bH = bmpHead.bmHeight
+    Dim bc As Integer: bc = bmpHead.bmBitsPixel
+    With m_BmpInfo
+        '.biSize = 126 'LenB(m_BmpInfo)
+        With .bmiHeader
+            .biWidth = bmpHead.bmWidth
+            .biHeight = bH
+            .biPlanes = bmpHead.bmPlanes
+            .biBitCount = bc
+            .biCompression = BI_RGB
+            '.biSizeImage = ?
+            .biXPelsPerMeter = 3779
+            .biYPelsPerMeter = 3779
+            '.biClrUsed
+            '.biClrImportant
+        End With
+    End With
+    'm_BmpInfo
+    Dim aHDC As LongPtr: aHDC = GetDC(0&)
+    Dim pBI  As LongPtr
+    If bc = 1 Or bc = 4 Or bc = 8 Then
+        Dim bi As BITMAPINFOV3: bi.biSize = 40
+        pBI = VarPtr(bi)
+        hr = GetDIBits(aHDC, aStdPicture.Handle, 0&, bH, ByVal 0&, ByVal pBI, DIBColors.DIB_RGB_COLORS)
+        If hr = 0 Then
+            MsgBox "Could not get DIBits"
+            'GoTo Finally
+        End If
+        With m_BmpInfo
+            .biSize = bi.biSize '40
+            .bmiHeader = bi.bmiHeader
+            Debug.Print bi.bmiHeader.biClrUsed ' .bmiHeader.biClrUsed
+            Debug.Print bi.bmiHeader.biClrImportant '  .bmiHeader.biClrImportant
+            .bmiHeader.biXPelsPerMeter = 3779
+            .bmiHeader.biYPelsPerMeter = 3779
+            '.Palette = bi.Palette
+            'Debug.Print BGRA_ToStr(bi.Palette.bmiColors(128))
+        End With
+    Else
+        pBI = VarPtr(m_BmpInfo)
+        m_BmpInfo.biSize = 124
+    End If
+    Dim bu As Long: bu = bc / 8 * Abs(bmpHead.bmHeight) * bmpHead.bmWidthBytes - 1
+    ReDim m_data(0 To bu)
+    hr = GetDIBits(aHDC, aStdPicture.Handle, 0&, bH, m_data(0), ByVal pBI, DIBColors.DIB_RGB_COLORS)
+    If bc < 16 Then
+        m_BmpInfo.Palette = bi.Palette
+    End If
+    If hr <> bH Then
+        MsgBox "Could not get di-bitmap data"
+    End If
+    ReleaseDC 0&, aHDC
+    'm_BmpInfo As BITMAPINFO
 End Sub
 
 Friend Sub NewC(other As Bitmap)

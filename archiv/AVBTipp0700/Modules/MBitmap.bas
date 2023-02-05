@@ -158,7 +158,6 @@ Public Function ConvertBitmapAllRes(ByVal Pic As StdPicture, Optional ByVal Bits
 Try: On Error GoTo Catch
     
     Dim hConvBmp As Long
-    Dim tBITMAP As BITMAP
     Dim tBITMAPINFO As BITMAPINFO256
     
     Dim tPictDesc As PICTDESC
@@ -200,6 +199,7 @@ Try: On Error GoTo Catch
     End Select
     
     ' Bitmapinfos vom StdPicture auslesen -> tBITMAP
+    Dim tBITMAP As BITMAP
     If GetObjectA(Pic.handle, Len(tBITMAP), tBITMAP) = 0 Then
         MsgBox "Could not get object for handle: " & Pic.handle
         Exit Function
@@ -226,8 +226,8 @@ Try: On Error GoTo Catch
     End If
     
     ' Der 1. Aufruf ohne Übergabe von bytArray, dient dazu die
-    ' Größe des benötigten Feldes festzustellen. Die Palette
-    ' wird hier auch schon übertragen.
+    ' Größe des benötigten Feldes festzustellen.
+    ' Die Palette wird hier auch schon übertragen.
     If GetDIBits(hDC, Pic.handle, 0&, tBITMAP.bmHeight, ByVal 0&, tBITMAPINFO, DIB_RGB_COLORS) = 0 Then
         MsgBox "Could not get DIBits"
         GoTo Finally

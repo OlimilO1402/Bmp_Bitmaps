@@ -1,15 +1,15 @@
 VERSION 5.00
 Begin VB.Form FMain 
    Caption         =   "Bitmaps"
-   ClientHeight    =   8670
+   ClientHeight    =   8175
    ClientLeft      =   225
    ClientTop       =   870
-   ClientWidth     =   14895
+   ClientWidth     =   15510
    Icon            =   "FMain.frx":0000
    LinkTopic       =   "FMain"
-   ScaleHeight     =   578
+   ScaleHeight     =   545
    ScaleMode       =   3  'Pixel
-   ScaleWidth      =   993
+   ScaleWidth      =   1034
    StartUpPosition =   3  'Windows-Standard
    Begin VB.PictureBox PanelBmp 
       Height          =   6735
@@ -41,16 +41,16 @@ Begin VB.Form FMain
    Begin VB.PictureBox PnlSideRight 
       Align           =   4  'Rechts ausrichten
       BorderStyle     =   0  'Kein
-      Height          =   8670
-      Left            =   13680
-      ScaleHeight     =   578
+      Height          =   8175
+      Left            =   14295
+      ScaleHeight     =   545
       ScaleMode       =   3  'Pixel
       ScaleWidth      =   81
       TabIndex        =   1
       Top             =   0
       Width           =   1215
-      Begin VB.CommandButton Command1 
-         Caption         =   "Test Safe"
+      Begin VB.CommandButton BtnTestFileSave 
+         Caption         =   "Test Save"
          Height          =   735
          Left            =   240
          TabIndex        =   10
@@ -218,6 +218,21 @@ Begin VB.Form FMain
    End
    Begin VB.Menu mnuEdit 
       Caption         =   "&Edit"
+      Begin VB.Menu mnuEditCut 
+         Caption         =   "Cut"
+         Shortcut        =   ^X
+      End
+      Begin VB.Menu mnuEditCopy 
+         Caption         =   "Copy"
+         Shortcut        =   ^C
+      End
+      Begin VB.Menu mnuEditPaste 
+         Caption         =   "Paste"
+         Shortcut        =   ^V
+      End
+      Begin VB.Menu mnuEditSep1 
+         Caption         =   "-"
+      End
       Begin VB.Menu mnuEditResize 
          Caption         =   "Resize"
       End
@@ -250,34 +265,45 @@ Private Sub Form_Load()
     UpdateFormCaption
 End Sub
 
+Private Sub Form_Resize()
+    Dim L As Single
+    Dim T As Single: T = Text1.Top
+    Dim W As Single: W = Text1.Width - L
+    Dim H As Single: H = Me.ScaleHeight - T
+    If W > 0 And H > 0 Then Text1.Move L, T, W, H
+    L = W:    W = Me.ScaleWidth - W - PnlSideRight.Width
+    If W > 0 And H > 0 Then PanelBmp.Move L, T, W, H
+    If W > 0 And H > 0 Then PBBitmap.Move 0, 0, W, H
+End Sub
+
 Private Sub BtnSelColorChangeForeBack_Click()
     Dim Color As Long: Color = Me.PbSelColorBack.BackColor
     Me.PbSelColorBack.BackColor = Me.PbSelColorFore.BackColor
     Me.PbSelColorFore.BackColor = Color
 End Sub
 
-Private Sub Command1_Click()
-    Dim v, PFN As String
+Private Sub BtnTestFileSave_Click()
+    Dim v, pfn As String
     Debug.Print m_PFNTests.Count
     For Each v In m_PFNTests
-        PFN = v
-        If FileExists(PFN) Then
-            Debug.Print PFN
-            TestBmp PFN
+        pfn = v
+        If FileExists(pfn) Then
+            Debug.Print pfn
+            TestBmp pfn
         Else
-            Debug.Print "File does not exists: " & vbCrLf & PFN
+            Debug.Print "File does not exists: " & vbCrLf & pfn
         End If
     Next
 End Sub
 
-Private Sub TestBmp(PFN As String)
+Private Sub TestBmp(pfn As String)
 Try: On Error GoTo Catch
-    If Len(PFN) = 0 Then Exit Sub
-    Dim bmp0 As Bitmap: Set bmp0 = MNew.Bitmap(PFN)
+    If Len(pfn) = 0 Then Exit Sub
+    Dim bmp0 As Bitmap: Set bmp0 = MNew.Bitmap(pfn)
     Dim tmppfn As String: tmppfn = Environ("tmp") & "\test.bmp"
     If FileExists(tmppfn) Then Kill tmppfn
     bmp0.Save tmppfn
-    Dim data0() As Byte: ReadFileContentBuffer PFN, data0
+    Dim data0() As Byte: ReadFileContentBuffer pfn, data0
     Dim Data1() As Byte: ReadFileContentBuffer tmppfn, Data1
     Dim L0 As Long: L0 = UBound(data0) + 1
     Dim l1 As Long: l1 = UBound(Data1) + 1
@@ -292,16 +318,16 @@ Catch:
     MsgBox Err.Description
 End Sub
 
-Private Function FileExists(ByVal PFN As String) As Boolean
+Private Function FileExists(ByVal pfn As String) As Boolean
     On Error Resume Next
-    FileExists = Not CBool(GetAttr(PFN) And (vbDirectory Or vbVolume))
+    FileExists = Not CBool(GetAttr(pfn) And (vbDirectory Or vbVolume))
     On Error GoTo 0
 End Function
 
-Private Sub ReadFileContentBuffer(PFN As String, Buffer() As Byte)
+Private Sub ReadFileContentBuffer(pfn As String, Buffer() As Byte)
 Try: On Error GoTo Catch
     Dim FNr As Integer: FNr = FreeFile
-    Open PFN For Binary Access Read As FNr
+    Open pfn For Binary Access Read As FNr
     ReDim Buffer(0 To LOF(FNr) - 1)
     Get FNr, , Buffer
     GoTo Finally
@@ -312,7 +338,7 @@ End Sub
 Private Sub PFNTests_AddFiles()
     Set m_PFNTests = New Collection
     Dim FNm As String, Path0 As String: Path0 = App.Path & "\bmps\"
-    Dim PFN As String, Path1 As String, Path As String
+    Dim pfn As String, Path1 As String, Path As String
     
     Path1 = "OS2\":    Path = Path0 & Path1
 
@@ -377,24 +403,149 @@ Private Sub BtnClone_Click()
 End Sub
 
 Private Sub UpdateFormCaption()
-    Dim PFN As String
-    If Not m_Bmp Is Nothing Then PFN = m_Bmp.FileName
-    Me.Caption = "Bitmaps" & " v" & App.Major & "." & App.Minor & "." & App.Revision & IIf(Len(PFN), " - " & PFN, "")
-End Sub
-
-Private Sub Form_Resize()
-    Dim L As Single
-    Dim T As Single: T = Text1.Top
-    Dim W As Single: W = Text1.Width - L
-    Dim H As Single: H = Me.ScaleHeight - T
-    If W > 0 And H > 0 Then Text1.Move L, T, W, H
-    L = W:    W = Me.ScaleWidth - W - PnlSideRight.Width
-    If W > 0 And H > 0 Then PanelBmp.Move L, T, W, H
-    If W > 0 And H > 0 Then PBBitmap.Move 0, 0, W, H
+    Dim pfn As String
+    If Not m_Bmp Is Nothing Then pfn = m_Bmp.FileName
+    Me.Caption = "Bitmaps" & " v" & App.Major & "." & App.Minor & "." & App.Revision & IIf(Len(pfn), " - " & pfn, "")
 End Sub
 
 Private Sub BtnPickAColor_Click()
     m_bPickAColor = True
+End Sub
+
+' v ############################## v '    mnuFile    ' v ############################## v '
+Private Sub mnuFileNew_Click()
+    MiddlePosDlg FDlgNewPicture
+    Dim bmp As Bitmap
+    'If Not m_Bmp Is Nothing Then Set Bmp = m_Bmp.Clone
+    If FDlgNewPicture.ShowDialog(Me, bmp) = vbCancel Then Exit Sub
+    Set m_Bmp = bmp
+    UpdateView
+End Sub
+
+Private Sub MiddlePosDlg(Frm As Form)
+    Dim W As Single: W = Frm.Width
+    Dim H As Single: H = Frm.Height
+    Dim L As Single: L = Me.Left + (Me.Width - W) / 2
+    Dim T As Single: T = Me.Top + (Me.Height - H) / 2
+    Frm.Move L, T
+End Sub
+
+Private Sub mnuFileOpen_Click()
+    'Dim OFD As OpenFileDialog: Set OFD = New OpenFileDialog
+    'OFD.Filter = "Bitmaps (*.bmp)|*.bmp|All files (*.*)|*.*"
+    'If OFD.ShowDialog(Me) = vbCancel Then Exit Sub
+    'Dim PFN As String: PFN = OFD.FileName
+    'Dim FD As New OpenFileDialog
+    'If Not m_Bmp Is Nothing Then FD.FileName = m_Bmp.FileName
+    Dim aPFN As String: If Not m_Bmp Is Nothing Then aPFN = m_Bmp.FileName
+    aPFN = MMain.GetOpenFileName(Me, aPFN)
+    If Len(aPFN) = 0 Then Exit Sub
+    Dim pos As Long: pos = InStrRev(aPFN, ".")
+    Dim ext As String: ext = LCase(Right(aPFN, Len(aPFN) - pos))
+    Dim pic As StdPicture
+    If ext = "bmp" Then
+        Set m_Bmp = MNew.Bitmap(aPFN)
+    Else
+        Select Case ext
+        Case "png": Set pic = MLoadPng.LoadPictureGDIp(aPFN)
+        Case "gif"
+                    'Set PBBitmap.Picture = LoadPicture(aPFN)
+                    'Dim ipd As IPictureDisp: Set ipd = LoadPicture(aPFN)
+                    'Set PBBitmap.Picture = ipd
+                    Dim sdp As StdPicture: Set sdp = LoadPicture(aPFN)
+                    Set PBBitmap.Picture = sdp
+                    UpdateView
+                    Exit Sub
+        ', "jpg": Set pic = LoadPicture(aPFN)
+        Case Else:  Set pic = LoadPicture(aPFN)
+        End Select
+        Set m_Bmp = MNew.BitmapSP(pic)
+    End If
+    UpdateView
+End Sub
+
+Private Sub mnuFileSave_Click()
+Try: On Error GoTo Catch
+    If m_Bmp Is Nothing Then Exit Sub
+    m_Bmp.Save
+    GoTo Finally
+Catch:
+    MsgBox Err.Description
+Finally:
+End Sub
+
+Private Sub mnuFileSaveAs_Click()
+    'Dim FD As New SaveFileDialog
+    'If Not m_Bmp Is Nothing Then FD.FileName = m_Bmp.FileName
+    Dim pfn As String: If Not m_Bmp Is Nothing Then pfn = m_Bmp.FileName
+    pfn = MMain.GetSaveFileName(Me, pfn)
+    If Len(pfn) = 0 Then Exit Sub
+    m_Bmp.Save pfn
+    UpdateView
+End Sub
+
+Private Sub mnuOpenBmpFolder_Click()
+    Dim p As String: p = App.Path & "\bmps\"
+    If MsgBox("Open folder?" & vbCrLf & p, vbOKCancel) = vbCancel Then Exit Sub
+    Shell "Explorer.exe " & p, vbNormalFocus
+End Sub
+
+Private Sub mnuFileExit_Click()
+    Unload Me
+End Sub
+' ^ ############################## ^ '    mnuFile    ' ^ ############################## ^ '
+
+' v ############################## v '    mnuEdit    ' v ############################## v '
+Private Sub mnuEditCut_Click()
+    'copy all to clipboard and remove
+    If m_Bmp Is Nothing Then Exit Sub
+    Clipboard.SetData m_Bmp.ToPicture, ClipBoardConstants.vbCFBitmap
+    'Clipboard.SetData m_Bmp.ToPicture, ClipBoardConstants.vbCFDIB 'which one is correct
+    Set m_Bmp = Nothing
+    UpdateView
+End Sub
+
+Private Sub mnuEditCopy_Click()
+    'copy all to clipboard
+    If m_Bmp Is Nothing Then Exit Sub
+    Clipboard.SetData m_Bmp.ToPicture, ClipBoardConstants.vbCFBitmap
+End Sub
+
+Private Sub mnuEditPaste_Click()
+    'paste from clipboard and create new
+    
+    Dim bBmp As Boolean: bBmp = Clipboard.GetFormat(ClipBoardConstants.vbCFBitmap)
+    Dim bDIB As Boolean: bDIB = Clipboard.GetFormat(ClipBoardConstants.vbCFDIB)
+        
+    If (Not bBmp) And (Not bDIB) Then
+        MsgBox "Neither bitmap- nor dib-data in clipboard"
+        Exit Sub
+    End If
+    
+    Dim pic As StdPicture
+    If bBmp Then
+        MsgBox "Trying to read bitmap from clipboard"
+        Set pic = Clipboard.GetData(ClipBoardConstants.vbCFBitmap)
+        If pic Is Nothing Then
+            MsgBox "Could not read bmp from clipboard"
+            Exit Sub
+        End If
+    ElseIf bDIB Then
+        MsgBox "Trying to read dib from clipboard"
+        Set pic = Clipboard.GetData(ClipBoardConstants.vbCFDIB)
+        If pic Is Nothing Then
+            MsgBox "Could not read dib from clipboard"
+            Exit Sub
+        End If
+    End If
+    
+    If m_Bmp Is Nothing Then
+        Set m_Bmp = MNew.BitmapSP(pic)
+    Else
+        m_Bmp.NewSP pic
+    End If
+    UpdateView
+    'Set PBBitmap.Picture = pic
 End Sub
 
 Private Sub mnuEditPalette_Click()
@@ -412,70 +563,13 @@ Private Sub mnuEditResize_Click()
     Set m_Bmp = bmp
     UpdateView
 End Sub
+' ^ ############################## ^ '    mnuEdit    ' ^ ############################## ^ '
 
-Private Sub mnuFileNew_Click()
-    MiddlePosDlg FDlgNewPicture
-    Dim bmp As Bitmap
-    'If Not m_Bmp Is Nothing Then Set Bmp = m_Bmp.Clone
-    If FDlgNewPicture.ShowDialog(Me, bmp) = vbCancel Then Exit Sub
-    Set m_Bmp = bmp
-    UpdateView
-End Sub
-
-Private Sub MiddlePosDlg(Frm As Form)
-    Dim W As Single: W = Frm.Width
-    Dim H As Single: H = Frm.Height
-    Dim L As Single: L = Me.Left + (Me.Width - W) / 2
-    Dim T As Single: T = Me.Top + (Me.Height - H) / 2
-    Frm.Move L, T
-End Sub
-Private Sub mnuFileOpen_Click()
-    'Dim OFD As OpenFileDialog: Set OFD = New OpenFileDialog
-    'OFD.Filter = "Bitmaps (*.bmp)|*.bmp|All files (*.*)|*.*"
-    'If OFD.ShowDialog(Me) = vbCancel Then Exit Sub
-    'Dim PFN As String: PFN = OFD.FileName
-    'Dim FD As New OpenFileDialog
-    'If Not m_Bmp Is Nothing Then FD.FileName = m_Bmp.FileName
-    Dim PFN As String: If Not m_Bmp Is Nothing Then PFN = m_Bmp.FileName
-    PFN = MMain.GetOpenFileName(Me, PFN)
-    If Len(PFN) = 0 Then Exit Sub
-    Set m_Bmp = MNew.Bitmap(PFN)
-    UpdateView
-End Sub
-
-Private Sub mnuFileSave_Click()
-Try: On Error GoTo Catch
-    If m_Bmp Is Nothing Then Exit Sub
-    m_Bmp.Save
-    GoTo Finally
-Catch:
-    MsgBox Err.Description
-Finally:
-End Sub
-
-Private Sub mnuFileSaveAs_Click()
-    'Dim FD As New SaveFileDialog
-    'If Not m_Bmp Is Nothing Then FD.FileName = m_Bmp.FileName
-    Dim PFN As String: If Not m_Bmp Is Nothing Then PFN = m_Bmp.FileName
-    PFN = MMain.GetSaveFileName(Me, PFN)
-    If Len(PFN) = 0 Then Exit Sub
-    m_Bmp.Save PFN
-    UpdateView
-End Sub
-
-Private Sub mnuOpenBmpFolder_Click()
-    Dim p As String: p = App.Path & "\bmps\"
-    If MsgBox("Open folder?" & vbCrLf & p, vbOKCancel) = vbCancel Then Exit Sub
-    Shell "Explorer.exe " & p, vbNormalFocus
-End Sub
-
-Private Sub mnuFileExit_Click()
-    Unload Me
-End Sub
-
+' v ############################## v '    mnuHelp    ' v ############################## v '
 Private Sub mnuHelpInfo_Click()
     MsgBox App.CompanyName & " " & App.EXEName & " v" & App.Major & "." & App.Minor & "." & App.Revision & vbCrLf & App.FileDescription
 End Sub
+' ^ ############################## ^ '    mnuHelp    ' ^ ############################## ^ '
 
 Private Sub PbColorSelect_MouseDown(Button As Integer, Shift As Integer, X As Single, Y As Single)
     Select Case Button
@@ -528,7 +622,6 @@ Private Function Color_ToStr(ByVal this As Long) As String
                   "B=" & sB & " (" & hexprefix & Hex2(CByte(b)) & ")"
 End Function
 
-
 Private Sub PBBitmap_MouseUp(Button As Integer, Shift As Integer, X As Single, Y As Single)
     If m_bPickAColor Then m_bPickAColor = False
 End Sub
@@ -558,13 +651,13 @@ End Sub
 
 Private Sub AllOLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, X As Single, Y As Single)
     If Not Data.GetFormat(vbCFFiles) Then Exit Sub
-    Dim PFN As String: PFN = Data.Files(1)
-    Dim ext As String: ext = LCase(Right(PFN, 3))
+    Dim pfn As String: pfn = Data.Files(1)
+    Dim ext As String: ext = LCase(Right(pfn, 3))
     If ext = "bmp" Then
-        Set m_Bmp = MNew.Bitmap(PFN)
+        Set m_Bmp = MNew.Bitmap(pfn)
         UpdateView
     ElseIf ext = "png" Then
-        Set PBBitmap.Picture = MLoadPng.LoadPictureGDIp(PFN)
+        Set PBBitmap.Picture = MLoadPng.LoadPictureGDIp(pfn)
     End If
 End Sub
 
@@ -580,5 +673,4 @@ Public Sub UpdateView()
     mnuEditPalette.Enabled = m_Bmp.IsIndexed
     BtnPickAColor.Enabled = True
     'BtnClone.Enabled = True
-    
 End Sub
