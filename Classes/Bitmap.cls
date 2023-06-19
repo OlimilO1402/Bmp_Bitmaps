@@ -1266,7 +1266,7 @@ End Function
 
 
 Public Property Get Height() As Long
-    Height = m_BmpInfo.bmiHeader.biHeight
+    Height = Abs(m_BmpInfo.bmiHeader.biHeight)
 End Property
 
 Public Property Let Height(ByVal Value As Long)
