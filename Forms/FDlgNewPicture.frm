@@ -1,6 +1,6 @@
 VERSION 5.00
 Begin VB.Form FDlgNewPicture 
-   BorderStyle     =   4  'Festes Werkzeugfenster
+   BorderStyle     =   3  'Fester Dialog
    Caption         =   "New Picture"
    ClientHeight    =   4575
    ClientLeft      =   45
@@ -363,6 +363,9 @@ Public Function ShowDialog(Owner As FMain, bmp_inout As Bitmap) As VbMsgBoxResul
     If bmp_inout.PixelPerMeterY <> ppm Then
         bmp_inout.PixelPerMeterY = ppm
     End If
+    If PBBackColor.BackColor <> 0 Then
+        bmp_inout.
+    End If
 End Function
 
 Private Property Get PixelPerMeter() As Double
@@ -503,7 +506,7 @@ Try: On Error GoTo Catch
 Catch:
 End Function
 
-Private Sub PBBackColor_DblClick()
+Private Sub PBBackColor_Click()
     Dim ColorDlg As New ColorDialog
     ColorDlg.Color = PBBackColor.BackColor
     If ColorDlg.ShowDialog(Me) = vbCancel Then Exit Sub
