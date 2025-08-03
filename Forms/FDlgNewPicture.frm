@@ -307,6 +307,7 @@ Private m_ResUnit    As Long
 Private m_PixFmt     As EPixelFormat
 Private m_bInit      As Boolean
 Private m_bUpVw      As Boolean
+Private m_SelColor   As Long
 
 Private Sub BtnOK_Click()
     m_DlgResult = vbOK
@@ -363,8 +364,8 @@ Public Function ShowDialog(Owner As FMain, bmp_inout As Bitmap) As VbMsgBoxResul
     If bmp_inout.PixelPerMeterY <> ppm Then
         bmp_inout.PixelPerMeterY = ppm
     End If
-    If PBBackColor.BackColor <> 0 Then
-        bmp_inout.
+    If m_SelColor <> 0 Then
+        bmp_inout.Fill m_SelColor 'PBBackColor.BackColor
     End If
 End Function
 
@@ -510,7 +511,8 @@ Private Sub PBBackColor_Click()
     Dim ColorDlg As New ColorDialog
     ColorDlg.Color = PBBackColor.BackColor
     If ColorDlg.ShowDialog(Me) = vbCancel Then Exit Sub
-    PBBackColor.BackColor = ColorDlg.Color
+    m_SelColor = ColorDlg.Color
+    PBBackColor.BackColor = m_SelColor
 End Sub
 
 Private Sub TxtWidth_LostFocus()
