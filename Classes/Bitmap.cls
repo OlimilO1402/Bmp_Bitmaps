@@ -92,7 +92,7 @@ Private Type TLng
 End Type
 
 Private Type BGRA '
-    B As Byte
+    b As Byte
     G As Byte
     R As Byte
     a As Byte
@@ -101,7 +101,7 @@ End Type
 Private Type RGBA
     R As Byte
     G As Byte
-    B As Byte
+    b As Byte
     a As Byte
 End Type
 
@@ -292,7 +292,7 @@ End Type         ' Sum: 16/24
     Private Declare PtrSafe Sub RtlMoveMemory Lib "kernel32" (pDst As Any, pSrc As Any, ByVal bytLength As Long)
     Private Declare PtrSafe Sub RtlFillMemory Lib "kernel32" (pDst As Any, ByVal bytLength As Long, ByVal fill As Byte)
     
-    ' ----==== USER32 API Deklarationen ====----
+    ' ----==== USER32 API declarations ====----
     Private Declare PtrSafe Function GetDC Lib "user32" (ByVal hwnd As LongPtr) As LongPtr
     Private Declare PtrSafe Function ReleaseDC Lib "user32" (ByVal hwnd As LongPtr, ByVal hDC As LongPtr) As Long
     
@@ -309,7 +309,7 @@ End Type         ' Sum: 16/24
     Private Declare Sub RtlMoveMemory Lib "kernel32" (pDst As Any, pSrc As Any, ByVal bytLength As Long)
     Private Declare Sub RtlFillMemory Lib "kernel32" (pDst As Any, ByVal bytLength As Long, ByVal Fill As Byte)
     
-    ' ----==== USER32 API Deklarationen ====----
+    ' ----==== USER32 API declarations ====----
     Private Declare Function GetDC Lib "user32" (ByVal hwnd As LongPtr) As LongPtr
     Private Declare Function ReleaseDC Lib "user32" (ByVal hwnd As LongPtr, ByVal hDC As LongPtr) As Long
     
@@ -419,16 +419,16 @@ Friend Sub NewWH(ByVal Width As Long, ByVal Height As Long, ByVal PixelFormat As
                 .bmiColors(i) = New_BGRA(0, 0, 255, 0):     i = i + 1:    .bmiColors(i) = New_BGRA(255, 0, 255, 0):   i = i + 1
                 .bmiColors(i) = New_BGRA(0, 255, 255, 0):   i = i + 1:    .bmiColors(i) = New_BGRA(255, 255, 255, 0): 'i = i + 1
         Case 8
-                Dim R As Integer, G As Integer, B As Integer
+                Dim R As Integer, G As Integer, b As Integer
                 For i = 0 To 5
                     For j = 0 To 5
                         For k = 0 To 5
-                            .bmiColors(c) = New_BGRA(CByte(R), CByte(G), CByte(B), 0)
-                            c = c + 1: B = B + 51
+                            .bmiColors(c) = New_BGRA(CByte(R), CByte(G), CByte(b), 0)
+                            c = c + 1: b = b + 51
                         Next
-                        B = 0: R = R + 51
+                        b = 0: R = R + 51
                     Next
-                    B = 0: R = 0: G = G + 51
+                    b = 0: R = 0: G = G + 51
                 Next
         End Select
     End With
@@ -642,7 +642,7 @@ Try: On Error GoTo Catch
                 .bmiHeader.biClrUsed = n
                 .bmiHeader.biClrImportant = n
                 For i = 0 To n - 1
-                    Get FNr, , aColor.B
+                    Get FNr, , aColor.b
                     Get FNr, , aColor.G
                     Get FNr, , aColor.R
                     .Palette.bmiColors(i) = aColor
@@ -687,28 +687,28 @@ Try: On Error GoTo Catch
 Catch: MsgBox "ReadBmpInfo " & sErr
 End Function
 
-Private Function New_BGRA(ByVal R As Byte, ByVal G As Byte, ByVal B As Byte, ByVal a As Byte) As BGRA
+Private Function New_BGRA(ByVal R As Byte, ByVal G As Byte, ByVal b As Byte, ByVal a As Byte) As BGRA
     With New_BGRA
-        .R = R: .G = G: .B = B: .a = a
+        .R = R: .G = G: .b = b: .a = a
     End With
 End Function
 
 Private Function BGRA_ToStr(this As BGRA, Optional ByVal skipAlpha As Boolean = False) As String
     Dim s As String: s = "  BGR" & IIf(skipAlpha, "", "A")
     With this
-        s = s & "{&H" & Hex2(.B) & Hex2(.G) & Hex2(.R) & IIf(skipAlpha, "", Hex2(.a)) & "}"
+        s = s & "{&H" & Hex2(.b) & Hex2(.G) & Hex2(.R) & IIf(skipAlpha, "", Hex2(.a)) & "}"
     End With
     BGRA_ToStr = s
 End Function
 
-Private Function Hex2(ByVal B As Byte) As String
-    Hex2 = Hex(B): If Len(Hex2) < 2 Then Hex2 = "0" & Hex2
+Private Function Hex2(ByVal b As Byte) As String
+    Hex2 = Hex(b): If Len(Hex2) < 2 Then Hex2 = "0" & Hex2
 End Function
 
 Private Function BGRA_ToRGBA(this As BGRA) As RGBA
     With this
         BGRA_ToRGBA.a = .a
-        BGRA_ToRGBA.B = .B
+        BGRA_ToRGBA.b = .b
         BGRA_ToRGBA.G = .G
         BGRA_ToRGBA.R = .R
     End With
@@ -717,7 +717,7 @@ End Function
 Private Function RGBA_ToBGRA(this As RGBA) As BGRA
     With this
         RGBA_ToBGRA.a = .a
-        RGBA_ToBGRA.B = .B
+        RGBA_ToBGRA.b = .b
         RGBA_ToBGRA.G = .G
         RGBA_ToBGRA.R = .R
     End With
@@ -846,7 +846,7 @@ Try: On Error GoTo Catch
             Put FNr, , .bmiHeader.biBitCount  'Int16
             If bc < 16 Then
                 For i = 0 To u
-                    Put FNr, , .Palette.bmiColors(i).B
+                    Put FNr, , .Palette.bmiColors(i).b
                     Put FNr, , .Palette.bmiColors(i).G
                     Put FNr, , .Palette.bmiColors(i).R
                 Next
@@ -1421,7 +1421,7 @@ Public Property Let Pixel(ByVal X As Long, ByVal Y As Long, ByVal Color As Long)
     Dim L As TLng: L.Value = Color
     Dim c As RGBA: LSet c = L
     With c
-        m_data(Y * m_Width + X) = (.R + .G + .B) \ 3
+        m_data(Y * Me.Width + X) = (.R + .G + .b) \ 3
     End With
 End Property
 '
@@ -1508,12 +1508,12 @@ Private Function Color16bppBGRA1555_ToColor32(ByVal Value As Long) As Long
 '    GreenMask = &H3E0   ' 5 bit
 '      RedMask = &H7C00  ' 5 bit
 '    AlphaMask = &H8000  ' 1 bit
-    Dim R As Long, G As Long, B As Long, a As Long
-    B = ((Value And &H1F&) * 256) \ &H1F&
+    Dim R As Long, G As Long, b As Long, a As Long
+    b = ((Value And &H1F&) * 256) \ &H1F&
     G = (((Value And &H3E0&) \ &H20&) * 256) \ &H1F&
     R = (((Value And &H7C00&) \ &H400&) * 256) \ &H1F&
     a = (((Value And &H8000&) \ &H8000&) * 256) ' alpha is only 1 bit, so it is 0 or 1, resp 0 or 255
-    Color16bppBGRA1555_ToColor32 = RGB(R, G, B)
+    Color16bppBGRA1555_ToColor32 = RGB(R, G, b)
 End Function
 
 Private Function Color16bppBGR565_ToColor32(ByVal Value As Long) As Long
@@ -1521,12 +1521,12 @@ Private Function Color16bppBGR565_ToColor32(ByVal Value As Long) As Long
 '    GreenMask = &H7E0   ' 6 bit
 '      RedMask = &HF800  ' 5 bit
 '    AlphaMask = &H0     ' ----
-    Dim R As Long, G As Long, B As Long, a As Long
-    B = ((Value And &H1F&) * 256) \ &H1F&
+    Dim R As Long, G As Long, b As Long, a As Long
+    b = ((Value And &H1F&) * 256) \ &H1F&
     G = (((Value And &H7E0&) \ &H20&) * 256) \ &H3F&
     R = (((Value And &HF800&) \ &H800&) * 256) \ &H1F&
     'a = ' alpha is not included
-    Color16bppBGR565_ToColor32 = RGB(R, G, B)
+    Color16bppBGR565_ToColor32 = RGB(R, G, b)
 End Function
 
 Public Property Get Pixel16Argb1555(ByVal X As Long, ByVal Y As Long) As Long
@@ -1546,6 +1546,9 @@ Public Property Let Pixel16Argb1555(ByVal X As Long, ByVal Y As Long, ByVal Colo
 End Property
 
 Public Property Get Pixel16Grayscale(ByVal X As Long, ByVal Y As Long) As Long
+    '
+End Property
+Public Property Let Pixel16Grayscale(ByVal X As Long, ByVal Y As Long, ByVal Color As Long)
     '
 End Property
 
@@ -1577,7 +1580,7 @@ Public Property Get Pixel16Rgb565(ByVal X As Long, ByVal Y As Long) As Long
     Dim tl As TLng: LSet tl = tb
     Pixel16Rgb565 = Color16bppBGR565_ToColor32(tl.Value)
 End Property
-Public Property Let Pixel16Rgb555(ByVal X As Long, ByVal Y As Long, ByVal Color As Long)
+Public Property Let Pixel16Rgb565(ByVal X As Long, ByVal Y As Long, ByVal Color As Long)
     '
 End Property
 
@@ -1597,7 +1600,7 @@ Public Property Get Pixel24(ByVal X As Long, ByVal Y As Long) As Long
     With RGBA
         .R = m_data(i + 2)
         .G = m_data(i + 1)
-        .B = m_data(i + 0)
+        .b = m_data(i + 0)
     End With
     Dim L As TLng: LSet L = RGBA 'BGRA
     Pixel24 = L.Value
@@ -1619,7 +1622,7 @@ Public Property Get Pixel32(ByVal X As Long, ByVal Y As Long) As Long
         '.A = m_data(i + 3)
         .R = m_data(i + 2)
         .G = m_data(i + 1)
-        .B = m_data(i + 0)
+        .b = m_data(i + 0)
     End With
     Dim L As TLng: LSet L = RGBA
     Pixel32 = L.Value
@@ -1636,7 +1639,7 @@ Public Property Let Pixel32(ByVal X As Long, ByVal Y As Long, Value As Long)
         m_data(i + 3) = .a
         m_data(i + 2) = .R
         m_data(i + 1) = .G
-        m_data(i + 0) = .B
+        m_data(i + 0) = .b
     End With
 End Property
 

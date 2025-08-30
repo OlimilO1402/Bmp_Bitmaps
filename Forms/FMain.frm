@@ -453,13 +453,14 @@ Try: On Error GoTo Catch
                     'Set PBBitmap.Picture = LoadPicture(aPFN)
                     'Dim ipd As IPictureDisp: Set ipd = LoadPicture(aPFN)
                     'Set PBBitmap.Picture = ipd
-                    Dim sdp As StdPicture: Set sdp = LoadPicture(aPFN)
-                    Set PBBitmap.Picture = sdp
-                    UpdateView
-                    Exit Sub
+                    'Dim sdp As StdPicture: Set sdp = LoadPicture(aPFN)
+                    Set pic = LoadPicture(aPFN)
+                    'Set PBBitmap.Picture = sdp
+                    'UpdateView
+                    'Exit Sub
         ', "jpg": Set pic = LoadPicture(aPFN)
         Case Else 'Just give it a try
-                  Set pic = LoadPicture(aPFN)
+                    Set pic = LoadPicture(aPFN)
         End Select
         Set m_Bmp = MNew.BitmapSP(pic)
     End If
@@ -663,6 +664,10 @@ Private Sub AllOLEDragDrop(Data As DataObject, Effect As Long, Button As Integer
         Set m_Bmp = MNew.Bitmap(PFN)
         UpdateView
     ElseIf ext = "png" Then
+        Set PBBitmap.Picture = MLoadPng.LoadPictureGDIp(PFN)
+    ElseIf ext = "jpg" Then
+        Set PBBitmap.Picture = MLoadPng.LoadPictureGDIp(PFN)
+    ElseIf ext = "gif" Then
         Set PBBitmap.Picture = MLoadPng.LoadPictureGDIp(PFN)
     End If
 End Sub

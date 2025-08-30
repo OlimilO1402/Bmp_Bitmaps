@@ -217,6 +217,18 @@ Sub LoadSHPalette(ByVal n As Long)
     Me.Height = borders + (SH * Screen.TwipsPerPixelY) '5385
 End Sub
 
+Private Sub Form_Load()
+
+End Sub
+
+Private Sub LblSelected_Click()
+    PanelPalette_DblClick
+End Sub
+
+Private Sub PanelCurrent_DblClick()
+    PanelPalette_DblClick
+End Sub
+
 Private Sub PanelPalette_MouseMove(Button As Integer, Shift As Integer, X As Single, Y As Single)
     m_Index = GetShapeIndex(X, Y)
     SetBorderStyleTransparent
