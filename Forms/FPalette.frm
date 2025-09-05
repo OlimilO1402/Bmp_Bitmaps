@@ -124,12 +124,14 @@ Private m_Palette() As Long 'backup copy of Bitmaps palette
 Private m_Index     As Long
 Private m_SelIndex  As Long
 Private m_Owner     As FMain
+Private m_oldI      As Integer
 
-Public Function ShowDialog(Owner As FMain, bmp As Bitmap) As VbMsgBoxResult
+Public Function ShowDialog(Owner As Form, bmp As Bitmap) As VbMsgBoxResult
     'Here now as a modal dialog.
     'maybe also would be nice as a modeless dialog?
     'to see the effect of changing palette-colors immediately
     Set m_Owner = Owner
+    m_oldI = -1
     Set m_Bmp = bmp
     If Not m_Bmp.IsIndexed Then Exit Function
     SavePalette m_Bmp
@@ -158,13 +160,13 @@ Private Function Color_ToStr(ByVal this As Long) As String
 End Function
 
 Private Sub BtnOK_Click()
-    m_Result = vbOK
+    m_Result = VbMsgBoxResult.vbOK
     'yes we take all the changes and write it to the Bitmap-palette
     Unload Me
 End Sub
 
 Private Sub BtnCancel_Click()
-    m_Result = vbCancel
+    m_Result = VbMsgBoxResult.vbCancel
     'no we don't want the changes we write the old state back to the Bitmap-palette
     Dim i As Long
     For i = 0 To UBound(m_Palette)
@@ -217,10 +219,6 @@ Sub LoadSHPalette(ByVal n As Long)
     Me.Height = borders + (SH * Screen.TwipsPerPixelY) '5385
 End Sub
 
-Private Sub Form_Load()
-
-End Sub
-
 Private Sub LblSelected_Click()
     PanelPalette_DblClick
 End Sub
@@ -231,8 +229,15 @@ End Sub
 
 Private Sub PanelPalette_MouseMove(Button As Integer, Shift As Integer, X As Single, Y As Single)
     m_Index = GetShapeIndex(X, Y)
-    SetBorderStyleTransparent
     If m_Index < 0 Then Exit Sub
+    Dim i As Long: i = m_Index
+    If -1 < m_oldI Then
+        ShPalette(m_oldI).BorderStyle = BorderStyleConstants.vbTransparent
+    End If
+    If -1 < i Then
+        ShPalette(i).BorderStyle = BorderStyleConstants.vbBSSolid
+    End If
+    If i <> m_oldI Then m_oldI = i
     UpdateView
 End Sub
 
@@ -260,14 +265,14 @@ Private Sub PanelPalette_DblClick()
     UpdateView True
 End Sub
 
-Private Sub SetBorderStyleTransparent()
-    Dim i As Long
-    For i = 0 To ShPalette.UBound
-        If ShPalette(i).BorderStyle = 1 Then
-            ShPalette(i).BorderStyle = 0
-        End If
-    Next
-End Sub
+'Private Sub SetBorderStyleTransparent()
+'    Dim i As Long
+'    For i = 0 To ShPalette.UBound
+'        If ShPalette(i).BorderStyle = 1 Then
+'            ShPalette(i).BorderStyle = 0
+'        End If
+'    Next
+'End Sub
 
 Private Function GetShapeIndex(ByVal X As Long, ByVal Y As Long) As Long
     Dim i As Long: GetShapeIndex = -1
