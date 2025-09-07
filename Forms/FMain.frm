@@ -49,6 +49,32 @@ Begin VB.Form FMain
       TabIndex        =   1
       Top             =   0
       Width           =   1215
+      Begin VB.PictureBox PBTest16bpp2 
+         Height          =   375
+         Left            =   720
+         ScaleHeight     =   315
+         ScaleWidth      =   315
+         TabIndex        =   15
+         Top             =   6840
+         Width           =   375
+      End
+      Begin VB.PictureBox PBTest16bpp1 
+         Height          =   375
+         Left            =   240
+         ScaleHeight     =   315
+         ScaleWidth      =   315
+         TabIndex        =   14
+         Top             =   6840
+         Width           =   375
+      End
+      Begin VB.CommandButton BtnTest16bpp 
+         Caption         =   "Test 16bpp"
+         Height          =   495
+         Left            =   240
+         TabIndex        =   13
+         Top             =   6240
+         Width           =   855
+      End
       Begin VB.CommandButton BtnTestFileSave 
          Caption         =   "Test Save"
          Height          =   735
@@ -257,6 +283,15 @@ Private m_Bmp As Bitmap
 Private m_bPickAColor As Boolean
 Private m_PFNTests As Collection
 
+Private Sub BtnTest16bpp_Click()
+    Dim cdlg As ColorDialog: Set cdlg = New ColorDialog
+    If cdlg.ShowDialog(Me) = vbCancel Then Exit Sub
+    Dim col As Long: col = cdlg.Color
+    PBTest16bpp1.BackColor = col
+    Dim RGB555 As RGB555: RGB555 = LngColor_ToRGB555(LngColor(col))
+    PBTest16bpp2.BackColor = MColor.RGB555_ToLngColor(RGB555).Value
+End Sub
+
 Private Sub Form_Load()
     PFNTests_AddFiles
     mnuEditPalette.Enabled = False
@@ -267,12 +302,12 @@ End Sub
 
 Private Sub Form_Resize()
     Dim L As Single
-    Dim T As Single: T = Text1.Top
+    Dim t As Single: t = Text1.Top
     Dim W As Single: W = Text1.Width - L
-    Dim H As Single: H = Me.ScaleHeight - T
-    If W > 0 And H > 0 Then Text1.Move L, T, W, H
+    Dim H As Single: H = Me.ScaleHeight - t
+    If W > 0 And H > 0 Then Text1.Move L, t, W, H
     L = W:    W = Me.ScaleWidth - W - PnlSideRight.Width
-    If W > 0 And H > 0 Then PanelBmp.Move L, T, W, H
+    If W > 0 And H > 0 Then PanelBmp.Move L, t, W, H
     If W > 0 And H > 0 Then PBBitmap.Move 0, 0, W, H
 End Sub
 
@@ -382,8 +417,8 @@ Private Sub PFNTests_AddFiles()
 
 End Sub
 
-Private Function Hex2(b As Byte) As String
-    Hex2 = Hex(b): If Len(Hex2) < 2 Then Hex2 = "0" & Hex2
+Private Function Hex2(B As Byte) As String
+    Hex2 = Hex(B): If Len(Hex2) < 2 Then Hex2 = "0" & Hex2
 End Function
 
 Public Function Clone() As FMain
@@ -426,8 +461,8 @@ Private Sub MiddlePosDlg(Frm As Form)
     Dim W As Single: W = Frm.Width
     Dim H As Single: H = Frm.Height
     Dim L As Single: L = Me.Left + (Me.Width - W) / 2
-    Dim T As Single: T = Me.Top + (Me.Height - H) / 2
-    Frm.Move L, T
+    Dim t As Single: t = Me.Top + (Me.Height - H) / 2
+    Frm.Move L, t
 End Sub
 
 Private Sub mnuFileOpen_Click()
@@ -619,14 +654,14 @@ End Sub
 Private Function Color_ToStr(ByVal this As Long) As String
     Dim R As Long: R = (this And &HFF&)
     Dim G As Long: G = (this And &HFF00&) \ &H100&
-    Dim b As Long: b = (this And &HFF0000) \ &H10000
+    Dim B As Long: B = (this And &HFF0000) \ &H10000
     Dim hexprefix As String: hexprefix = "&&H"
     Dim sR As String: sR = CStr(R): sR = Space$(3 - Len(sR)) & sR
     Dim sG As String: sG = CStr(G): sG = Space$(3 - Len(sG)) & sG
-    Dim sB As String: sB = CStr(b): sB = Space$(3 - Len(sB)) & sB
+    Dim sB As String: sB = CStr(B): sB = Space$(3 - Len(sB)) & sB
     Color_ToStr = "R=" & sR & " (" & hexprefix & Hex2(CByte(R)) & ")" & vbCrLf & _
                   "G=" & sG & " (" & hexprefix & Hex2(CByte(G)) & ")" & vbCrLf & _
-                  "B=" & sB & " (" & hexprefix & Hex2(CByte(b)) & ")"
+                  "B=" & sB & " (" & hexprefix & Hex2(CByte(B)) & ")"
 End Function
 
 Private Sub PBBitmap_MouseUp(Button As Integer, Shift As Integer, X As Single, Y As Single)

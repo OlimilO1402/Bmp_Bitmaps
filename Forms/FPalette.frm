@@ -186,29 +186,10 @@ Sub SavePalette(bmp As Bitmap)
 End Sub
 
 Sub LoadSHPalette(ByVal n As Long)
-    'ShPalette() is a control-array of quadratic shapes
-    'First tried it with 256 Pictureboxes, this was a bit too slow because each Picturebox is a window in itself.
-    'With the Shapes this works really fast, moreover the control-array is really ideal for this purpose
-    Dim L0 As Single: L0 = ShPalette(0).Left
-    Dim T0 As Single: T0 = ShPalette(0).Top
-    Dim W0 As Single: W0 = ShPalette(0).Width
+    ControlArrayOfShapes_Load ShPalette, 16, 16
+    ControlArrayOfShapes_BackColor(ShPalette) = m_Palette
+    
     Dim H0 As Single: H0 = ShPalette(0).Height
-    Dim L As Single: L = L0
-    Dim T As Single: T = T0
-    Dim i As Long
-    For i = 0 To n - 1
-        If i > 0 Then Load ShPalette(i)
-        ShPalette(i).Move L, T, W0, H0
-        ShPalette(i).Visible = True
-        ShPalette(i).BorderStyle = 0
-        ShPalette(i).BackColor = m_Palette(i)
-        ShPalette(i).BorderWidth = 3
-        L = L + W0
-        If ((i + 1) Mod 16) = 0 Then
-            L = L0
-            T = T + H0
-        End If
-    Next
     Dim PH As Single: PH = IIf(n < 255, 1, 16) * H0
     PanelPalette.Height = PH
     PanelCurrent.Top = PanelPalette.Top + PH + 8
@@ -225,20 +206,6 @@ End Sub
 
 Private Sub PanelCurrent_DblClick()
     PanelPalette_DblClick
-End Sub
-
-Private Sub PanelPalette_MouseMove(Button As Integer, Shift As Integer, X As Single, Y As Single)
-    m_Index = GetShapeIndex(X, Y)
-    If m_Index < 0 Then Exit Sub
-    Dim i As Long: i = m_Index
-    If -1 < m_oldI Then
-        ShPalette(m_oldI).BorderStyle = BorderStyleConstants.vbTransparent
-    End If
-    If -1 < i Then
-        ShPalette(i).BorderStyle = BorderStyleConstants.vbBSSolid
-    End If
-    If i <> m_oldI Then m_oldI = i
-    UpdateView
 End Sub
 
 Private Sub PanelPalette_Click()
@@ -264,28 +231,6 @@ Private Sub PanelPalette_DblClick()
     m_SelIndex = m_Index
     UpdateView True
 End Sub
-
-'Private Sub SetBorderStyleTransparent()
-'    Dim i As Long
-'    For i = 0 To ShPalette.UBound
-'        If ShPalette(i).BorderStyle = 1 Then
-'            ShPalette(i).BorderStyle = 0
-'        End If
-'    Next
-'End Sub
-
-Private Function GetShapeIndex(ByVal X As Long, ByVal Y As Long) As Long
-    Dim i As Long: GetShapeIndex = -1
-    Dim q As Shape
-    For i = 0 To ShPalette.UBound
-        Set q = ShPalette(i)
-        If (q.Left < X) And (X < q.Left + q.Width) And _
-           (q.Top < Y) And (Y < q.Top + q.Height) Then
-           GetShapeIndex = i
-           Exit Function
-        End If
-    Next
-End Function
 
 Private Sub SetDefaultColorPalette()
     'these are the colors from the VB-IDE properties color palette
@@ -340,3 +285,57 @@ Private Sub SetDefaultColorPalette()
     ShPalette(87).BackColor = &H400040
 End Sub
 
+Private Sub PanelPalette_MouseMove(Button As Integer, Shift As Integer, X As Single, Y As Single)
+    m_Index = ControlArrayOfShapes_GetIndex(ShPalette, X, Y)
+    If m_Index < 0 Then Exit Sub
+    Dim i As Long: i = m_Index
+    If -1 < m_oldI Then
+        ShPalette(m_oldI).BorderStyle = BorderStyleConstants.vbTransparent
+    End If
+    If -1 < i Then
+        ShPalette(i).BorderStyle = BorderStyleConstants.vbBSSolid
+    End If
+    If i <> m_oldI Then m_oldI = i
+    UpdateView
+End Sub
+
+' v ' ############################## ' v '    Shapes    ' v ' ############################## ' v '
+Private Sub ControlArrayOfShapes_Load(ControlArrayOfShapes, ByVal nw As Byte, ByVal nh As Byte)
+    Dim L As Single, T As Single
+    Dim W As Single: W = ControlArrayOfShapes(0).Width
+    Dim H As Single: H = ControlArrayOfShapes(0).Height
+    Dim i As Long
+    For i = 0 To CLng(nw) * CLng(nh) - 1
+        If i > 0 Then Load ControlArrayOfShapes(i)
+        With ControlArrayOfShapes(i)
+            .Move L, T, W, H
+            .Visible = True
+            .BorderStyle = BorderStyleConstants.vbTransparent '0
+            .BorderWidth = 3
+        End With
+        L = L + W
+        If ((i + 1) Mod nw) = 0 Then
+            L = 0: T = T + H
+        End If
+    Next
+End Sub
+
+Private Function ControlArrayOfShapes_GetIndex(ControlArrayOfShapes, ByVal X As Single, ByVal Y As Single) As Integer
+    Dim i As Long: ControlArrayOfShapes_GetIndex = -1
+    Dim q As Shape
+    For i = ControlArrayOfShapes.LBound To ControlArrayOfShapes.UBound
+        Set q = ControlArrayOfShapes(i)
+        If (q.Left < X) And (X < q.Left + q.Width) And _
+           (q.Top < Y) And (Y < q.Top + q.Height) Then
+            ControlArrayOfShapes_GetIndex = i
+            Exit Function
+        End If
+    Next
+End Function
+
+Private Property Let ControlArrayOfShapes_BackColor(ControlArrayOfShapes, Color() As Long)
+    Dim i As Long
+    For i = ControlArrayOfShapes.LBound To ControlArrayOfShapes.UBound
+        ControlArrayOfShapes(i).BackColor = Color(i)
+    Next
+End Property
