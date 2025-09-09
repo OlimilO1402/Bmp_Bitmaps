@@ -4,7 +4,7 @@ Option Explicit
     Bitmap
 #End If
 
-Public Function Bitmap(aPFN As String) As Bitmap
+Public Function Bitmap(ByVal aPFN As String) As Bitmap
     Set Bitmap = New Bitmap: Bitmap.New_ aPFN
 End Function
 
@@ -12,7 +12,7 @@ Public Function BitmapWH(ByVal Width As Long, ByVal Height As Long, ByVal PixelF
     Set BitmapWH = New Bitmap: BitmapWH.NewWH Width, Height, PixelFormat
 End Function
 
-Public Function BitmapSP(aStdPicture As StdPicture) As Bitmap
-    Set BitmapSP = New Bitmap: BitmapSP.NewSP aStdPicture
+Public Function BitmapSP(aStdPicture As StdPicture, ByVal aPFN As String) As Bitmap
+    Set BitmapSP = New Bitmap: BitmapSP.NewSP aStdPicture, aPFN
 End Function
 

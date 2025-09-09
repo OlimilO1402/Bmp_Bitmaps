@@ -286,9 +286,9 @@ Private m_PFNTests As Collection
 Private Sub BtnTest16bpp_Click()
     Dim cdlg As ColorDialog: Set cdlg = New ColorDialog
     If cdlg.ShowDialog(Me) = vbCancel Then Exit Sub
-    Dim col As Long: col = cdlg.Color
-    PBTest16bpp1.BackColor = col
-    Dim RGB555 As RGB555: RGB555 = LngColor_ToRGB555(LngColor(col))
+    Dim Col As Long: Col = cdlg.Color
+    PBTest16bpp1.BackColor = Col
+    Dim RGB555 As RGB555: RGB555 = LngColor_ToRGB555(LngColor(Col))
     PBTest16bpp2.BackColor = MColor.RGB555_ToLngColor(RGB555).Value
 End Sub
 
@@ -417,8 +417,8 @@ Private Sub PFNTests_AddFiles()
 
 End Sub
 
-Private Function Hex2(B As Byte) As String
-    Hex2 = Hex(B): If Len(Hex2) < 2 Then Hex2 = "0" & Hex2
+Private Function Hex2(b As Byte) As String
+    Hex2 = Hex(b): If Len(Hex2) < 2 Then Hex2 = "0" & Hex2
 End Function
 
 Public Function Clone() As FMain
@@ -476,7 +476,7 @@ Try: On Error GoTo Catch
     Dim aPFN As String: If Not m_Bmp Is Nothing Then aPFN = m_Bmp.FileName
     aPFN = MMain.GetOpenFileName(Me, aPFN)
     If Len(aPFN) = 0 Then Exit Sub
-    Dim pos As Long: pos = InStrRev(aPFN, ".")
+    Dim pos As Long:   pos = InStrRev(aPFN, ".")
     Dim ext As String: ext = LCase(Right(aPFN, Len(aPFN) - pos))
     Dim pic As StdPicture
     If ext = "bmp" Then
@@ -497,7 +497,7 @@ Try: On Error GoTo Catch
         Case Else 'Just give it a try
                     Set pic = LoadPicture(aPFN)
         End Select
-        Set m_Bmp = MNew.BitmapSP(pic)
+        Set m_Bmp = MNew.BitmapSP(pic, aPFN)
     End If
     UpdateView
     Exit Sub
@@ -566,14 +566,14 @@ Private Sub mnuEditPaste_Click()
     
     Dim pic As StdPicture
     If bBmp Then
-        MsgBox "Trying to read bitmap from clipboard"
+        'MsgBox "Trying to read bitmap from clipboard"
         Set pic = Clipboard.GetData(ClipBoardConstants.vbCFBitmap)
         If pic Is Nothing Then
             MsgBox "Could not read bmp from clipboard"
             Exit Sub
         End If
     ElseIf bDIB Then
-        MsgBox "Trying to read dib from clipboard"
+        'MsgBox "Trying to read dib from clipboard"
         Set pic = Clipboard.GetData(ClipBoardConstants.vbCFDIB)
         If pic Is Nothing Then
             MsgBox "Could not read dib from clipboard"
@@ -582,9 +582,9 @@ Private Sub mnuEditPaste_Click()
     End If
     
     If m_Bmp Is Nothing Then
-        Set m_Bmp = MNew.BitmapSP(pic)
+        Set m_Bmp = MNew.BitmapSP(pic, "<CLipboard>")
     Else
-        m_Bmp.NewSP pic
+        m_Bmp.NewSP pic, "<CLipboard>"
     End If
     UpdateView
     'Set PBBitmap.Picture = pic
@@ -654,14 +654,14 @@ End Sub
 Private Function Color_ToStr(ByVal this As Long) As String
     Dim R As Long: R = (this And &HFF&)
     Dim G As Long: G = (this And &HFF00&) \ &H100&
-    Dim B As Long: B = (this And &HFF0000) \ &H10000
+    Dim b As Long: b = (this And &HFF0000) \ &H10000
     Dim hexprefix As String: hexprefix = "&&H"
-    Dim sR As String: sR = CStr(R): sR = Space$(3 - Len(sR)) & sR
+    Dim sr As String: sr = CStr(R): sr = Space$(3 - Len(sr)) & sr
     Dim sG As String: sG = CStr(G): sG = Space$(3 - Len(sG)) & sG
-    Dim sB As String: sB = CStr(B): sB = Space$(3 - Len(sB)) & sB
-    Color_ToStr = "R=" & sR & " (" & hexprefix & Hex2(CByte(R)) & ")" & vbCrLf & _
+    Dim sB As String: sB = CStr(b): sB = Space$(3 - Len(sB)) & sB
+    Color_ToStr = "R=" & sr & " (" & hexprefix & Hex2(CByte(R)) & ")" & vbCrLf & _
                   "G=" & sG & " (" & hexprefix & Hex2(CByte(G)) & ")" & vbCrLf & _
-                  "B=" & sB & " (" & hexprefix & Hex2(CByte(B)) & ")"
+                  "B=" & sB & " (" & hexprefix & Hex2(CByte(b)) & ")"
 End Function
 
 Private Sub PBBitmap_MouseUp(Button As Integer, Shift As Integer, X As Single, Y As Single)
@@ -695,16 +695,23 @@ Private Sub AllOLEDragDrop(Data As DataObject, Effect As Long, Button As Integer
     If Not Data.GetFormat(vbCFFiles) Then Exit Sub
     Dim PFN As String: PFN = Data.Files(1)
     Dim ext As String: ext = LCase(Right(PFN, 3))
+    Dim pic As StdPicture
     If ext = "bmp" Then
         Set m_Bmp = MNew.Bitmap(PFN)
-        UpdateView
     ElseIf ext = "png" Then
-        Set PBBitmap.Picture = MLoadPng.LoadPictureGDIp(PFN)
+        Set pic = MLoadPng.LoadPictureGDIp(PFN)
+        Set m_Bmp = MNew.BitmapSP(pic, PFN)
+        'Set PBBitmap.Picture = MLoadPng.LoadPictureGDIp(PFN)
     ElseIf ext = "jpg" Then
-        Set PBBitmap.Picture = MLoadPng.LoadPictureGDIp(PFN)
+        Set pic = MLoadPng.LoadPictureGDIp(PFN)
+        Set m_Bmp = MNew.BitmapSP(pic, PFN)
+        'Set PBBitmap.Picture = MLoadPng.LoadPictureGDIp(PFN)
     ElseIf ext = "gif" Then
-        Set PBBitmap.Picture = MLoadPng.LoadPictureGDIp(PFN)
+        Set pic = MLoadPng.LoadPictureGDIp(PFN)
+        Set m_Bmp = MNew.BitmapSP(pic, PFN)
+        'Set PBBitmap.Picture = MLoadPng.LoadPictureGDIp(PFN)
     End If
+    UpdateView
 End Sub
 
 Public Sub UpdateView()
