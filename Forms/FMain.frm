@@ -5,195 +5,27 @@ Begin VB.Form FMain
    ClientLeft      =   225
    ClientTop       =   870
    ClientWidth     =   15510
+   BeginProperty Font 
+      Name            =   "Segoe UI"
+      Size            =   9.75
+      Charset         =   0
+      Weight          =   400
+      Underline       =   0   'False
+      Italic          =   0   'False
+      Strikethrough   =   0   'False
+   EndProperty
    Icon            =   "FMain.frx":0000
    LinkTopic       =   "FMain"
    ScaleHeight     =   545
    ScaleMode       =   3  'Pixel
    ScaleWidth      =   1034
    StartUpPosition =   3  'Windows-Standard
-   Begin VB.PictureBox PanelBmp 
-      Height          =   6735
-      Left            =   4200
-      ScaleHeight     =   445
-      ScaleMode       =   3  'Pixel
-      ScaleWidth      =   589
-      TabIndex        =   11
+   Begin VB.ComboBox CmbZoom 
+      Height          =   375
+      Left            =   960
+      TabIndex        =   16
       Top             =   0
-      Width           =   8895
-      Begin VB.PictureBox PBBitmap 
-         Appearance      =   0  '2D
-         AutoRedraw      =   -1  'True
-         BackColor       =   &H00400040&
-         BorderStyle     =   0  'Kein
-         ForeColor       =   &H80000008&
-         Height          =   6495
-         Left            =   0
-         OLEDropMode     =   1  'Manuell
-         ScaleHeight     =   433
-         ScaleMode       =   3  'Pixel
-         ScaleWidth      =   577
-         TabIndex        =   12
-         ToolTipText     =   "Drag'n'drop pictures of filetype *.bmp to the window."
-         Top             =   0
-         Width           =   8655
-      End
-   End
-   Begin VB.PictureBox PnlSideRight 
-      Align           =   4  'Rechts ausrichten
-      BorderStyle     =   0  'Kein
-      Height          =   8175
-      Left            =   14295
-      ScaleHeight     =   545
-      ScaleMode       =   3  'Pixel
-      ScaleWidth      =   81
-      TabIndex        =   1
-      Top             =   0
-      Width           =   1215
-      Begin VB.PictureBox PBTest16bpp2 
-         Height          =   375
-         Left            =   720
-         ScaleHeight     =   315
-         ScaleWidth      =   315
-         TabIndex        =   15
-         Top             =   6840
-         Width           =   375
-      End
-      Begin VB.PictureBox PBTest16bpp1 
-         Height          =   375
-         Left            =   240
-         ScaleHeight     =   315
-         ScaleWidth      =   315
-         TabIndex        =   14
-         Top             =   6840
-         Width           =   375
-      End
-      Begin VB.CommandButton BtnTest16bpp 
-         Caption         =   "Test 16bpp"
-         Height          =   495
-         Left            =   240
-         TabIndex        =   13
-         Top             =   6240
-         Width           =   855
-      End
-      Begin VB.CommandButton BtnTestFileSave 
-         Caption         =   "Test Save"
-         Height          =   735
-         Left            =   240
-         TabIndex        =   10
-         Top             =   5400
-         Width           =   735
-      End
-      Begin VB.PictureBox PbSelColorFore 
-         Appearance      =   0  '2D
-         BackColor       =   &H80000005&
-         ForeColor       =   &H80000008&
-         Height          =   450
-         Left            =   120
-         ScaleHeight     =   420
-         ScaleWidth      =   585
-         TabIndex        =   7
-         Top             =   4200
-         Width           =   615
-      End
-      Begin VB.PictureBox PbSelColorBack 
-         Appearance      =   0  '2D
-         BackColor       =   &H80000005&
-         ForeColor       =   &H80000008&
-         Height          =   570
-         Left            =   480
-         ScaleHeight     =   540
-         ScaleWidth      =   465
-         TabIndex        =   8
-         Top             =   4440
-         Width           =   495
-      End
-      Begin VB.CommandButton BtnSelColorChangeForeBack 
-         Caption         =   "^>"
-         Height          =   360
-         Left            =   120
-         TabIndex        =   9
-         Top             =   4650
-         Width           =   360
-      End
-      Begin VB.CommandButton BtnPickAColor 
-         Caption         =   "Pick a Color"
-         BeginProperty Font 
-            Name            =   "Tahoma"
-            Size            =   8.25
-            Charset         =   0
-            Weight          =   400
-            Underline       =   0   'False
-            Italic          =   0   'False
-            Strikethrough   =   0   'False
-         EndProperty
-         Height          =   375
-         Left            =   0
-         TabIndex        =   3
-         Top             =   360
-         Width           =   1215
-      End
-      Begin VB.CommandButton BtnClone 
-         Caption         =   "Clone >>"
-         BeginProperty Font 
-            Name            =   "Tahoma"
-            Size            =   8.25
-            Charset         =   0
-            Weight          =   400
-            Underline       =   0   'False
-            Italic          =   0   'False
-            Strikethrough   =   0   'False
-         EndProperty
-         Height          =   375
-         Left            =   0
-         TabIndex        =   2
-         Top             =   0
-         Width           =   1215
-      End
-      Begin VB.PictureBox PbColorSelect 
-         Appearance      =   0  '2D
-         AutoSize        =   -1  'True
-         BackColor       =   &H80000005&
-         BorderStyle     =   0  'Kein
-         ForeColor       =   &H80000008&
-         Height          =   1485
-         Left            =   240
-         Picture         =   "FMain.frx":1782
-         ScaleHeight     =   1485
-         ScaleWidth      =   720
-         TabIndex        =   6
-         Top             =   2640
-         Width           =   720
-      End
-      Begin VB.PictureBox PBCurColor 
-         Appearance      =   0  '2D
-         BackColor       =   &H80000005&
-         ForeColor       =   &H80000008&
-         Height          =   435
-         Left            =   300
-         ScaleHeight     =   405
-         ScaleWidth      =   585
-         TabIndex        =   4
-         Top             =   765
-         Width           =   615
-      End
-      Begin VB.Label LblCurColor 
-         Alignment       =   2  'Zentriert
-         Caption         =   ". . ."
-         BeginProperty Font 
-            Name            =   "Tahoma"
-            Size            =   8.25
-            Charset         =   0
-            Weight          =   400
-            Underline       =   0   'False
-            Italic          =   0   'False
-            Strikethrough   =   0   'False
-         EndProperty
-         Height          =   1395
-         Left            =   0
-         TabIndex        =   5
-         Top             =   1200
-         Width           =   1215
-      End
+      Width           =   1095
    End
    Begin VB.TextBox Text1 
       BeginProperty Font 
@@ -211,8 +43,256 @@ Begin VB.Form FMain
       ScrollBars      =   3  'Beides
       TabIndex        =   0
       ToolTipText     =   "Drag'n'drop pictures of filetype *.bmp to the window."
-      Top             =   0
+      Top             =   360
       Width           =   4215
+   End
+   Begin VB.PictureBox PanelBmp 
+      Height          =   6735
+      Left            =   4200
+      OLEDropMode     =   1  'Manuell
+      ScaleHeight     =   445
+      ScaleMode       =   3  'Pixel
+      ScaleWidth      =   589
+      TabIndex        =   11
+      Top             =   360
+      Width           =   8895
+      Begin VB.PictureBox PBBitmap 
+         Appearance      =   0  '2D
+         AutoRedraw      =   -1  'True
+         BackColor       =   &H00400040&
+         BorderStyle     =   0  'Kein
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   8.25
+            Charset         =   0
+            Weight          =   400
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         ForeColor       =   &H80000008&
+         Height          =   6495
+         Left            =   0
+         OLEDropMode     =   1  'Manuell
+         ScaleHeight     =   433
+         ScaleMode       =   3  'Pixel
+         ScaleWidth      =   577
+         TabIndex        =   12
+         ToolTipText     =   "Drag'n'drop pictures of filetype *.bmp to the window."
+         Top             =   0
+         Width           =   8655
+      End
+   End
+   Begin VB.PictureBox PnlSideRight 
+      Align           =   4  'Rechts ausrichten
+      BorderStyle     =   0  'Kein
+      BeginProperty Font 
+         Name            =   "MS Sans Serif"
+         Size            =   8.25
+         Charset         =   0
+         Weight          =   400
+         Underline       =   0   'False
+         Italic          =   0   'False
+         Strikethrough   =   0   'False
+      EndProperty
+      Height          =   8175
+      Left            =   14295
+      ScaleHeight     =   545
+      ScaleMode       =   3  'Pixel
+      ScaleWidth      =   81
+      TabIndex        =   1
+      Top             =   0
+      Width           =   1215
+      Begin VB.PictureBox PBTest16bpp2 
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   8.25
+            Charset         =   0
+            Weight          =   400
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   375
+         Left            =   720
+         ScaleHeight     =   315
+         ScaleWidth      =   315
+         TabIndex        =   15
+         Top             =   6960
+         Width           =   375
+      End
+      Begin VB.PictureBox PBTest16bpp1 
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   8.25
+            Charset         =   0
+            Weight          =   400
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   375
+         Left            =   240
+         ScaleHeight     =   315
+         ScaleWidth      =   315
+         TabIndex        =   14
+         Top             =   6960
+         Width           =   375
+      End
+      Begin VB.CommandButton BtnTest16bpp 
+         Caption         =   "Test 16bpp"
+         Height          =   615
+         Left            =   240
+         TabIndex        =   13
+         Top             =   6240
+         Width           =   855
+      End
+      Begin VB.CommandButton BtnTestFileSave 
+         Caption         =   "Test Save"
+         Height          =   735
+         Left            =   240
+         TabIndex        =   10
+         Top             =   5400
+         Width           =   735
+      End
+      Begin VB.PictureBox PbSelColorFore 
+         Appearance      =   0  '2D
+         BackColor       =   &H80000005&
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   8.25
+            Charset         =   0
+            Weight          =   400
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         ForeColor       =   &H80000008&
+         Height          =   450
+         Left            =   120
+         ScaleHeight     =   420
+         ScaleWidth      =   585
+         TabIndex        =   7
+         Top             =   4200
+         Width           =   615
+      End
+      Begin VB.PictureBox PbSelColorBack 
+         Appearance      =   0  '2D
+         BackColor       =   &H80000005&
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   8.25
+            Charset         =   0
+            Weight          =   400
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         ForeColor       =   &H80000008&
+         Height          =   570
+         Left            =   480
+         ScaleHeight     =   540
+         ScaleWidth      =   465
+         TabIndex        =   8
+         Top             =   4440
+         Width           =   495
+      End
+      Begin VB.CommandButton BtnSelColorChangeForeBack 
+         Caption         =   "^>"
+         BeginProperty Font 
+            Name            =   "Segoe UI"
+            Size            =   9
+            Charset         =   0
+            Weight          =   400
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   360
+         Left            =   120
+         TabIndex        =   9
+         Top             =   4650
+         Width           =   360
+      End
+      Begin VB.CommandButton BtnPickAColor 
+         Caption         =   "Pick a Color"
+         Height          =   375
+         Left            =   0
+         TabIndex        =   3
+         Top             =   360
+         Width           =   1215
+      End
+      Begin VB.CommandButton BtnClone 
+         Caption         =   "Clone >>"
+         Height          =   375
+         Left            =   0
+         TabIndex        =   2
+         Top             =   0
+         Width           =   1215
+      End
+      Begin VB.PictureBox PbColorSelect 
+         Appearance      =   0  '2D
+         AutoSize        =   -1  'True
+         BackColor       =   &H80000005&
+         BorderStyle     =   0  'Kein
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   8.25
+            Charset         =   0
+            Weight          =   400
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         ForeColor       =   &H80000008&
+         Height          =   1485
+         Left            =   240
+         Picture         =   "FMain.frx":1782
+         ScaleHeight     =   1485
+         ScaleWidth      =   720
+         TabIndex        =   6
+         Top             =   2640
+         Width           =   720
+      End
+      Begin VB.PictureBox PBCurColor 
+         Appearance      =   0  '2D
+         BackColor       =   &H80000005&
+         BeginProperty Font 
+            Name            =   "MS Sans Serif"
+            Size            =   8.25
+            Charset         =   0
+            Weight          =   400
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         ForeColor       =   &H80000008&
+         Height          =   435
+         Left            =   300
+         ScaleHeight     =   405
+         ScaleWidth      =   585
+         TabIndex        =   4
+         Top             =   765
+         Width           =   615
+      End
+      Begin VB.Label LblCurColor 
+         Alignment       =   2  'Zentriert
+         Caption         =   ". . ."
+         Height          =   1395
+         Left            =   0
+         TabIndex        =   5
+         Top             =   1200
+         Width           =   1215
+      End
+   End
+   Begin VB.Label Label1 
+      AutoSize        =   -1  'True
+      Caption         =   "Zoom:"
+      Height          =   255
+      Left            =   120
+      TabIndex        =   17
+      Top             =   60
+      Width           =   555
    End
    Begin VB.Menu mnuFile 
       Caption         =   "&File"
@@ -266,6 +346,138 @@ Begin VB.Form FMain
          Caption         =   "Palette"
       End
    End
+   Begin VB.Menu mnuView 
+      Caption         =   "View"
+      Begin VB.Menu mnuViewZoomNormal 
+         Caption         =   "Normal 1:1"
+      End
+      Begin VB.Menu mnuViewZoomIn_ 
+         Caption         =   "Zoom In"
+         Begin VB.Menu mnuViewZoomIn 
+            Caption         =   "2:1"
+            Index           =   2
+         End
+         Begin VB.Menu mnuViewZoomIn 
+            Caption         =   "3:1"
+            Index           =   3
+         End
+         Begin VB.Menu mnuViewZoomIn 
+            Caption         =   "4:1"
+            Index           =   4
+         End
+         Begin VB.Menu mnuViewZoomIn 
+            Caption         =   "5:1"
+            Index           =   5
+         End
+         Begin VB.Menu mnuViewZoomIn 
+            Caption         =   "6:1"
+            Index           =   6
+         End
+         Begin VB.Menu mnuViewZoomIn 
+            Caption         =   "7:1"
+            Index           =   7
+         End
+         Begin VB.Menu mnuViewZoomIn 
+            Caption         =   "8:1"
+            Index           =   8
+         End
+         Begin VB.Menu mnuViewZoomIn 
+            Caption         =   "9:1"
+            Index           =   9
+         End
+         Begin VB.Menu mnuViewZoomIn 
+            Caption         =   "10:1"
+            Index           =   10
+         End
+         Begin VB.Menu mnuViewZoomIn 
+            Caption         =   "11:1"
+            Index           =   11
+         End
+         Begin VB.Menu mnuViewZoomIn 
+            Caption         =   "12:1"
+            Index           =   12
+         End
+         Begin VB.Menu mnuViewZoomIn 
+            Caption         =   "13:1"
+            Index           =   13
+         End
+         Begin VB.Menu mnuViewZoomIn 
+            Caption         =   "14:1"
+            Index           =   14
+         End
+         Begin VB.Menu mnuViewZoomIn 
+            Caption         =   "15:1"
+            Index           =   15
+         End
+         Begin VB.Menu mnuViewZoomIn 
+            Caption         =   "16:1"
+            Index           =   16
+         End
+      End
+      Begin VB.Menu mnuViewZoomOut_ 
+         Caption         =   "Zoom Out"
+         Begin VB.Menu mnuViewZoomOut 
+            Caption         =   "1:2"
+            Index           =   2
+         End
+         Begin VB.Menu mnuViewZoomOut 
+            Caption         =   "1:3"
+            Index           =   3
+         End
+         Begin VB.Menu mnuViewZoomOut 
+            Caption         =   "1:4"
+            Index           =   4
+         End
+         Begin VB.Menu mnuViewZoomOut 
+            Caption         =   "1:5"
+            Index           =   5
+         End
+         Begin VB.Menu mnuViewZoomOut 
+            Caption         =   "1:6"
+            Index           =   6
+         End
+         Begin VB.Menu mnuViewZoomOut 
+            Caption         =   "1:7"
+            Index           =   7
+         End
+         Begin VB.Menu mnuViewZoomOut 
+            Caption         =   "1:8"
+            Index           =   8
+         End
+         Begin VB.Menu mnuViewZoomOut 
+            Caption         =   "1:9"
+            Index           =   9
+         End
+         Begin VB.Menu mnuViewZoomOut 
+            Caption         =   "1:10"
+            Index           =   10
+         End
+         Begin VB.Menu mnuViewZoomOut 
+            Caption         =   "1:11"
+            Index           =   11
+         End
+         Begin VB.Menu mnuViewZoomOut 
+            Caption         =   "1:12"
+            Index           =   12
+         End
+         Begin VB.Menu mnuViewZoomOut 
+            Caption         =   "1:13"
+            Index           =   13
+         End
+         Begin VB.Menu mnuViewZoomOut 
+            Caption         =   "1:14"
+            Index           =   14
+         End
+         Begin VB.Menu mnuViewZoomOut 
+            Caption         =   "1:15"
+            Index           =   15
+         End
+         Begin VB.Menu mnuViewZoomOut 
+            Caption         =   "1:16"
+            Index           =   16
+         End
+      End
+   End
    Begin VB.Menu mnuHelp 
       Caption         =   " &? "
       Begin VB.Menu mnuHelpInfo 
@@ -280,6 +492,7 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
 Private m_Bmp As Bitmap
+Private m_PBZoom As PictureBoxZoom
 Private m_bPickAColor As Boolean
 Private m_PFNTests As Collection
 
@@ -298,16 +511,18 @@ Private Sub Form_Load()
     BtnPickAColor.Enabled = False
     BtnClone.Enabled = False
     UpdateFormCaption
+    InitZoom
+    Set m_PBZoom = MNew.PictureBoxZoom(Me, Me.PBBitmap, Nothing)
 End Sub
 
 Private Sub Form_Resize()
     Dim L As Single
-    Dim t As Single: t = Text1.Top
+    Dim T As Single: T = Text1.Top
     Dim W As Single: W = Text1.Width - L
-    Dim H As Single: H = Me.ScaleHeight - t
-    If W > 0 And H > 0 Then Text1.Move L, t, W, H
+    Dim H As Single: H = Me.ScaleHeight - T
+    If W > 0 And H > 0 Then Text1.Move L, T, W, H
     L = W:    W = Me.ScaleWidth - W - PnlSideRight.Width
-    If W > 0 And H > 0 Then PanelBmp.Move L, t, W, H
+    If W > 0 And H > 0 Then PanelBmp.Move L, T, W, H
     If W > 0 And H > 0 Then PBBitmap.Move 0, 0, W, H
 End Sub
 
@@ -417,9 +632,9 @@ Private Sub PFNTests_AddFiles()
 
 End Sub
 
-Private Function Hex2(b As Byte) As String
-    Hex2 = Hex(b): If Len(Hex2) < 2 Then Hex2 = "0" & Hex2
-End Function
+'Private Function Hex2(b As Byte) As String
+'    Hex2 = Hex(b): If Len(Hex2) < 2 Then Hex2 = "0" & Hex2
+'End Function
 
 Public Function Clone() As FMain
     Set Clone = New FMain
@@ -454,6 +669,7 @@ Private Sub mnuFileNew_Click()
     'If Not m_Bmp Is Nothing Then Set Bmp = m_Bmp.Clone
     If FDlgNewPicture.ShowDialog(Me, bmp) = vbCancel Then Exit Sub
     Set m_Bmp = bmp
+    
     UpdateView
 End Sub
 
@@ -461,8 +677,8 @@ Private Sub MiddlePosDlg(Frm As Form)
     Dim W As Single: W = Frm.Width
     Dim H As Single: H = Frm.Height
     Dim L As Single: L = Me.Left + (Me.Width - W) / 2
-    Dim t As Single: t = Me.Top + (Me.Height - H) / 2
-    Frm.Move L, t
+    Dim T As Single: T = Me.Top + (Me.Height - H) / 2
+    Frm.Move L, T
 End Sub
 
 Private Sub mnuFileOpen_Click()
@@ -499,6 +715,7 @@ Try: On Error GoTo Catch
         End Select
         Set m_Bmp = MNew.BitmapSP(pic, aPFN)
     End If
+    Set m_PBZoom.Image = m_Bmp.ToPicture
     UpdateView
     Exit Sub
 Catch:
@@ -586,6 +803,8 @@ Private Sub mnuEditPaste_Click()
     Else
         m_Bmp.NewSP pic, "<CLipboard>"
     End If
+    Set m_PBZoom.Image = pic 'm_Image
+    
     UpdateView
     'Set PBBitmap.Picture = pic
 End Sub
@@ -607,43 +826,89 @@ Private Sub mnuEditResize_Click()
 End Sub
 ' ^ ############################## ^ '    mnuEdit    ' ^ ############################## ^ '
 
+' v ' ############################## ' v '    mnuView    ' v ' ############################## ' v '
+' v ' #################### ' v '    Controls for PictureBoxZoom    ' v ' #################### ' v '
+Sub InitZoom()
+    Dim i As Long
+    For i = 16 To 1 Step -1: CmbZoom.AddItem CStr(i) & ":1": Next
+    For i = 2 To 16:         CmbZoom.AddItem "1:" & CStr(i): Next
+    CmbZoom.ListIndex = 15
+End Sub
+
+Private Sub mnuViewZoomNormal_Click()
+    CmbZoom.ListIndex = 15
+End Sub
+
+Private Sub mnuViewZoomIn_Click(Index As Integer)
+    CmbZoom.ListIndex = 16 - Index
+End Sub
+
+Private Sub mnuViewZoomOut_Click(Index As Integer)
+    CmbZoom.ListIndex = Index + 14
+End Sub
+
+Private Sub CmbZoom_Click()
+    If m_PBZoom Is Nothing Then Exit Sub
+    Dim li As Long:     li = CmbZoom.ListIndex - 15
+    Dim z As Double: z = IIf(li = 0, 1, IIf(li < 1, Abs(li) + 1, 1))
+    Dim n As Double: n = IIf(li = 0, 1, IIf(li < 1, 1, Abs(li) + 1))
+    m_PBZoom.ZoomFactor = z / n
+    mnuViewZoom_UnCheckAll
+    If z = 1 And n = 1 Then
+        mnuViewZoomNormal.Checked = True
+    ElseIf z = 1 Then
+        mnuViewZoomOut(CLng(n)).Checked = True
+    ElseIf n = 1 Then
+        mnuViewZoomIn(CLng(z)).Checked = True
+    End If
+End Sub
+
+Private Sub mnuViewZoom_UnCheckAll()
+    Dim i As Integer
+    For i = mnuViewZoomIn.LBound To mnuViewZoomIn.UBound:   mnuViewZoomIn(i).Checked = False:  Next
+    For i = mnuViewZoomOut.LBound To mnuViewZoomOut.UBound: mnuViewZoomOut(i).Checked = False: Next
+    mnuViewZoomNormal.Checked = False
+End Sub
+
+' ^ ############################## ^ '    mnuView    ' ^ ############################## ^ '
+
 ' v ############################## v '    mnuHelp    ' v ############################## v '
 Private Sub mnuHelpInfo_Click()
     MsgBox App.CompanyName & " " & App.EXEName & " v" & App.Major & "." & App.Minor & "." & App.Revision & vbCrLf & App.FileDescription
 End Sub
 ' ^ ############################## ^ '    mnuHelp    ' ^ ############################## ^ '
 
-Private Sub PbColorSelect_MouseDown(Button As Integer, Shift As Integer, X As Single, Y As Single)
+Private Sub PbColorSelect_MouseDown(Button As Integer, Shift As Integer, x As Single, y As Single)
     Select Case Button
     Case MouseButtonConstants.vbLeftButton:  PbSelColorFore.BackColor = PBCurColor.BackColor
     Case MouseButtonConstants.vbRightButton: PbSelColorBack.BackColor = PBCurColor.BackColor
     End Select
 End Sub
 
-Private Sub PbColorSelect_MouseMove(Button As Integer, Shift As Integer, X As Single, Y As Single)
-    Dim Color As Long: Color = PbColorSelect.Point(X, Y)
+Private Sub PbColorSelect_MouseMove(Button As Integer, Shift As Integer, x As Single, y As Single)
+    Dim Color As Long: Color = PbColorSelect.Point(x, y)
     If Color < 0 Then Exit Sub
     PBCurColor.BackColor = Color
-    LblCurColor.Caption = MouseCoordsNColor_ToStr(X, Y, Color)
+    LblCurColor.Caption = MouseCoordsNColor_ToStr(x, y, Color)
 End Sub
 
-Private Sub PBBitmap_MouseMove(Button As Integer, Shift As Integer, X As Single, Y As Single)
+Private Sub PBBitmap_MouseMove(Button As Integer, Shift As Integer, x As Single, y As Single)
     If m_Bmp Is Nothing Then Exit Sub
     If Not m_bPickAColor Then Exit Sub
-    Dim Color As Long: Color = m_Bmp.Pixel(X, Y)
+    Dim Color As Long: Color = m_Bmp.Pixel(x, y)
     PBCurColor.BackColor = Color
     Dim s As String
     If m_Bmp.IsIndexed Then
-        s = "Index: " & m_Bmp.PalettePixelIndex(X, Y) & vbCrLf
+        s = "Index: " & m_Bmp.PalettePixelIndex(x, y) & vbCrLf
     End If
-    s = s & MouseCoordsNColor_ToStr(X, Y, Color)
+    s = s & MouseCoordsNColor_ToStr(x, y, Color)
     LblCurColor.Caption = s
 End Sub
-Private Function MouseCoordsNColor_ToStr(X As Single, Y As Single, ByVal Color As Long) As String
-    MouseCoordsNColor_ToStr = "X;Y: " & X & ";" & Y & vbCrLf & Color_ToStr(Color)
+Private Function MouseCoordsNColor_ToStr(x As Single, y As Single, ByVal Color As Long) As String
+    MouseCoordsNColor_ToStr = "X;Y: " & x & ";" & y & vbCrLf & Color_ToStr(Color)
 End Function
     
-Private Sub PBBitmap_MouseDown(Button As Integer, Shift As Integer, X As Single, Y As Single)
+Private Sub PBBitmap_MouseDown(Button As Integer, Shift As Integer, x As Single, y As Single)
     If Not m_bPickAColor Then Exit Sub
     Select Case Button
     Case MouseButtonConstants.vbLeftButton:  PbSelColorFore.BackColor = PBCurColor.BackColor
@@ -652,24 +917,24 @@ Private Sub PBBitmap_MouseDown(Button As Integer, Shift As Integer, X As Single,
 End Sub
 
 Private Function Color_ToStr(ByVal this As Long) As String
-    Dim R As Long: R = (this And &HFF&)
+    Dim r As Long: r = (this And &HFF&)
     Dim G As Long: G = (this And &HFF00&) \ &H100&
     Dim b As Long: b = (this And &HFF0000) \ &H10000
     Dim hexprefix As String: hexprefix = "&&H"
-    Dim sr As String: sr = CStr(R): sr = Space$(3 - Len(sr)) & sr
+    Dim sr As String: sr = CStr(r): sr = Space$(3 - Len(sr)) & sr
     Dim sG As String: sG = CStr(G): sG = Space$(3 - Len(sG)) & sG
     Dim sB As String: sB = CStr(b): sB = Space$(3 - Len(sB)) & sB
-    Color_ToStr = "R=" & sr & " (" & hexprefix & Hex2(CByte(R)) & ")" & vbCrLf & _
-                  "G=" & sG & " (" & hexprefix & Hex2(CByte(G)) & ")" & vbCrLf & _
-                  "B=" & sB & " (" & hexprefix & Hex2(CByte(b)) & ")"
+    Color_ToStr = "R=" & sr & " (" & hexprefix & MString.Hex2(CByte(r)) & ")" & vbCrLf & _
+                  "G=" & sG & " (" & hexprefix & MString.Hex2(CByte(G)) & ")" & vbCrLf & _
+                  "B=" & sB & " (" & hexprefix & MString.Hex2(CByte(b)) & ")"
 End Function
 
-Private Sub PBBitmap_MouseUp(Button As Integer, Shift As Integer, X As Single, Y As Single)
+Private Sub PBBitmap_MouseUp(Button As Integer, Shift As Integer, x As Single, y As Single)
     If m_bPickAColor Then m_bPickAColor = False
 End Sub
 
-Private Sub PBBitmap_OLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, X As Single, Y As Single)
-    AllOLEDragDrop Data, Effect, Button, Shift, X, Y
+Private Sub PBBitmap_OLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, x As Single, y As Single)
+    AllOLEDragDrop Data, Effect, Button, Shift, x, y
 End Sub
 
 Private Sub PbSelColorBack_Click()
@@ -687,17 +952,22 @@ Private Function ColorDlg(ByVal CurColor As Long) As Long
     ColorDlg = IIf(CD.ShowDialog(Me) = vbOK, CD.Color, CurColor)
 End Function
 
-Private Sub Text1_OLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, X As Single, Y As Single)
-    AllOLEDragDrop Data, Effect, Button, Shift, X, Y
+Private Sub Text1_OLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, x As Single, y As Single)
+    AllOLEDragDrop Data, Effect, Button, Shift, x, y
 End Sub
 
-Private Sub AllOLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, X As Single, Y As Single)
+Private Sub PanelBmp_OLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, x As Single, y As Single)
+    AllOLEDragDrop Data, Effect, Button, Shift, x, y
+End Sub
+
+Private Sub AllOLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, x As Single, y As Single)
     If Not Data.GetFormat(vbCFFiles) Then Exit Sub
     Dim PFN As String: PFN = Data.Files(1)
     Dim ext As String: ext = LCase(Right(PFN, 3))
     Dim pic As StdPicture
     If ext = "bmp" Then
         Set m_Bmp = MNew.Bitmap(PFN)
+        Set pic = m_Bmp.ToPicture
     ElseIf ext = "png" Then
         Set pic = MLoadPng.LoadPictureGDIp(PFN)
         Set m_Bmp = MNew.BitmapSP(pic, PFN)
@@ -711,6 +981,7 @@ Private Sub AllOLEDragDrop(Data As DataObject, Effect As Long, Button As Integer
         Set m_Bmp = MNew.BitmapSP(pic, PFN)
         'Set PBBitmap.Picture = MLoadPng.LoadPictureGDIp(PFN)
     End If
+    Set m_PBZoom.Image = pic
     UpdateView
 End Sub
 

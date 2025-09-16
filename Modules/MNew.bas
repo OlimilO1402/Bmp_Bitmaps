@@ -16,3 +16,7 @@ Public Function BitmapSP(aStdPicture As StdPicture, ByVal aPFN As String) As Bit
     Set BitmapSP = New Bitmap: BitmapSP.NewSP aStdPicture, aPFN
 End Function
 
+Public Function PictureBoxZoom(Window As Form, Canvas As PictureBox, aImage As StdPicture) As PictureBoxZoom
+    Set PictureBoxZoom = New PictureBoxZoom: PictureBoxZoom.New_ Window, Canvas, aImage
+End Function
+
