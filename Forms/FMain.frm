@@ -20,6 +20,10 @@ Begin VB.Form FMain
    ScaleMode       =   3  'Pixel
    ScaleWidth      =   1034
    StartUpPosition =   3  'Windows-Standard
+   Begin VB.Timer Timer1 
+      Left            =   0
+      Top             =   0
+   End
    Begin VB.ComboBox CmbZoom 
       Height          =   375
       Left            =   960
@@ -47,6 +51,7 @@ Begin VB.Form FMain
       Width           =   4215
    End
    Begin VB.PictureBox PanelBmp 
+      BackColor       =   &H00400040&
       Height          =   6735
       Left            =   4200
       OLEDropMode     =   1  'Manuell
@@ -103,6 +108,23 @@ Begin VB.Form FMain
       TabIndex        =   1
       Top             =   0
       Width           =   1215
+      Begin VB.CommandButton BtnSelColorChangeForeBack 
+         Caption         =   "^>"
+         BeginProperty Font 
+            Name            =   "Segoe UI"
+            Size            =   8.25
+            Charset         =   0
+            Weight          =   400
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
+         Height          =   420
+         Left            =   120
+         TabIndex        =   9
+         Top             =   4590
+         Width           =   420
+      End
       Begin VB.PictureBox PBTest16bpp2 
          BeginProperty Font 
             Name            =   "MS Sans Serif"
@@ -168,9 +190,9 @@ Begin VB.Form FMain
             Strikethrough   =   0   'False
          EndProperty
          ForeColor       =   &H80000008&
-         Height          =   450
+         Height          =   390
          Left            =   120
-         ScaleHeight     =   420
+         ScaleHeight     =   360
          ScaleWidth      =   585
          TabIndex        =   7
          Top             =   4200
@@ -189,30 +211,13 @@ Begin VB.Form FMain
             Strikethrough   =   0   'False
          EndProperty
          ForeColor       =   &H80000008&
-         Height          =   570
-         Left            =   480
-         ScaleHeight     =   540
-         ScaleWidth      =   465
+         Height          =   615
+         Left            =   540
+         ScaleHeight     =   585
+         ScaleWidth      =   405
          TabIndex        =   8
-         Top             =   4440
-         Width           =   495
-      End
-      Begin VB.CommandButton BtnSelColorChangeForeBack 
-         Caption         =   "^>"
-         BeginProperty Font 
-            Name            =   "Segoe UI"
-            Size            =   9
-            Charset         =   0
-            Weight          =   400
-            Underline       =   0   'False
-            Italic          =   0   'False
-            Strikethrough   =   0   'False
-         EndProperty
-         Height          =   360
-         Left            =   120
-         TabIndex        =   9
-         Top             =   4650
-         Width           =   360
+         Top             =   4395
+         Width           =   435
       End
       Begin VB.CommandButton BtnPickAColor 
          Caption         =   "Pick a Color"
@@ -278,6 +283,15 @@ Begin VB.Form FMain
       Begin VB.Label LblCurColor 
          Alignment       =   2  'Zentriert
          Caption         =   ". . ."
+         BeginProperty Font 
+            Name            =   "Segoe UI"
+            Size            =   9
+            Charset         =   0
+            Weight          =   400
+            Underline       =   0   'False
+            Italic          =   0   'False
+            Strikethrough   =   0   'False
+         EndProperty
          Height          =   1395
          Left            =   0
          TabIndex        =   5
@@ -315,6 +329,30 @@ Begin VB.Form FMain
          Caption         =   "Save &As..."
       End
       Begin VB.Menu mnuFileSep1 
+         Caption         =   "-"
+      End
+      Begin VB.Menu mnuFileImport 
+         Caption         =   "&Import"
+         Begin VB.Menu mnuFileImportTwain 
+            Caption         =   "&Twain"
+            Begin VB.Menu mnuFileImportTwainSelectSource 
+               Caption         =   "&Select Source..."
+            End
+            Begin VB.Menu mnuFileImportTwainRead 
+               Caption         =   "&Read..."
+            End
+         End
+         Begin VB.Menu mnuFileImportWIA 
+            Caption         =   "&WIA"
+            Begin VB.Menu mnuFileImportWIASelectSource 
+               Caption         =   "&Select Source..."
+            End
+            Begin VB.Menu mnuFileImportWIARead 
+               Caption         =   "&Read"
+            End
+         End
+      End
+      Begin VB.Menu mnuFileSep2 
          Caption         =   "-"
       End
       Begin VB.Menu mnuFileExit 
@@ -491,9 +529,25 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
-Private m_Bmp As Bitmap
-Private m_PBZoom As PictureBoxZoom
-Private m_bPickAColor As Boolean
+
+'Private Type POINTAPI
+'    X As Long
+'    Y As Long
+'End Type
+
+'Private Declare Function GetCursorPos Lib "user32" (lpPoint As POINTAPI) As Long
+'Private Declare Function GetDC Lib "user32" (ByVal hwnd As LongPtr) As LongPtr
+'Private Declare Function GetPixel Lib "gdi32" (ByVal hDC As LongPtr, ByVal X As Long, ByVal Y As Long) As Long
+'Private Declare Function ReleaseDC Lib "user32" (ByVal hwnd As LongPtr, ByVal hDC As LongPtr) As Long
+'Private CurMousePos As POINTAPI
+
+Private m_ScanTwain As ScannerTwain
+Private m_ScanWIA   As ScannerWIA
+
+Private m_Bmp      As Bitmap
+Private m_PBZoom   As PictureBoxZoom
+Private mColorSel  As ColorSelector
+
 Private m_PFNTests As Collection
 
 Private Sub BtnTest16bpp_Click()
@@ -506,6 +560,9 @@ Private Sub BtnTest16bpp_Click()
 End Sub
 
 Private Sub Form_Load()
+    Set m_ScanTwain = MNew.ScannerTwain(Me)
+    Set m_ScanWIA = New ScannerWIA
+
     PFNTests_AddFiles
     mnuEditPalette.Enabled = False
     BtnPickAColor.Enabled = False
@@ -513,6 +570,7 @@ Private Sub Form_Load()
     UpdateFormCaption
     InitZoom
     Set m_PBZoom = MNew.PictureBoxZoom(Me, Me.PBBitmap, Nothing)
+    Set mColorSel = MNew.ColorSelector(Timer1, BtnPickAColor, PBCurColor, LblCurColor)
 End Sub
 
 Private Sub Form_Resize()
@@ -550,11 +608,11 @@ Private Sub TestBmp(PFN As String)
 Try: On Error GoTo Catch
     If Len(PFN) = 0 Then Exit Sub
     Dim bmp0 As Bitmap: Set bmp0 = MNew.Bitmap(PFN)
-    Dim tmppfn As String: tmppfn = Environ("tmp") & "\test.bmp"
-    If FileExists(tmppfn) Then Kill tmppfn
-    bmp0.Save tmppfn
+    Dim tmpPFN As String: tmpPFN = Environ("tmp") & "\test.bmp"
+    If FileExists(tmpPFN) Then Kill tmpPFN
+    bmp0.Save tmpPFN
     Dim data0() As Byte: ReadFileContentBuffer PFN, data0
-    Dim Data1() As Byte: ReadFileContentBuffer tmppfn, Data1
+    Dim Data1() As Byte: ReadFileContentBuffer tmpPFN, Data1
     Dim L0 As Long: L0 = UBound(data0) + 1
     Dim l1 As Long: l1 = UBound(Data1) + 1
     If L0 <> l1 Then
@@ -658,9 +716,9 @@ Private Sub UpdateFormCaption()
     Me.Caption = "Bitmaps" & " v" & App.Major & "." & App.Minor & "." & App.Revision & IIf(Len(PFN), " - " & PFN, "")
 End Sub
 
-Private Sub BtnPickAColor_Click()
-    m_bPickAColor = True
-End Sub
+'Private Sub BtnPickAColor_Click()
+'    m_bPickAColor = True
+'End Sub
 
 ' v ############################## v '    mnuFile    ' v ############################## v '
 Private Sub mnuFileNew_Click()
@@ -690,6 +748,7 @@ Try: On Error GoTo Catch
     'Dim FD As New OpenFileDialog
     'If Not m_Bmp Is Nothing Then FD.FileName = m_Bmp.FileName
     Dim aPFN As String: If Not m_Bmp Is Nothing Then aPFN = m_Bmp.FileName
+    If aPFN = "<Clipboard>" Then aPFN = vbNullString
     aPFN = MMain.GetOpenFileName(Me, aPFN)
     If Len(aPFN) = 0 Then Exit Sub
     Dim pos As Long:   pos = InStrRev(aPFN, ".")
@@ -715,7 +774,7 @@ Try: On Error GoTo Catch
         End Select
         Set m_Bmp = MNew.BitmapSP(pic, aPFN)
     End If
-    Set m_PBZoom.Image = m_Bmp.ToPicture
+    'Set m_PBZoom.Image = m_Bmp.ToPicture
     UpdateView
     Exit Sub
 Catch:
@@ -748,6 +807,37 @@ Private Sub mnuOpenBmpFolder_Click()
     If MsgBox("Open folder?" & vbCrLf & p, vbOKCancel) = vbCancel Then Exit Sub
     Shell "Explorer.exe " & p, vbNormalFocus
 End Sub
+
+' FileImport
+Private Sub mnuFileImportTwainSelectSource_Click()
+    If Not m_ScanTwain.SelectDevice Then
+        MsgBox "An error occured, maybe EZTW32.DLL not found, make sure this file can be found in the search-path."
+    End If
+End Sub
+
+Private Sub mnuFileImportTwainRead_Click()
+    GetScannedImage m_ScanTwain
+End Sub
+
+Private Sub mnuFileImportWIASelectSource_Click()
+    Dim DeviceNames() As String
+    If Not m_ScanWIA.TryGetDeviceNames(DeviceNames) Then
+        MsgBox "No devices found!"
+        Exit Sub
+    End If
+    Dim SelDevice As String
+    If FSelect.ShowDialog(Me, "Select Source", DeviceNames, SelDevice) = vbCancel Then Exit Sub
+    m_ScanWIA.SelectDevice SelDevice
+End Sub
+
+Private Sub mnuFileImportWIAProperties_Click()
+    m_ScanWIA.ShowDevicePropertiesDialog
+End Sub
+
+Private Sub mnuFileImportWIARead_Click()
+    GetScannedImage m_ScanWIA
+End Sub
+
 
 Private Sub mnuFileExit_Click()
     Unload Me
@@ -799,14 +889,11 @@ Private Sub mnuEditPaste_Click()
     End If
     
     If m_Bmp Is Nothing Then
-        Set m_Bmp = MNew.BitmapSP(pic, "<CLipboard>")
+        Set m_Bmp = MNew.BitmapSP(pic, "<Clipboard>")
     Else
-        m_Bmp.NewSP pic, "<CLipboard>"
+        m_Bmp.NewSP pic, "<Clipboard>"
     End If
-    Set m_PBZoom.Image = pic 'm_Image
-    
     UpdateView
-    'Set PBBitmap.Picture = pic
 End Sub
 
 Private Sub mnuEditPalette_Click()
@@ -878,63 +965,63 @@ Private Sub mnuHelpInfo_Click()
 End Sub
 ' ^ ############################## ^ '    mnuHelp    ' ^ ############################## ^ '
 
-Private Sub PbColorSelect_MouseDown(Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub PbColorSelect_MouseDown(Button As Integer, Shift As Integer, X As Single, Y As Single)
     Select Case Button
     Case MouseButtonConstants.vbLeftButton:  PbSelColorFore.BackColor = PBCurColor.BackColor
     Case MouseButtonConstants.vbRightButton: PbSelColorBack.BackColor = PBCurColor.BackColor
     End Select
 End Sub
 
-Private Sub PbColorSelect_MouseMove(Button As Integer, Shift As Integer, x As Single, y As Single)
-    Dim Color As Long: Color = PbColorSelect.Point(x, y)
-    If Color < 0 Then Exit Sub
-    PBCurColor.BackColor = Color
-    LblCurColor.Caption = MouseCoordsNColor_ToStr(x, y, Color)
-End Sub
+'Private Sub PbColorSelect_MouseMove(Button As Integer, Shift As Integer, X As Single, Y As Single)
+'    Dim Color As Long: Color = PbColorSelect.Point(X, Y)
+'    If Color < 0 Then Exit Sub
+'    PBCurColor.BackColor = Color
+'    LblCurColor.Caption = MouseCoordsNColor_ToStr(X, Y, Color)
+'End Sub
 
-Private Sub PBBitmap_MouseMove(Button As Integer, Shift As Integer, x As Single, y As Single)
-    If m_Bmp Is Nothing Then Exit Sub
-    If Not m_bPickAColor Then Exit Sub
-    Dim Color As Long: Color = m_Bmp.Pixel(x, y)
-    PBCurColor.BackColor = Color
-    Dim s As String
-    If m_Bmp.IsIndexed Then
-        s = "Index: " & m_Bmp.PalettePixelIndex(x, y) & vbCrLf
-    End If
-    s = s & MouseCoordsNColor_ToStr(x, y, Color)
-    LblCurColor.Caption = s
-End Sub
-Private Function MouseCoordsNColor_ToStr(x As Single, y As Single, ByVal Color As Long) As String
-    MouseCoordsNColor_ToStr = "X;Y: " & x & ";" & y & vbCrLf & Color_ToStr(Color)
-End Function
+'Private Sub PBBitmap_MouseMove(Button As Integer, Shift As Integer, x As Single, y As Single)
+'    If m_Bmp Is Nothing Then Exit Sub
+'    If Not m_bPickAColor Then Exit Sub
+'    Dim Color As Long: Color = m_Bmp.Pixel(x, y)
+'    PBCurColor.BackColor = Color
+'    Dim s As String
+'    If m_Bmp.IsIndexed Then
+'        s = "Index: " & m_Bmp.PalettePixelIndex(x, y) & vbCrLf
+'    End If
+'    s = s & MouseCoordsNColor_ToStr(x, y, Color)
+'    LblCurColor.Caption = s
+'End Sub
+'Private Function MouseCoordsNColor_ToStr(X As Single, Y As Single, ByVal Color As Long) As String
+'    MouseCoordsNColor_ToStr = "X;Y: " & X & ";" & Y & vbCrLf & Color_ToStr(Color)
+'End Function
     
-Private Sub PBBitmap_MouseDown(Button As Integer, Shift As Integer, x As Single, y As Single)
-    If Not m_bPickAColor Then Exit Sub
+Private Sub PBBitmap_MouseDown(Button As Integer, Shift As Integer, X As Single, Y As Single)
+    'If Not m_bPickAColor Then Exit Sub
     Select Case Button
     Case MouseButtonConstants.vbLeftButton:  PbSelColorFore.BackColor = PBCurColor.BackColor
     Case MouseButtonConstants.vbRightButton: PbSelColorBack.BackColor = PBCurColor.BackColor
     End Select
 End Sub
 
-Private Function Color_ToStr(ByVal this As Long) As String
-    Dim r As Long: r = (this And &HFF&)
-    Dim G As Long: G = (this And &HFF00&) \ &H100&
-    Dim b As Long: b = (this And &HFF0000) \ &H10000
-    Dim hexprefix As String: hexprefix = "&&H"
-    Dim sr As String: sr = CStr(r): sr = Space$(3 - Len(sr)) & sr
-    Dim sG As String: sG = CStr(G): sG = Space$(3 - Len(sG)) & sG
-    Dim sB As String: sB = CStr(b): sB = Space$(3 - Len(sB)) & sB
-    Color_ToStr = "R=" & sr & " (" & hexprefix & MString.Hex2(CByte(r)) & ")" & vbCrLf & _
-                  "G=" & sG & " (" & hexprefix & MString.Hex2(CByte(G)) & ")" & vbCrLf & _
-                  "B=" & sB & " (" & hexprefix & MString.Hex2(CByte(b)) & ")"
-End Function
+'Private Function Color_ToStr(ByVal this As Long) As String
+'    Dim r As Long: r = (this And &HFF&)
+'    Dim G As Long: G = (this And &HFF00&) \ &H100&
+'    Dim b As Long: b = (this And &HFF0000) \ &H10000
+'    Dim hexprefix As String: hexprefix = "&&H"
+'    Dim sr As String: sr = CStr(r): sr = Space$(3 - Len(sr)) & sr
+'    Dim sG As String: sG = CStr(G): sG = Space$(3 - Len(sG)) & sG
+'    Dim sB As String: sB = CStr(b): sB = Space$(3 - Len(sB)) & sB
+'    Color_ToStr = "R=" & sr & " (" & hexprefix & MString.Hex2(CByte(r)) & ")" & vbCrLf & _
+'                  "G=" & sG & " (" & hexprefix & MString.Hex2(CByte(G)) & ")" & vbCrLf & _
+'                  "B=" & sB & " (" & hexprefix & MString.Hex2(CByte(b)) & ")"
+'End Function
 
-Private Sub PBBitmap_MouseUp(Button As Integer, Shift As Integer, x As Single, y As Single)
-    If m_bPickAColor Then m_bPickAColor = False
-End Sub
+'Private Sub PBBitmap_MouseUp(Button As Integer, Shift As Integer, X As Single, Y As Single)
+'    If m_bPickAColor Then m_bPickAColor = False
+'End Sub
 
-Private Sub PBBitmap_OLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, x As Single, y As Single)
-    AllOLEDragDrop Data, Effect, Button, Shift, x, y
+Private Sub PBBitmap_OLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, X As Single, Y As Single)
+    AllOLEDragDrop Data, Effect, Button, Shift, X, Y
 End Sub
 
 Private Sub PbSelColorBack_Click()
@@ -952,22 +1039,22 @@ Private Function ColorDlg(ByVal CurColor As Long) As Long
     ColorDlg = IIf(CD.ShowDialog(Me) = vbOK, CD.Color, CurColor)
 End Function
 
-Private Sub Text1_OLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, x As Single, y As Single)
-    AllOLEDragDrop Data, Effect, Button, Shift, x, y
+Private Sub Text1_OLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, X As Single, Y As Single)
+    AllOLEDragDrop Data, Effect, Button, Shift, X, Y
 End Sub
 
-Private Sub PanelBmp_OLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, x As Single, y As Single)
-    AllOLEDragDrop Data, Effect, Button, Shift, x, y
+Private Sub PanelBmp_OLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, X As Single, Y As Single)
+    AllOLEDragDrop Data, Effect, Button, Shift, X, Y
 End Sub
 
-Private Sub AllOLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, x As Single, y As Single)
+Private Sub AllOLEDragDrop(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, X As Single, Y As Single)
     If Not Data.GetFormat(vbCFFiles) Then Exit Sub
     Dim PFN As String: PFN = Data.Files(1)
     Dim ext As String: ext = LCase(Right(PFN, 3))
     Dim pic As StdPicture
     If ext = "bmp" Then
         Set m_Bmp = MNew.Bitmap(PFN)
-        Set pic = m_Bmp.ToPicture
+        'Set pic = m_Bmp.ToPicture
     ElseIf ext = "png" Then
         Set pic = MLoadPng.LoadPictureGDIp(PFN)
         Set m_Bmp = MNew.BitmapSP(pic, PFN)
@@ -981,7 +1068,7 @@ Private Sub AllOLEDragDrop(Data As DataObject, Effect As Long, Button As Integer
         Set m_Bmp = MNew.BitmapSP(pic, PFN)
         'Set PBBitmap.Picture = MLoadPng.LoadPictureGDIp(PFN)
     End If
-    Set m_PBZoom.Image = pic
+    'Set m_PBZoom.Image = pic
     UpdateView
 End Sub
 
@@ -990,7 +1077,10 @@ Public Sub UpdateView()
     dt = Timer - dt
     BtnClone.Enabled = Not m_Bmp Is Nothing
     If m_Bmp Is Nothing Then Exit Sub
-    Set PBBitmap.Picture = m_Bmp.ToPicture
+    
+    Set m_PBZoom.Image = m_Bmp.ToPicture
+
+    'Set PBBitmap.Picture = m_Bmp.ToPicture
     'Label1.Caption = "File loading time t: " & dt & "sec;"
     UpdateFormCaption
     Text1.Text = m_Bmp.ToStr
@@ -998,3 +1088,27 @@ Public Sub UpdateView()
     BtnPickAColor.Enabled = True
     'BtnClone.Enabled = True
 End Sub
+
+Public Sub GetScannedImage(ImageScanner)
+    Dim img As IPictureDisp: Set img = ImageScanner.Scan
+    If img Is Nothing Then MsgBox "Image not found!": Exit Sub
+    If img = 0 Then MsgBox "Image not found!": Exit Sub
+    'Set m_Image = img
+    Set m_Bmp = MNew.BitmapSP(img, "<Scanned Image>")
+    UpdateView
+    'If m_PBZoom Is Nothing Then
+    '    Set m_PBZoom = MNew.PictureBoxZoom(Me, Me.Picture1, m_Image)
+    'Else
+    '    Set m_PBZoom.Image = m_Image
+    'End If
+End Sub
+
+' v ' ############################## ' v '    Pick a Color    ' v ' ############################## ' v '
+'Private Sub Timer1_Timer()
+'    GetCursorPos CurMousePos
+'    Dim Color As Long: Color = ColorUnderMouse(CurMousePos.X, CurMousePos.Y)
+'    PBCurColor.BackColor = Color
+'    LblCurColor.Caption = MouseCoordsNColor_ToStr(X, Y, Color)
+'    'UpdateView
+'End Sub
+

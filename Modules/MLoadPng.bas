@@ -54,14 +54,14 @@ End Type
     Private Declare Function GdiplusStartup Lib "GDIPlus" (token As LongPtr, inputbuf As GdiplusStartupInput, Optional ByVal outputbuf As LongPtr = 0) As Long
     Private Declare Function GdipCreateBitmapFromFile Lib "GDIPlus" (ByVal FileName As LongPtr, pBitmap As LongPtr) As Long
     Private Declare Function GdipCreateHBITMAPFromBitmap Lib "GDIPlus" (ByVal Bitmap As LongPtr, hbmReturn As LongPtr, ByVal background As LongPtr) As Long
-    Private Declare Function GdipDisposeImage Lib "GDIPlus" (ByVal image As LongPtr) As Long
+    Private Declare Function GdipDisposeImage Lib "GDIPlus" (ByVal Image As LongPtr) As Long
     Private Declare Sub GdiplusShutdown Lib "GDIPlus" (ByVal token As LongPtr)
     Private Declare Function OleCreatePictureIndirect Lib "oleaut32" (PicDesc As PICTDESC, RefIID As GUID, ByVal fPictureOwnsHandle As Long, IPic As IPicture) As Long
 #End If
 
-' Procedure:    LoadPictureGDI
+' Procedure:    LoadPictureGDIp
 ' Purpose:      Loads an image using GDI+
-' Returns:      The image as an IPicture Object
+' Returns:      The image as a StdPicture Object
 Public Function LoadPictureGDIp(ByVal sFilename As String) As StdPicture
     
     'Initialize GDI+

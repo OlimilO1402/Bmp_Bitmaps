@@ -20,3 +20,11 @@ Public Function PictureBoxZoom(Window As Form, Canvas As PictureBox, aImage As S
     Set PictureBoxZoom = New PictureBoxZoom: PictureBoxZoom.New_ Window, Canvas, aImage
 End Function
 
+Public Function ColorSelector(aTimer As Timer, aButton As CommandButton, aColorView As PictureBox, aLabel As Label) As ColorSelector
+    Set ColorSelector = New ColorSelector: ColorSelector.New_ aTimer, aButton, aColorView, aLabel
+End Function
+
+Public Function ScannerTwain(Owner As Form) As ScannerTwain
+    Set ScannerTwain = New ScannerTwain: ScannerTwain.New_ Owner
+End Function
+
