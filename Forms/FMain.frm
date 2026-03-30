@@ -810,8 +810,12 @@ End Sub
 
 ' FileImport
 Private Sub mnuFileImportTwainSelectSource_Click()
+    'Dim i As Long
+    'i = m_ScanTwain.SelectDevice
+    'Debug.Print i
     If Not m_ScanTwain.SelectDevice Then
-        MsgBox "An error occured, maybe EZTW32.DLL not found, make sure this file can be found in the search-path."
+    'If i = 0 Then
+        'MsgBox "An error occured, maybe EZTW32.DLL not found, make sure this file can be found in the search-path."
     End If
 End Sub
 
@@ -1083,7 +1087,7 @@ Public Sub UpdateView()
     'Set PBBitmap.Picture = m_Bmp.ToPicture
     'Label1.Caption = "File loading time t: " & dt & "sec;"
     UpdateFormCaption
-    Text1.Text = m_Bmp.ToStr
+    Text1.text = m_Bmp.ToStr
     mnuEditPalette.Enabled = m_Bmp.IsIndexed
     BtnPickAColor.Enabled = True
     'BtnClone.Enabled = True

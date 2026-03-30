@@ -90,54 +90,42 @@ Attribute VB_Exposed = False
 
 Option Explicit
 
-Private Declare Function GetObject Lib "GDI32" Alias _
-         "GetObjectA" (ByVal hObject As Long, ByVal _
-         nCount As Long, lpObject As Any) As Long
-
-Private Declare Function VarPtrArray Lib "msvbvm50.dll" _
-        Alias "VarPtr" (Ptr() As Any) As Long
-
-Private Declare Sub CopyMemory Lib "kernel32" Alias _
-        "RtlMoveMemory" (pDst As Any, pSrc As Any, ByVal _
-        ByteLen As Long)
-
-Private Declare Function BitBlt Lib "GDI32" (ByVal hDestDC _
-        As Long, ByVal x As Long, ByVal y As Long, ByVal _
-        nWidth As Long, ByVal nHeight As Long, ByVal hSrcDC _
-        As Long, ByVal xSrc As Long, ByVal ySrc As Long, _
-        ByVal dwRop As Long) As Long
+Private Declare Function GetObject Lib "GDI32" Alias "GetObjectA" (ByVal hObject As Long, ByVal nCount As Long, lpObject As Any) As Long
+Private Declare Function VarPtrArray Lib "msvbvm60" Alias "VarPtr" (Ptr() As Any) As Long
+Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (pDst As Any, pSrc As Any, ByVal ByteLen As Long)
+Private Declare Function BitBlt Lib "GDI32" (ByVal hDestDC As Long, ByVal x As Long, ByVal y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal hSrcDC As Long, ByVal xSrc As Long, ByVal ySrc As Long, ByVal dwRop As Long) As Long
 
 Private Type SAFEARRAYBOUND
-  cElements As Long
-  lLbound As Long
+    cElements As Long
+    lLbound   As Long
 End Type
 
 
 Private Type SAFEARRAY2D
-  cDims As Integer
-  fFeatures As Integer
-  cbElements As Long
-  cLocks As Long
-  pvData As Long
-  Bounds(0 To 1) As SAFEARRAYBOUND
+    cDims      As Integer
+    fFeatures  As Integer
+    cbElements As Long
+    cLocks     As Long
+    pvData     As Long
+    Bounds(0 To 1) As SAFEARRAYBOUND
 End Type
 
 Private Type BITMAP
-  bmType As Long
-  bmWidth As Long
-  bmHeight As Long
-  bmWidthBytes As Long
-  bmPlanes As Integer
-  bmBitsPixel As Integer
-  bmBits As Long
+    bmType       As Long
+    bmWidth      As Long
+    bmHeight     As Long
+    bmWidthBytes As Long
+    bmPlanes     As Integer
+    bmBitsPixel  As Integer
+    bmBits       As Long
 End Type
 
 
-Private Const SRCCOPY = &HCC0020
-Private Const SRCERASE = &H440328
-Private Const SRCINVERT = &H660046
-Private Const SRCPAINT = &HEE0086
-Private Const SRCAND = &H8800C6
+Private Const SRCCOPY   As Long = &HCC0020
+Private Const SRCERASE  As Long = &H440328
+Private Const SRCINVERT As Long = &H660046
+Private Const SRCPAINT  As Long = &HEE0086
+Private Const SRCAND    As Long = &H8800C6
 
 Private b_hgt%, b_wid%, inhere%, cx%, cy%
 Private pic_w%, pic_h%

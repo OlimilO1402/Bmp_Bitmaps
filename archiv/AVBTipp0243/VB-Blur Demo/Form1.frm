@@ -112,22 +112,10 @@ Attribute VB_Exposed = False
 
 Option Explicit
 
-Private Declare Function VarPtrArray Lib "msvbvm50.dll" _
-        Alias "VarPtr" (ptr() As Any) As Long
-        
-Private Declare Sub CopyMemory Lib "kernel32" Alias _
-        "RtlMoveMemory" (pDst As Any, pSrc As Any, ByVal _
-        ByteLen As Long)
-        
-Private Declare Function BitBlt Lib "gdi32" (ByVal hDestDC _
-        As Long, ByVal x As Long, ByVal y As Long, ByVal _
-        nWidth As Long, ByVal nHeight As Long, ByVal _
-        hSrcDC As Long, ByVal xSrc As Long, ByVal ySrc _
-        As Long, ByVal dwRop As Long) As Long
-
-Private Declare Function GetObject Lib "gdi32" Alias _
-        "GetObjectA" (ByVal hObject As Long, ByVal nCount _
-        As Long, lpObject As Any) As Long
+Private Declare Function VarPtrArray Lib "msvbvm60" Alias "VarPtr" (ptr() As Any) As Long
+Private Declare Sub CopyMemory Lib "kernel32" Alias "RtlMoveMemory" (pDst As Any, pSrc As Any, ByVal ByteLen As Long)
+Private Declare Function BitBlt Lib "gdi32" (ByVal hDestDC As Long, ByVal x As Long, ByVal y As Long, ByVal nWidth As Long, ByVal nHeight As Long, ByVal hSrcDC As Long, ByVal xSrc As Long, ByVal ySrc As Long, ByVal dwRop As Long) As Long
+Private Declare Function GetObject Lib "gdi32" Alias "GetObjectA" (ByVal hObject As Long, ByVal nCount As Long, lpObject As Any) As Long
 
 Private Type SAFEARRAYBOUND
   cElements As Long
