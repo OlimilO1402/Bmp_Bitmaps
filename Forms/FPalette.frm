@@ -6,6 +6,15 @@ Begin VB.Form FPalette
    ClientLeft      =   10245
    ClientTop       =   4710
    ClientWidth     =   4335
+   BeginProperty Font 
+      Name            =   "Segoe UI"
+      Size            =   9
+      Charset         =   0
+      Weight          =   400
+      Underline       =   0   'False
+      Italic          =   0   'False
+      Strikethrough   =   0   'False
+   EndProperty
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
@@ -26,7 +35,7 @@ Begin VB.Form FPalette
       Begin VB.Label LblSelected 
          AutoSize        =   -1  'True
          Caption         =   ". . . ."
-         Height          =   195
+         Height          =   225
          Left            =   480
          TabIndex        =   5
          Top             =   120
@@ -43,15 +52,6 @@ Begin VB.Form FPalette
    Begin VB.CommandButton BtnCancel 
       Cancel          =   -1  'True
       Caption         =   "&Cancel"
-      BeginProperty Font 
-         Name            =   "Tahoma"
-         Size            =   9
-         Charset         =   0
-         Weight          =   400
-         Underline       =   0   'False
-         Italic          =   0   'False
-         Strikethrough   =   0   'False
-      EndProperty
       Height          =   375
       Left            =   2280
       TabIndex        =   2
@@ -61,15 +61,6 @@ Begin VB.Form FPalette
    Begin VB.CommandButton BtnOK 
       Caption         =   "&OK"
       Default         =   -1  'True
-      BeginProperty Font 
-         Name            =   "Tahoma"
-         Size            =   9
-         Charset         =   0
-         Weight          =   400
-         Underline       =   0   'False
-         Italic          =   0   'False
-         Strikethrough   =   0   'False
-      EndProperty
       Height          =   375
       Left            =   480
       TabIndex        =   1
@@ -105,7 +96,7 @@ Begin VB.Form FPalette
    Begin VB.Label LblCurrent 
       AutoSize        =   -1  'True
       Caption         =   ". . . ."
-      Height          =   195
+      Height          =   225
       Left            =   120
       TabIndex        =   4
       Top             =   120
@@ -153,10 +144,10 @@ Private Sub UpdateView(Optional ByVal SelectedColorAsWell As Boolean = False)
 End Sub
 
 Private Function Color_ToStr(ByVal this As Long) As String
-    Dim R As Long: R = (this And &HFF&)
+    Dim r As Long: r = (this And &HFF&)
     Dim G As Long: G = (this And &HFF00&) \ &H100&
     Dim b As Long: b = (this And &HFF0000) \ &H10000
-    Color_ToStr = "R=" & R & ", G=" & G & ", B=" & b
+    Color_ToStr = "R=" & r & ", G=" & G & ", B=" & b
 End Function
 
 Private Sub BtnOK_Click()

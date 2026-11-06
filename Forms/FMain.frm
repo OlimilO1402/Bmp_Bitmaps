@@ -830,7 +830,7 @@ Private Sub mnuFileImportWIASelectSource_Click()
         Exit Sub
     End If
     Dim SelDevice As String
-    If FSelect.ShowDialog(Me, "Select Source", DeviceNames, SelDevice) = vbCancel Then Exit Sub
+    If FScannerSelect.ShowDialog(Me, "Select Source", DeviceNames, SelDevice) = vbCancel Then Exit Sub
     m_ScanWIA.SelectDevice SelDevice
 End Sub
 
